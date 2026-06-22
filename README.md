@@ -66,7 +66,7 @@ PetCentre solves this problem by providing a complete online platform that enabl
 
 ### DevOps and Deployment
 - **Containerization:** Docker for consistent deployment environments
-- **Cloud Platform:** AWS for scalable cloud deployment
+- **Cloud Platform:** AWS or railway for scalable cloud deployment
 - **CI/CD Pipeline:** GitHub Actions for automated testing and deployment
 - **Infrastructure as Code:** Automated deployment pipeline for continuous integration and delivery
 
