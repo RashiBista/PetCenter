@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PetCare Messenger</title>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+    <div class="w-full max-w-md h-[700px] bg-white rounded-xl shadow-lg flex flex-col overflow-hidden">
+        
+        <!-- Header with user selection -->
+        <div class="bg-blue-600 p-4 text-white flex items-center gap-3">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold">P</div>
+            <div>
+                <p class="font-semibold">Chat with</p>
+                <select id="recipient-select" class="bg-blue-700 text-white border-none rounded p-1 text-sm">
+                    <option value="">-- Select User --</option>
+                </select>
+                <p id="online-status-badge" class="text-xs text-blue-200">● Offline</p>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chat-box" class="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
+            <!-- Messages rendered here -->
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="px-4 py-1 text-sm text-gray-500 italic hidden">
+            Someone is typing...
+        </div>
+
+        <!-- Input Area -->
+        <div class="border-t p-3 bg-white flex gap-2">
+            <input id="msg" placeholder="Type a message..." 
+                   class="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <button onclick="sendMessage()" 
+                    class="bg-blue-600 text-white rounded-full px-5 py-2 hover:bg-blue-700 transition">
+                Send
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Global state ---
+        let currentUser = null; // will be set after login
+        let targetUserId = null;
+        let ws = null;
+        const chatBox = document.getElementById('chat-box');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const statusBadge = document.getElementById('online-status-badge');
+        const recipientSelect = document.getElementById('recipient-select');
+
+        // --- Helper: get JWT token (replace with your actual token retrieval) ---
+        function getToken() {
+            // For demo, we assume token is stored in localStorage.
+            // If not, you might need to log in first.
+            return localStorage.getItem('access_token') || '';
+        }
+
+        // --- Load list of users (for demo, we fetch all users) ---
+        async function loadUsers() {
+            // In a real app, you'd have an endpoint to list users.
+            // For demo, we'll create a static list or fetch from the server.
+            // We'll fetch from the same origin's admin or a custom endpoint.
+            // For simplicity, we'll hardcode some users (you should replace this).
+            // Here we assume we have an API to get all users.
+            // If not, you can manually set options.
+            try {
+                const response = await fetch('/api/users/', {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (response.ok) {
+                    const users = await response.json();
+                    users.forEach(user => {
+                        if (user.id !== currentUser.id) {
+                            const option = document.createElement('option');
+                            option.value = user.id;
+                            option.textContent = user.username;
+                            recipientSelect.appendChild(option);
+                        }
+                    });
+                } else {
+                    // Fallback: add some dummy users
+                    addDummyUsers();
+                }
+            } catch (e) {
+                addDummyUsers();
+            }
+            recipientSelect.addEventListener('change', onRecipientChange);
+        }
+
+        function addDummyUsers() {
+            // Add dummy users (you can change these)
+            const dummyUsers = [
+                {id: 2, username: 'Vet1'},
+                {id: 3, username: 'Pharma1'},
+                {id: 4, username: 'Rescuer1'},
+                {id: 5, username: 'Adopter1'}
+            ];
+            dummyUsers.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.username;
+                recipientSelect.appendChild(option);
+            });
+        }
+
+        // --- When recipient changes ---
+        function onRecipientChange() {
+            const val = recipientSelect.value;
+            if (!val) {
+                // disconnect WebSocket if any
+                if (ws) ws.close();
+                chatBox.innerHTML = '';
+                return;
+            }
+            targetUserId = parseInt(val);
+            // Load history and connect WebSocket
+            loadHistory(targetUserId);
+            connectWebSocket(targetUserId);
+        }
+
+        // --- Load message history ---
+        async function loadHistory(otherUserId) {
+            try {
+                const response = await fetch(`/api/messages/${otherUserId}/`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (response.ok) {
+                    const messages = await response.json();
+                    chatBox.innerHTML = ''; // clear
+                    messages.forEach(msg => {
+                        const isMine = msg.sender === currentUser.id;
+                        appendMessage(
+                            isMine ? 'You' : msg.sender_username,
+                            msg.message,
+                            isMine ? 'right' : 'left',
+                            msg.is_read,
+                            msg.created_at
+                        );
+                    });
+                } else {
+                    console.error('Failed to load history');
+                }
+            } catch (e) {
+                console.error('Error loading history:', e);
+            }
+        }
+
+        // --- Connect WebSocket ---
+        function connectWebSocket(otherUserId) {
+            if (ws) ws.close();
+            const token = getToken();
+            //const wsUrl = `ws://127.0.0.1:8000/ws/chat/?token=${token}&target_user_id=${otherUserId}`;
+            ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/` + `?token=${token}&target_user_id=${otherUserId}`);
+
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+            };
+
+            ws.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                switch(data.type) {
+                    case 'message':
+                        const isMine = data.sender_id === currentUser.id;
+                        appendMessage(
+                            isMine ? 'You' : data.sender_username,
+                            data.message,
+                            isMine ? 'right' : 'left',
+                            false,
+                            data.timestamp
+                        );
+                        break;
+                    case 'typing':
+                        if (data.status === 'on') {
+                            typingIndicator.innerText = `${data.sender_username} is typing...`;
+                            typingIndicator.classList.remove('hidden');
+                            clearTimeout(window.typingTimeout);
+                            window.typingTimeout = setTimeout(() => {
+                                typingIndicator.classList.add('hidden');
+                            }, 3000);
+                        } else {
+                            typingIndicator.classList.add('hidden');
+                        }
+                        break;
+                    case 'status':
+                        if (data.user_id !== currentUser.id) {
+                            const isOnline = data.status === 'online';
+                            statusBadge.innerHTML = isOnline ? '● Online' : '● Offline';
+                            statusBadge.className = `text-xs ${isOnline ? 'text-green-300' : 'text-gray-300'}`;
+                        }
+                        break;
+                    default:
+                        console.log('Unknown message type:', data);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+                // Attempt to reconnect after a delay?
+            };
+        }
+
+        // --- Render message ---
+        function appendMessage(sender, text, side, isRead = false, timestamp = 'Just now') {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${side === 'right' ? 'justify-end' : 'justify-start'} mb-2`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-[75%] p-3 rounded-2xl ${side === 'right' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border text-gray-800 rounded-bl-none shadow-sm'}`;
+            
+            // Sender name (if not you)
+            if (side === 'left' && sender !== 'You') {
+                const nameSpan = document.createElement('div');
+                nameSpan.className = 'text-xs font-semibold text-gray-500 mb-1';
+                nameSpan.innerText = sender;
+                bubble.appendChild(nameSpan);
+            }
+
+            const textNode = document.createElement('div');
+            textNode.innerText = text;
+            bubble.appendChild(textNode);
+
+            const footer = document.createElement('div');
+            footer.className = `text-xs mt-1 ${side === 'right' ? 'text-blue-200' : 'text-gray-400'} flex items-center justify-end gap-1`;
+            
+            const time = document.createElement('span');
+            time.innerText = timestamp;
+            footer.appendChild(time);
+
+            if (side === 'right') {
+                const tick = document.createElement('span');
+                tick.innerHTML = isRead ? '✓✓' : '✓';
+                tick.className = isRead ? 'text-blue-300' : 'text-gray-300';
+                footer.appendChild(tick);
+            }
+
+            bubble.appendChild(footer);
+            wrapper.appendChild(bubble);
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- Send message ---
+        function sendMessage() {
+            const input = document.getElementById('msg');
+            const text = input.value.trim();
+            if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+            ws.send(JSON.stringify({
+                type: 'message',
+                message: text
+            }));
+
+            input.value = '';
+            ws.send(JSON.stringify({ type: 'typing', status: 'off' }));
+        }
+
+        // --- Typing detection ---
+        const msgInput = document.getElementById('msg');
+        let typingTimer;
+        msgInput.addEventListener('keydown', function(e) {
+            if (!this.dataset.typing) {
+                this.dataset.typing = 'true';
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'typing', status: 'on' }));
+                }
+            }
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                this.dataset.typing = 'false';
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'typing', status: 'off' }));
+                }
+            }, 1500);
+        });
+
+        msgInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // --- On page load ---
+        window.addEventListener('load', async function() {
+            // Get current user info (you need to implement this)
+            // For demo, we assume we have a current user ID and token.
+            // You can get this from localStorage or session.
+            // For testing, we'll set a dummy current user (must exist in DB)
+            // In a real app, you'd get from JWT payload.
+            // For now, we assume user id 1 (admin) is logged in.
+            currentUser = { id: 1, username: 'admin' };
+            // Also set token in localStorage if not there.
+            // You need to have logged in to get a valid token.
+
+            // Load users
+            await loadUsers();
+
+            // Optionally select a default recipient
+            // For testing, select the first option.
+            if (recipientSelect.options.length > 1) {
+                recipientSelect.selectedIndex = 1;
+                recipientSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+</body>
+</html>

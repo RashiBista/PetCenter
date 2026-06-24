@@ -1,0 +1,1 @@
+// Placeholder chat frontend JavaScript
