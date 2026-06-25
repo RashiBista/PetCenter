@@ -24,9 +24,9 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        cd realchat
+        cd final_chat
         pip install -r requirements.txt
     - name: Run Tests
       run: |
-        cd realchat
+        cd final_chat
         python manage.py test
