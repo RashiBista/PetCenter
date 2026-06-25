@@ -45,20 +45,9 @@ jobs:
       - name: Debug repo layout
         run: |
           echo "PWD: $(pwd)"
-          echo "Listing final_chat:"
           ls -la final_chat || true
-          if [ -f final_chat/manage.py ]; then
-            echo "Found manage.py"
-          else
-            echo "ERROR: manage.py not found in final_chat" >&2
-            exit 1
-          fi
-          if [ -f final_chat/requirements.txt ]; then
-            echo "Found requirements.txt"
-          else
-            echo "ERROR: requirements.txt not found in final_chat" >&2
-            exit 1
-          fi
+          test -f final_chat/manage.py || { echo "manage.py not found in final_chat" >&2; exit 1; }
+          test -f final_chat/requirements.txt || { echo "requirements.txt not found in final_chat" >&2; exit 1; }
 
       - name: Install Dependencies
         run: |
