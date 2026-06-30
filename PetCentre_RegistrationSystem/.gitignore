@@ -8,7 +8,11 @@ __pycache__/
 venv/
 ENV/
 env/
-
+#env
+.env/
+venv/
+.venv/
+*.pyc
 # Django
 *.log
 *.pot

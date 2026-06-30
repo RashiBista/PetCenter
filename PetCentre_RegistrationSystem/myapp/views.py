@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.db.models import Q
 from .permissions import IsPetOwner, IsVet
 from .serializers import (
     LoginSerializer,
@@ -160,3 +160,29 @@ class VetDashboardView(APIView):
             'message': 'Welcome to your veterinarian dashboard',
             'user': UserPublicSerializer(request.user).data,
         }, status=200)
+class UserSearchView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        query = request.GET.get('q', '').strip()
+        if len(query) < 2:
+            return Response({'results': []})
+
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(pets__name__icontains=query)
+        ).exclude(id=request.user.id).distinct().prefetch_related('pets')[:10]
+
+        results = []
+        for user in users:
+            results.append({
+                'id': user.id,
+                'username': user.username,
+                'full_name': f"{user.first_name} {user.last_name}".strip(),
+                'role': user.role,
+                'pets': list(user.pets.values('id', 'name', 'species')),
+            })
+        return Response({'results': results})
+
