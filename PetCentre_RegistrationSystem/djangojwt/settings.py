@@ -9,7 +9,8 @@ import os
 import sys
 from datetime import timedelta
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,10 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'channels',
     'myapp',
+    'chat', 
+    'corsheaders',         
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -95,7 +100,7 @@ WSGI_APPLICATION = 'djangojwt.wsgi.application'
 # project. Must be set before the first migration is ever applied.
 AUTH_USER_MODEL = 'myapp.User'
 
-
+CORS_ALLOW_ALL_ORIGINS = True
 # ------------------------------------------------------------------
 # Database — PostgreSQL (+ PostGIS-ready)
 # ------------------------------------------------------------------
@@ -114,14 +119,23 @@ AUTH_USER_MODEL = 'myapp.User'
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.environ.get('DB_NAME', 'petcentre'),
-        'USER': os.environ.get('DB_USER', 'petcentre'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'petcentre_password'),
+        'NAME': os.environ.get('DB_NAME', 'petcenter_db'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'Oxygen816?'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
+ASGI_APPLICATION = 'djangojwt.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 # Allow tests to run without a PostgreSQL server when the local environment
 # does not have a test database available.
 if 'test' in sys.argv:
@@ -168,3 +182,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATIC_URL='/static/' 
+STATIC_ROOT=BASE_DIR / 'staticfiles'

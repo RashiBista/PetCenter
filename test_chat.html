@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PetCentre — final_chat Test Console</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 30px auto; padding: 0 16px; background: #111; color: #eee; }
+  h2 { border-bottom: 1px solid #444; padding-bottom: 6px; margin-top: 36px; font-size: 16px; color: #aaa; }
+  code { background: #222; padding: 1px 5px; border-radius: 3px; font-size: 12px; color: #93c5fd; }
+  input, button { font-size: 14px; padding: 6px 10px; margin: 4px 4px 4px 0; }
+  input { background: #222; color: #eee; border: 1px solid #555; border-radius: 4px; }
+  button { background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #1d4ed8; }
+  pre { background: #1a1a1a; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 13px; white-space: pre-wrap; }
+  #results, #inbox { display: flex; flex-direction: column; gap: 6px; }
+  .result-item, .inbox-item { background: #1f1f1f; padding: 8px; border-radius: 6px; cursor: pointer; border: 1px solid #333; }
+  .result-item:hover, .inbox-item:hover { background: #2a2a2a; }
+  .unread-badge { background: #dc2626; color: white; border-radius: 10px; padding: 1px 7px; font-size: 11px; margin-left: 6px; }
+  #messages { background: #1a1a1a; border-radius: 6px; padding: 10px; height: 220px; overflow-y: auto; margin-bottom: 8px; }
+  .msg { margin-bottom: 6px; }
+  .msg .who { color: #60a5fa; font-weight: 600; }
+  #status { font-size: 13px; color: #999; margin-bottom: 8px; }
+  #status.connected { color: #4ade80; }
+  #status.disconnected { color: #f87171; }
+</style>
+</head>
+<body>
+
+<h1>🐾 PetCentre — final_chat Test Console</h1>
+<p style="color:#888; font-size:13px;">Targets the real <code>chat/urls.py</code> routes (<code>chat/</code>, <code>chat/start/&lt;id&gt;/</code>, <code>chat/room/&lt;id&gt;/</code>, <code>chat/unread/</code>) and the <code>ChatConsumer</code> WebSocket at <code>ws/chat/&lt;room_id&gt;/</code>.</p>
+
+<h2>1. Login — POST /api/auth/login/</h2>
+<input id="login-username" placeholder="username">
+<input id="login-password" type="password" placeholder="password">
+<button onclick="login()">Login</button>
+<pre id="login-output">Not logged in.</pre>
+
+<h2>2. Search Users — GET /api/users/search/?q=</h2>
+<input id="search-query" placeholder="search by name or pet name...">
+<button onclick="searchUsers()">Search</button>
+<div id="results"></div>
+
+<h2>3. Inbox — GET /chat/</h2>
+<button onclick="loadInbox()">Refresh Inbox</button>
+<span id="unread-total" style="color:#999; font-size:13px;"></span>
+<div id="inbox"></div>
+
+<h2>4. Active Conversation</h2>
+<pre id="room-output">No room selected. Click a search result or inbox item above.</pre>
+<div id="status">○ Not connected</div>
+<div id="messages"></div>
+<input id="message-input" placeholder="Type a message..." style="width: 70%;" onkeydown="if(event.key==='Enter') sendMessage()">
+<button onclick="sendMessage()">Send</button>
+
+<script>
+const API_BASE = 'http://127.0.0.1:8000';
+let accessToken = null;
+let ws = null;
+let currentRoomId = null;
+
+function authHeaders() {
+  return { 'Authorization': `Bearer ${accessToken}` };
+}
+
+// ---------- 1. Login ----------
+async function login() {
+  const username = document.getElementById('login-username').value;
+  const password = document.getElementById('login-password').value;
+  const out = document.getElementById('login-output');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      accessToken = data.access;
+      out.textContent = `Logged in as ${data.user.username} (${data.user.role})\nToken stored.`;
+      loadInbox();
+    } else {
+      out.textContent = `Login failed: ${JSON.stringify(data)}`;
+    }
+  } catch (e) {
+    out.textContent = `Error: ${e.message}\n(Is daphne running at ${API_BASE}?)`;
+  }
+}
+
+// ---------- 2. Search ----------
+async function searchUsers() {
+  const query = document.getElementById('search-query').value;
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = '';
+
+  if (!accessToken) {
+    resultsDiv.innerHTML = '<div class="result-item">⚠️ Log in first.</div>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/users/search/?q=${encodeURIComponent(query)}`, {
+      headers: authHeaders()
+    });
+    const data = await res.json();
+
+    if (!data.results || data.results.length === 0) {
+      resultsDiv.innerHTML = '<div class="result-item">No matches.</div>';
+      return;
+    }
+
+    data.results.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'result-item';
+      const petList = u.pets && u.pets.length ? ` 🐾 ${u.pets.map(p => p.name || p).join(', ')}` : '';
+      div.textContent = `${u.full_name || u.username} (@${u.username}, ${u.role})${petList}`;
+      div.onclick = () => startChat(u.id, u.username);
+      resultsDiv.appendChild(div);
+    });
+  } catch (e) {
+    resultsDiv.innerHTML = `<div class="result-item">Error: ${e.message}</div>`;
+  }
+}
+
+// ---------- 3. Inbox — chat/urls.py "" -> InboxView ----------
+async function loadInbox() {
+  const inboxDiv = document.getElementById('inbox');
+  const unreadSpan = document.getElementById('unread-total');
+  inboxDiv.innerHTML = '';
+
+  if (!accessToken) {
+    inboxDiv.innerHTML = '<div class="inbox-item">⚠️ Log in first.</div>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/chat/`, { headers: authHeaders() });
+    const data = await res.json();
+
+    if (!data.rooms || data.rooms.length === 0) {
+      inboxDiv.innerHTML = '<div class="inbox-item">No conversations yet.</div>';
+    } else {
+      data.rooms.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'inbox-item';
+        const last = r.last_message ? r.last_message.content : '(no messages yet)';
+        const unreadBadge = r.unread_count > 0 ? `<span class="unread-badge">${r.unread_count}</span>` : '';
+        div.innerHTML = `<strong>${r.other_user.full_name || r.other_user.username}</strong> — ${last} ${unreadBadge}`;
+        div.onclick = () => openRoom(r.room_id, r.other_user.username);
+        inboxDiv.appendChild(div);
+      });
+    }
+
+    // chat/urls.py "unread/" -> UnreadCountView
+    const unreadRes = await fetch(`${API_BASE}/chat/unread/`, { headers: authHeaders() });
+    const unreadData = await unreadRes.json();
+    unreadSpan.textContent = `Total unread: ${unreadData.count}`;
+  } catch (e) {
+    inboxDiv.innerHTML = `<div class="inbox-item">Error: ${e.message}</div>`;
+  }
+}
+
+// ---------- start/<user_id>/ -> StartChatView ----------
+async function startChat(userId, username) {
+  const out = document.getElementById('room-output');
+  try {
+    const res = await fetch(`${API_BASE}/chat/start/${userId}/`, {
+      method: 'POST',
+      headers: authHeaders()
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      out.textContent = `Room #${data.room_id} with ${username} (created: ${data.created})`;
+      openRoom(data.room_id, username);
+    } else {
+      out.textContent = `Error: ${JSON.stringify(data)}`;
+    }
+  } catch (e) {
+    out.textContent = `Error: ${e.message}`;
+  }
+}
+
+// ---------- room/<room_id>/ -> RoomView + WebSocket ----------
+async function openRoom(roomId, username) {
+  currentRoomId = roomId;
+  document.getElementById('room-output').textContent = `Room #${roomId} with ${username}`;
+  await loadHistory(roomId);
+  connectWebSocket(roomId);
+}
+
+async function loadHistory(roomId) {
+  const messagesDiv = document.getElementById('messages');
+  messagesDiv.innerHTML = '';
+  try {
+    const res = await fetch(`${API_BASE}/chat/room/${roomId}/`, { headers: authHeaders() });
+    const data = await res.json();
+    (data.messages || []).forEach(m => appendMessage(m.sender_username, m.content));
+  } catch (e) {
+    console.error('History load failed', e);
+  }
+}
+
+// ---------- WebSocket — ws/chat/<room_id>/?token= -> ChatConsumer ----------
+function connectWebSocket(roomId) {
+  if (ws) ws.close();
+
+  const wsUrl = `ws://127.0.0.1:8000/ws/chat/${roomId}/?token=${accessToken}`;
+  ws = new WebSocket(wsUrl);
+  const status = document.getElementById('status');
+
+  ws.onopen = () => {
+    status.textContent = '● Connected';
+    status.className = 'connected';
+  };
+
+  ws.onclose = (e) => {
+    status.textContent = `○ Disconnected (code ${e.code})`;
+    status.className = 'disconnected';
+  };
+
+  ws.onerror = () => {
+    status.textContent = '○ Connection error';
+    status.className = 'disconnected';
+  };
+
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    appendMessage(data.sender, data.message);
+  };
+}
+
+function appendMessage(sender, text) {
+  const messagesDiv = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `<span class="who">${sender}:</span> ${text}`;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('message-input');
+  const text = input.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+  ws.send(JSON.stringify({ message: text }));
+  input.value = '';
+}
+</script>
+
+</body>
+</html>

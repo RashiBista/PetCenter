@@ -2,3 +2,9 @@ Django>=5.0,<7.0
 djangorestframework>=3.15
 djangorestframework-simplejwt>=5.3
 psycopg2-binary>=2.9
+channels
+channels-redis
+daphne
+python-dotenv
+Pillow
+django-cors-headers
