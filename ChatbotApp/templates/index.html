@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PetCenter Chatbot</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 420px;
+            height: 620px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #2c7a7b;
+            color: white;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .msg {
+            max-width: 75%;
+            padding: 0.6rem 0.9rem;
+            border-radius: 14px;
+            line-height: 1.4;
+            font-size: 0.92rem;
+            white-space: pre-wrap;
+        }
+        .msg.user {
+            background: #2c7a7b;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.bot {
+            background: #eef2f3;
+            color: #222;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #eee;
+            padding: 0.6rem;
+            gap: 0.5rem;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 0.92rem;
+        }
+        .chat-input button {
+            background: #2c7a7b;
+            color: white;
+            border: none;
+            padding: 0 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.92rem;
+        }
+        .chat-input button:hover { background: #256667; }
+        .typing {
+            font-style: italic;
+            color: #888;
+            font-size: 0.85rem;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">🐾 PetCenter Chatbot</div>
+        <div class="chat-messages" id="messages"></div>
+        <div class="chat-input">
+            <input id="input" type="text" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesEl = document.getElementById('messages');
+        const inputEl = document.getElementById('input');
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + sender;
+            div.textContent = text;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage() {
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            inputEl.value = '';
+
+            const typingEl = document.createElement('div');
+            typingEl.className = 'typing';
+            typingEl.textContent = 'Bot is typing...';
+            messagesEl.appendChild(typingEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+                typingEl.remove();
+                addMessage(data.reply, 'bot');
+            } catch (err) {
+                typingEl.remove();
+                addMessage('Error connecting to server.', 'bot');
+            }
+        }
+
+        // Greet on load
+        addMessage("Hi! I'm the PetCenter assistant. Ask me anything about pet care 🐶🐱", 'bot');
+    </script>
+</body>
+</html>
