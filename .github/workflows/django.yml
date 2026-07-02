@@ -18,10 +18,11 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ['3.10', '3.11']
+        project: ['PetCentre_RegistrationSystem', 'final_chat']
 
     defaults:
       run:
-        working-directory: ./final_chat
+        working-directory: ./${{ matrix.project }}
 
     steps:
       - name: Checkout
@@ -38,16 +39,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: build-pip-${{ matrix.python-version }}-${{ hashFiles('**/final_chat/requirements.txt') }}
+          key: build-pip-${{ matrix.python-version }}-${{ hashFiles('**/${{ matrix.project }}/requirements.txt') }}
           restore-keys: |
             build-pip-${{ matrix.python-version }}-
 
       - name: Debug repo layout
         run: |
           echo "PWD: $(pwd)"
-          ls -la  || true
-          test -f manage.py || { echo "manage.py not found in final_chat" >&2; exit 1; }
-          test -f requirements.txt || { echo "requirements.txt not found in final_chat" >&2; exit 1; }
+          ls -la || true
+          test -f manage.py || { echo "manage.py not found in ${{ matrix.project }}" >&2; exit 1; }
+          test -f requirements.txt || { echo "requirements.txt not found in ${{ matrix.project }}" >&2; exit 1; }
 
       - name: Install Dependencies
         run: |
