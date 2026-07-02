@@ -1,6 +1,7 @@
 from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import get_user_model
 
@@ -12,7 +13,7 @@ def get_user_from_token(token_key):
         token = AccessToken(token_key)
         user_id = token['user_id']
         return User.objects.get(id=user_id)
-    except Exception:
+    except (TokenError, KeyError, User.DoesNotExist):
         return AnonymousUser()
 
 class JWTAuthMiddleware:

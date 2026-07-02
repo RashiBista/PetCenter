@@ -6,6 +6,8 @@ from django.db.models import Q
 
 from chat.models import ChatRoom, Message
 
+MAX_MESSAGE_LENGTH = 2000  
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     """
@@ -50,6 +52,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not message_text:
             return
 
+        # Enforce the same limit as Message.content's max_length. TextField's
+        # max_length is NOT enforced by the database, and this consumer
+        # bypasses any serializer validation, so without this check a
+        # client could persist an arbitrarily long message.
+        if len(message_text) > MAX_MESSAGE_LENGTH:
+            await self.send(text_data=json.dumps({
+                'error': f'Message exceeds {MAX_MESSAGE_LENGTH} character limit.',
+            }))
+            return
+
         message = await self.save_message(message_text)
 
         await self.channel_layer.group_send(
@@ -71,7 +83,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': event['timestamp'],
         }))
 
-    # ---- DB helpers (sync ORM calls wrapped for async context) ----
+    #DB helpers (sync ORM calls wrapped for async context) 
 
     @database_sync_to_async
     def is_participant(self):

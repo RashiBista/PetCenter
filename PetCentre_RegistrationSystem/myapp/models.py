@@ -93,5 +93,3 @@ class Pet(models.Model):
 
     def __str__(self):
         return f"{self.name} → {self.owner.username}"
-    def __str__(self):
-        return f'VetProfile<{self.user.username}>'

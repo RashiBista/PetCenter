@@ -8,3 +8,4 @@ daphne
 python-dotenv
 Pillow
 django-cors-headers
+drf-spectacular
