@@ -1,0 +1,281 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pet Centre - Premium Care</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#f1ecf2",
+                      "on-tertiary-fixed-variant": "#534600",
+                      "inverse-surface": "#313034",
+                      "on-tertiary-container": "#4c4000",
+                      "surface": "#fdf8fd",
+                      "primary-fixed": "#e5deff",
+                      "on-surface-variant": "#48454f",
+                      "primary": "#5f578f",
+                      "inverse-on-surface": "#f4eff5",
+                      "on-primary-fixed": "#1b1248",
+                      "on-primary": "#ffffff",
+                      "outline": "#797580",
+                      "surface-container-low": "#f7f2f8",
+                      "surface-tint": "#5f578f",
+                      "inverse-primary": "#c8bfff",
+                      "on-surface": "#1c1b1f",
+                      "on-secondary-container": "#616470",
+                      "secondary-fixed": "#e0e1f0",
+                      "error": "#ba1a1a",
+                      "primary-container": "#afa6e4",
+                      "secondary-fixed-dim": "#c4c6d4",
+                      "on-primary-fixed-variant": "#473f76",
+                      "error-container": "#ffdad6",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#dac671",
+                      "surface-variant": "#e5e1e6",
+                      "on-primary-container": "#413a70",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#6d5e13",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#444652",
+                      "tertiary-fixed": "#f8e28a",
+                      "surface-bright": "#fdf8fd",
+                      "on-tertiary": "#ffffff",
+                      "secondary-container": "#e0e1f0",
+                      "on-secondary-fixed": "#181b26",
+                      "outline-variant": "#c9c4d0",
+                      "surface-container-high": "#ebe7ec",
+                      "background": "#fdf8fd",
+                      "on-background": "#1c1b1f",
+                      "surface-container-highest": "#e5e1e6",
+                      "primary-fixed-dim": "#c8bfff",
+                      "secondary": "#5b5e6a",
+                      "surface-dim": "#ddd9de",
+                      "tertiary-container": "#c0ad5b",
+                      "on-tertiary-fixed": "#221b00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "container-padding-desktop": "40px",
+                      "card-gap": "24px",
+                      "gutter": "24px",
+                      "section-margin": "64px",
+                      "container-padding-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "title-lg": ["Plus Jakarta Sans"],
+                      "display-lg": ["Manrope"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "title-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-body-md text-body-md relative selection:bg-primary-container selection:text-on-primary-container">
+<!-- Navigation Header -->
+<header class="fixed top-0 w-full z-50 transition-all duration-300 bg-surface/80 backdrop-blur-md shadow-sm" id="main-nav">
+<div class="max-w-[1360px] mx-auto px-container-padding-mobile md:px-container-padding-desktop h-20 flex items-center justify-between">
+<!-- Brand -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined fill">pets</span>
+</div>
+<span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">Pet Centre</span>
+</div>
+<!-- Desktop Links -->
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#about">About</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#services">Services</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#features">Features</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#contact">Contact</a>
+</nav>
+<!-- CTA / Login -->
+<div class="hidden md:flex items-center gap-4">
+<button onclick="window.location.href='{% url 'core:pet_owner_login' %}'" class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors px-4 py-2">
+                    Log In
+                </button>
+<button onclick="window.location.href='{% url 'core:pet_owner_login' %}'" class="font-label-md text-label-md bg-primary text-on-primary px-6 py-2.5 rounded-full hover:bg-primary/90 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
+                    Sign Up
+                </button>
+</div>
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden p-2 text-on-surface-variant rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-20">
+<!-- Hero Section -->
+<section class="relative min-h-[calc(100vh-80px)] flex items-center overflow-hidden">
+<!-- Background Decorative Elements -->
+<div class="absolute inset-0 pointer-events-none z-0">
+<!-- Abstract Lavender Mist blobs -->
+<div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-primary-container/20 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-secondary-container/30 rounded-full blur-3xl"></div>
+</div>
+<div class="max-w-[1360px] mx-auto w-full px-container-padding-mobile md:px-container-padding-desktop grid grid-cols-1 md:grid-cols-12 gap-gutter relative z-10 py-section-margin">
+<!-- Hero Text & Controls -->
+<div class="md:col-span-6 flex flex-col justify-center space-y-8 pr-0 md:pr-12">
+<div class="space-y-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/30 w-max">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Your Sanctuary for Pet Wellness</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface">
+                            Premium care for your beloved pets.
+                        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                            Seamless vet appointments, meticulous medicine management, and dedicated lost/found support—all in a calming, sophisticated platform designed for modern pet owners.
+                        </p>
+</div>
+<!-- Onboarding Widget -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-outline-variant/20 max-w-md">
+<form class="space-y-5" onsubmit="event.preventDefault();">
+<div class="space-y-1.5">
+<label class="font-label-md text-label-md text-on-surface" for="userType">I am a...</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3.5 font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer" id="userType">
+<option value="owner">Pet Owner</option>
+<option value="vet">Veterinary Professional</option>
+<option value="admin">Administrator</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="pt-2 flex flex-col sm:flex-row gap-3">
+<button class="flex-1 font-label-md text-label-md bg-primary text-on-primary px-6 py-3.5 rounded-full hover:bg-primary/90 hover:shadow-lg transition-all duration-200 text-center flex items-center justify-center gap-2 group" type="submit">
+                                    Continue
+                                    <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="flex-1 font-label-md text-label-md bg-surface-container border border-outline-variant/30 text-primary px-6 py-3.5 rounded-full hover:bg-surface-container-high transition-colors text-center" type="button">
+                                    Log In
+                                </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Hero Visual (Bento-style layout of features) -->
+<div class="md:col-span-6 relative mt-12 md:mt-0 min-h-[500px]">
+<!-- Main Image Placeholder -->
+<div class="absolute inset-0 rounded-3xl overflow-hidden shadow-[0px_12px_24px_rgba(46,46,56,0.08)]">
+<div class="bg-cover bg-center w-full h-full" data-alt="A bright, modern veterinary clinic room with large windows letting in soft, diffused daylight, creating a calming, clean light-mode aesthetic. A golden retriever sits calmly on an examination table while a smiling veterinarian in a clean white coat gently examines it. The room features subtle lavender and soft grey accents, conveying a premium, nurturing, and professional environment." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDWu715vq6bmfHfXRFfOFrTqnRgHBXC7uU8SFJ9z-PpcUtmRAnZbduAIYkCfwfedaKcA8DJPyvS3mhj_DLgUPSuSI8aXYoSzPDik0ckAGCA0kmaIiSaeqtk0JvZQLx0_kL-9FkfjTcImVxE59iyGni0iVHjXXzDCvEnmvoiHDY5jQbSKjQ0R89gxvv7c_w0HtpSzmUkA4kiG343zv-JK3vUziPzNwqx5FEcO1ky0pc8xETBgiSttREXQ086zKz77eL49-zN_VdiaDjD')"></div>
+</div>
+<!-- Floating Glassmorphism Cards -->
+<div class="absolute top-8 -left-8 bg-surface/80 backdrop-blur-xl p-4 rounded-xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-white/50 flex items-center gap-4 animate-[bounce_4s_infinite]">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">calendar_clock</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"></p>
+<p class="font-title-lg text-title-lg text-on-surface">Book your appointment today</p>
+</div>
+</div>
+<div class="absolute bottom-12 -right-8 bg-surface/80 backdrop-blur-xl p-4 rounded-xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-white/50 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
+<span class="material-symbols-outlined">vaccines</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Medication Due</p>
+<p class="font-title-lg text-title-lg text-on-surface">Heartworm Preventative</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Brief Features Section to establish scrolling context -->
+<section class="bg-surface-container-lowest py-section-margin" id="features">
+<div class="max-w-[1360px] mx-auto px-container-padding-mobile md:px-container-padding-desktop">
+<div class="text-center mb-16 max-w-2xl mx-auto">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-4">Comprehensive Care Ecosystem</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Everything you need to ensure your pet lives a long, healthy, and happy life, consolidated in one serene interface.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap">
+<!-- Feature 1 -->
+<div class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<div class="w-14 h-14 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">medical_services</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3">Health Tracking</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Monitor weight, vaccinations, and log daily observations to share instantly with your veterinary team.</p>
+</div>
+<!-- Feature 2 -->
+<div class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<div class="w-14 h-14 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">location_on</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3">Lost &amp; Found Network</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Rapidly mobilize the local community with automated alerts if your pet goes missing.</p>
+</div>
+<!-- Feature 3 -->
+<div class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<div class="w-14 h-14 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">forum</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3">Talk to our AI assistant</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Get quick insights from our AI Assistant</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (Chatbot Assistant) from JSON specification -->
+<button onclick="window.location.href='{% url 'core:chatbot' %}'" aria-label="Assistant" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed font-label-md text-label-md z-50 flex items-center justify-center shadow-xl hover:scale-110 hover:shadow-2xl transition-all duration-200 active:scale-95 group">
+<span class="material-symbols-outlined">smart_toy</span>
+<!-- Optional expanding label on hover for desktop -->
+<span class="hidden md:inline-block max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-3 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100">
+            Assistant
+        </span>
+</button>
+</body></html>
