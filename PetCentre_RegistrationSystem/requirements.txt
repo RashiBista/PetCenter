@@ -9,3 +9,4 @@ python-dotenv
 Pillow
 django-cors-headers
 drf-spectacular
+django-cloudinary-storage

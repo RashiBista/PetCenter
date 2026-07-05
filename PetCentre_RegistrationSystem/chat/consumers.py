@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from chat.models import ChatRoom, Message
 
-MAX_MESSAGE_LENGTH = 2000  
+MAX_MESSAGE_LENGTH = 2000  # keep in sync with Message.content max_length
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -83,7 +83,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': event['timestamp'],
         }))
 
-    #DB helpers (sync ORM calls wrapped for async context) 
+    # ---- DB helpers (sync ORM calls wrapped for async context) ----
 
     @database_sync_to_async
     def is_participant(self):
