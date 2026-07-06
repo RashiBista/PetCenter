@@ -106,6 +106,7 @@
 <script>
   const ROOM_ID = "{{ room.pk }}";
   const CURRENT_USER_ID = {{ request.user.pk|default:0 }};
+  const WS_TOKEN = "{{ ws_token }}";
 
   // ── Elements
   const messageList   = document.getElementById("message-list");
@@ -115,8 +116,15 @@
   const typingIndicator = document.getElementById("typing-indicator");
 
   // ── WebSocket setup
+  // NOTE: previously this file declared `const socket = new WebSocket(...)`
+  // here AND `let socket = null` below — a duplicate declaration that
+  // threw a SyntaxError and silently killed this entire <script> block,
+  // meaning connect() never ran and the send button never enabled.
+  // Also, the token was never appended to the reconnecting wsUrl below,
+  // so even a fixed script would have gotten WSREJECT from the backend
+  // (AnonymousUser, since JWTAuthMiddleware saw no token).
   const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-  const wsUrl = wsProtocol + window.location.host + "/ws/chat/" + ROOM_ID + "/";
+  const wsUrl = wsProtocol + window.location.host + "/ws/chat/" + ROOM_ID + "/?token=" + WS_TOKEN;
   let socket = null;
   let reconnectDelay = 1000;
 
@@ -143,10 +151,12 @@
 
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      if (data.type === "chat_message") {
-        appendMessage(data);
-        scrollToBottom();
+      if (data.error) {
+        console.error("Chat error:", data.error);
+        return;
       }
+      appendMessage(data);
+      scrollToBottom();
     };
   }
 
@@ -164,7 +174,7 @@
   }
 
   function appendMessage(data) {
-    const isOwn = data.is_own;
+    const isOwn = data.sender_id === CURRENT_USER_ID;
     const wrapper = document.createElement("div");
     wrapper.className = "flex " + (isOwn ? "justify-end" : "justify-start");
 
@@ -174,7 +184,7 @@
           ? "bg-green-500 text-white rounded-2xl rounded-br-sm"
           : "bg-white text-gray-800 rounded-2xl rounded-bl-sm border border-gray-100"
         } px-4 py-2 shadow-sm">
-          <p class="text-sm leading-relaxed">${escapeHtml(data.content)}</p>
+          <p class="text-sm leading-relaxed">${escapeHtml(data.message)}</p>
         </div>
         <p class="text-[11px] text-gray-400 mt-1 ${isOwn ? "text-right pr-1" : "pl-1"}">
           ${formatTime(data.timestamp)}

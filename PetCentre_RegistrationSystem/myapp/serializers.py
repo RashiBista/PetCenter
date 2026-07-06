@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from .models import UserProfile, VetProfile
+from .models import Pet, UserProfile, VetProfile
 
 User = get_user_model()
 
@@ -52,12 +52,57 @@ class BaseRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(BaseRegisterSerializer):
-    """Registration serializer for pet-owner ('user') accounts."""
+    """
+    Registration serializer for pet-owner ('user') accounts.
+
+    Pet fields are optional at registration time — a pet owner can sign
+    up without a pet yet, or add one immediately including a photo.
+    Photo uploads go to Cloudinary automatically once DEFAULT_FILE_STORAGE
+    is configured (see settings.py); no extra code needed here for that.
+    """
+    pet_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    pet_species = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    pet_breed = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    pet_photo = serializers.ImageField(write_only=True, required=False, allow_null=True)
+
     role = User.Role.USER
 
+    class Meta(BaseRegisterSerializer.Meta):
+        fields = BaseRegisterSerializer.Meta.fields + (
+            'pet_name', 'pet_species', 'pet_breed', 'pet_photo',
+        )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        # If any pet field is supplied, require at least name + species
+        # so we don't create a half-blank Pet record.
+        pet_fields_present = any([
+            attrs.get('pet_name'), attrs.get('pet_species'), attrs.get('pet_photo')
+        ])
+        if pet_fields_present and not (attrs.get('pet_name') and attrs.get('pet_species')):
+            raise serializers.ValidationError(
+                {'pet_name': 'Pet name and species are required if adding a pet during registration.'}
+            )
+        return attrs
+
     def create(self, validated_data):
+        pet_name = validated_data.pop('pet_name', None)
+        pet_species = validated_data.pop('pet_species', None)
+        pet_breed = validated_data.pop('pet_breed', '')
+        pet_photo = validated_data.pop('pet_photo', None)
+
         user = super().create(validated_data)
         UserProfile.objects.create(user=user)
+
+        if pet_name and pet_species:
+            Pet.objects.create(
+                owner=user,
+                name=pet_name,
+                species=pet_species,
+                breed=pet_breed,
+                photo=pet_photo,
+            )
+
         return user
 
 

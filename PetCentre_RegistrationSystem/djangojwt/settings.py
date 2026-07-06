@@ -111,7 +111,7 @@ ROOT_URLCONF = 'djangojwt.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Add your templates directory here
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -162,6 +162,14 @@ DATABASES = {
         'PASSWORD': _db_password,
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
+        # Neon (and most managed Postgres providers) require SSL.
+        # Defaults to 'require' so this is safe even if DB_SSLMODE is
+        # unset — plain localhost Postgres in dev generally accepts
+        # sslmode=require too (it just negotiates SSL if available),
+        # but override to 'disable' locally if that ever causes issues.
+        'OPTIONS': {
+            'sslmode': os.environ.get('DB_SSLMODE', 'require'),
+        },
     }
 }
 
@@ -208,8 +216,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Production hardening (only kicks in when DEBUG=False)
 
+# Production hardening (only kicks in when DEBUG=False)
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').strip().lower() in ('true', '1', 'yes')
     SESSION_COOKIE_SECURE = True
