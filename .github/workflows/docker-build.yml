@@ -1,0 +1,39 @@
+name: Docker Build & Push (PetCentre_RegistrationSystem)
+
+on:
+  # Runs only after "Django CI" completes successfully on main — avoids
+  # building/pushing an image for a project whose tests just failed.
+  workflow_run:
+    workflows: ["Django CI"]
+    types: [completed]
+    branches: ["main"]
+
+jobs:
+  build-and-push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          # Only this project has a Dockerfile — scope the build context
+          # accordingly so this workflow never touches final_chat/ChatbotApp.
+          context: ./PetCentre_RegistrationSystem
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/petcentre-registration:latest
+            ghcr.io/${{ github.repository_owner }}/petcentre-registration:${{ github.sha }}
