@@ -1,0 +1,6 @@
+# Shell scripts must always use LF line endings, even on Windows,
+# because they execute inside Linux containers (Docker). If Git
+# converts these to CRLF locally, the shebang line (#!/bin/sh) gets a
+# trailing \r that breaks execution inside the container with errors
+# like "no such file or directory" or "bad interpreter".
+*.sh text eol=lf
