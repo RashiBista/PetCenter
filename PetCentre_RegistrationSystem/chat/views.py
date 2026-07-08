@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.db.models import Q, Count
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from .models import ChatRoom, Message
 
 User = get_user_model()
@@ -59,6 +61,13 @@ def room(request, room_id):
     """
     The main chat room view. Renders the last 50 messages.
     WebSocket connection is established client-side via JS.
+
+    ws_token: ChatConsumer authenticates over WebSocket via JWTAuthMiddleware
+    (see chat/middlewares.py) — a completely separate auth path from this
+    view's session-based @login_required. Without minting a token here,
+    room.html's {{ ws_token }} renders empty, producing a WebSocket URL
+    like ?token= with nothing after it, which JWTAuthMiddleware treats as
+    AnonymousUser and the consumer rejects.
     """
     chat_room = get_object_or_404(ChatRoom, pk=room_id)
 
@@ -77,10 +86,14 @@ def room(request, room_id):
         room=chat_room, is_read=False
     ).exclude(sender=request.user).update(is_read=True)
 
+    # Mint a short-lived JWT so the WebSocket handshake can authenticate.
+    ws_token = str(RefreshToken.for_user(request.user).access_token)
+
     return render(request, "chat/room.html", {
         "room": chat_room,
         "other_user": other_user,
         "messages": messages,
+        "ws_token": ws_token,
         "page_title": f"Chat with {other_user.get_full_name() or other_user.username}",
     })
 

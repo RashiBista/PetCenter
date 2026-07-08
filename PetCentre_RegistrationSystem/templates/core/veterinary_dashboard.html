@@ -1,0 +1,386 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Veterinary Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f1ecf2",
+                        "on-tertiary-fixed-variant": "#534600",
+                        "inverse-surface": "#313034",
+                        "on-tertiary-container": "#4c4000",
+                        "surface": "#fdf8fd",
+                        "primary-fixed": "#e5deff",
+                        "on-surface-variant": "#48454f",
+                        "primary": "#5f578f",
+                        "inverse-on-surface": "#f4eff5",
+                        "on-primary-fixed": "#1b1248",
+                        "on-primary": "#ffffff",
+                        "outline": "#797580",
+                        "surface-container-low": "#f7f2f8",
+                        "surface-tint": "#5f578f",
+                        "inverse-primary": "#c8bfff",
+                        "on-surface": "#1c1b1f",
+                        "on-secondary-container": "#616470",
+                        "secondary-fixed": "#e0e1f0",
+                        "error": "#ba1a1a",
+                        "primary-container": "#afa6e4",
+                        "secondary-fixed-dim": "#c4c6d4",
+                        "on-primary-fixed-variant": "#473f76",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#dac671",
+                        "surface-variant": "#e5e1e6",
+                        "on-primary-container": "#413a70",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#6d5e13",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#444652",
+                        "tertiary-fixed": "#f8e28a",
+                        "surface-bright": "#fdf8fd",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#e0e1f0",
+                        "on-secondary-fixed": "#181b26",
+                        "outline-variant": "#c9c4d0",
+                        "surface-container-high": "#ebe7ec",
+                        "background": "#fdf8fd",
+                        "on-background": "#1c1b1f",
+                        "surface-container-highest": "#e5e1e6",
+                        "primary-fixed-dim": "#c8bfff",
+                        "secondary": "#5b5e6a",
+                        "surface-dim": "#ddd9de",
+                        "tertiary-container": "#c0ad5b",
+                        "on-tertiary-fixed": "#221b00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "container-padding-desktop": "40px",
+                        "card-gap": "24px",
+                        "gutter": "24px",
+                        "section-margin": "64px",
+                        "container-padding-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Manrope"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "title-lg": ["20px", { "lineHeight": "1.5", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-[280px] bg-surface dark:bg-surface-dim flex-col gap-2 p-4 border-r border-outline-variant shadow-sm z-50">
+<div class="flex items-center gap-3 px-4 py-6">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold overflow-hidden">
+<img alt="Pet Centre Logo" class="w-full h-full object-cover" data-alt="A clean, minimalist logo featuring a stylized dog and cat intertwined in a circular sanctuary emblem. The design uses primary lavender tones on an off-white background, conveying trust, care, and professional veterinary services. Soft lighting, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqK3IAJalkO2SsxT8p8Ot_Y_CXxrn2zzLCHoOTfRtzhv50RNDGT6kXKo9YEPHH8WARDoIwlbtWcs-GLvt2hey87FMLC3M2FHl7DoG4Ml-WIrTmvHnTyEmjc5cAZAXQXTK85XY1VqyUJiakkuCJx2nfu25NjnSxCXchLu7_lPNU3Qd7Vfan3h2qs2wvFNVe-Ht4nStmzFDOSaauLioEKBCNOaDFtzWRxr9Ae3vlMvPjhZ6Y8J1AH3RhuGdkfe_TztK0qBZPLiJ4a0yC"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Pet Centre</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto flex flex-col gap-1 mt-4">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary transition-transform scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md font-bold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-label-md text-label-md">Medicine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md text-label-md">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'chat:inbox' %}">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-md text-label-md">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="mt-auto pt-4">
+<button class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md text-label-md hover:bg-surface-tint transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">calendar_add_on</span>
+                Book Appointment
+            </button>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="hidden md:flex fixed top-0 right-0 w-[calc(100%-280px)] h-20 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md justify-between items-center px-10 z-40 shadow-sm">
+<div class="flex-1 flex items-center">
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-full py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none" placeholder="Search patients, owners, records..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button onclick="window.location.href='{% url 'chat:inbox' %}'" class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chat</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">support_agent</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container cursor-pointer hover:border-primary transition-colors">
+<img alt="User A" class="w-full h-full object-cover" data-alt="A professional headshot of a friendly veterinarian wearing a clean white coat over a soft lavender scrub. Warm, inviting lighting in a modern clinic setting. The aesthetic is reassuring, trustworthy, and high-quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAlvKatG4Nf4d-jlDzLX_q8t-WY4On34Hif7zDIqBLf79HkV1j_xCunKF4oj3FKV42g0Nmk2T7u_wI0HY0X-WUS4qMdJUkT5ch6OjTzavlVY4rThkRFqYAy2Io9v29RoVxceJ1DR-unWpqLGALWUiNF4QEnaIRKKxJkpGTBF0FP72HoTpvkLsVDHm6kQrtTwYzdBAXI_gcH2nUiOv3_QlnaNcYmQd4hKMeBZ3OxQ6_3lsAElF323EAMjCXbSmWtrI-7pusEv6ve6FT"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full md:ml-[280px] pt-24 px-container-padding-mobile md:px-container-padding-desktop pb-24">
+<!-- Header -->
+<div class="mb-section-margin flex justify-between items-end">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface mb-2">Hello, Dr. {{ request.user.get_full_name|default:request.user.username }}</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Here's what's happening at the sanctuary today.</p>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant shadow-sm">
+<span class="w-2 h-2 rounded-full bg-[#4caf50]"></span>
+<span class="font-label-md text-label-md text-on-surface">Available for Consults</span>
+</div>
+</div>
+<!-- Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap mb-section-margin">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-container-highest hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-container rounded-full opacity-20 group-hover:scale-110 transition-transform"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-primary-container/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">event</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-1">3</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">Today's Appointments</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-container-highest hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-container rounded-full opacity-20 group-hover:scale-110 transition-transform"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/30 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">prescriptions</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-1">5</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">Pending Prescriptions</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-container-highest hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-[#4caf50]/20 rounded-full opacity-20 group-hover:scale-110 transition-transform"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-full bg-[#4caf50]/20 flex items-center justify-center text-[#2e7d32]">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-1">Available</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">Status</p>
+</div>
+</div>
+</div>
+<!-- Bento Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap">
+<!-- Appointments List (Left Column, spans 8) -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-title-lg text-title-lg text-on-surface">Today's Appointments</h3>
+<button class="text-primary font-label-md text-label-md hover:underline">View All</button>
+</div>
+<div class="space-y-4">
+<!-- Appt 1 -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-outline-variant/30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User A Pet" class="w-full h-full object-cover" data-alt="A portrait of a golden retriever dog looking happy and healthy in a softly lit, modern veterinary clinic room. Clean aesthetic, soft lavender backgrounds." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb-gLFYP_pHkUQ9x-FCvvxQiS4TVGbb_XTlrhMBdhtyBBZC5NkxM606u4_NZsnmh4WYI724DcUjGoiAXnWX14JtoIg44RAqP_ks6ddb0NSSLoIJZEJ5RlZUULtpJX84VqMVXq28EsRqVhvCPs8g3vde-bRwPb1y-Lt6ouirCNnmsUcKaNAATUBHnNy3Td37x4cvUfRaxT7OKpFJOo0s5zUd7hHm0yzf6YSFqw8zBUf32RkAAVjgOzyNwtKwfsjCeeUUA8GwljbhWMi"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Max (Golden Retriever)</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: User A • 09:00 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded-full bg-primary-container/30 text-on-primary-container font-label-sm text-label-sm">Checkup</span>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Appt 2 -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-outline-variant/30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User B Pet" class="w-full h-full object-cover" data-alt="A fluffy white Persian cat resting calmly on a clean examination table. Soft lighting, modern veterinary sanctuary aesthetic, calming tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv85odTVyYJMFNKt9QyKjPvJ6eor-HfZDPjgh93ANfVfChtnc-2rJvomEYXdG5Ab3SQBx5DA5lmiu5dUrrsmwTKD_3wljCq4YZ6kJ04rAJ4AZcuQBeWgz8vECMcutEKLuqaE-ueKDYWOZT3U4fueElCU0plyaOWDIUhhBaQU_KOpfJ8T09IiumPp9LuzESTatWBnpXugNCTq1YIc2AhnLyHknY378Dt5R2d9ulN1kYN4Gq5HnqRC1aHb7AqS6BflVjGvqMalWrdFrN"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Luna (Persian Cat)</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: User B • 11:30 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded-full bg-tertiary-container/30 text-on-tertiary-container font-label-sm text-label-sm">Vaccination</span>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Appt 3 -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-outline-variant/30">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User C Pet" class="w-full h-full object-cover" data-alt="A small brown dachshund puppy looking curious, sitting on a soft surface in a modern vet clinic. Bright, clean, welcoming environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkTArsH9Fp_rVHZZLvny0M8V-yJ6H4tZK0TlAu5npu0iCNbqnFzSEyZ9tZsMN9P6cpQpD7Znl56qNNyvYG9fb41Yv9hG-Apwlnl9ql5SGbn-UNCeVVIpJm4cwj73_tWB7LIVKXRVH8wUAh-kkrX0vn4SrtA1_B5ZIXAhv8XCSiPQilRj-ynWcauauM1hXcPsMIix-XuMuAfY20xq6qY1ckuZ8B6dbaJUK5RG2fsbhEsB9L_3QOKlh_ZWaSQH1mnzZO2QAdaUQr2VvN"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">Buster (Dachshund)</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: User C • 02:15 PM</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 rounded-full bg-error-container/30 text-on-error-container font-label-sm text-label-sm">Follow-up</span>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (spans 4) -->
+<div class="lg:col-span-4 flex flex-col gap-card-gap">
+<!-- Recent Messages -->
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest flex-1">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-title-lg text-title-lg text-on-surface">Recent Messages</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary">open_in_new</span>
+</div>
+<div class="space-y-4">
+<!-- Message 1 -->
+<div class="flex gap-3 cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex-shrink-0 flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<div class="flex-1 min-w-0 border-b border-surface-container-high pb-3 group-hover:border-primary/30 transition-colors">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="font-label-md text-label-md text-on-surface font-semibold truncate">User A</h4>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">10m ago</span>
+</div>
+<p class="font-body-md text-body-md text-sm text-on-surface-variant truncate">Is it normal for Max to sleep this much after...</p>
+</div>
+</div>
+<!-- Message 2 -->
+<div class="flex gap-3 cursor-pointer group">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex-shrink-0 flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<div class="flex-1 min-w-0 border-b border-surface-container-high pb-3 group-hover:border-primary/30 transition-colors">
+<div class="flex justify-between items-baseline mb-1">
+<h4 class="font-label-md text-label-md text-on-surface font-semibold truncate">Clinic Reception</h4>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">1h ago</span>
+</div>
+<p class="font-body-md text-body-md text-sm text-on-surface-variant truncate">The lab results for Bella are ready for review.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Simple Chart Placeholder -->
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Appointments Trend</h3>
+<div class="h-32 w-full flex items-end gap-2 px-2 relative">
+<!-- Y Axis marks -->
+<div class="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-on-surface-variant pb-6">
+<span>20</span>
+<span>10</span>
+<span>0</span>
+</div>
+<!-- Bars -->
+<div class="flex-1 ml-4 flex items-end justify-between gap-1 h-full pb-6 relative">
+<!-- Bar 1 -->
+<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[40%] relative group">
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">M</span>
+</div>
+<!-- Bar 2 -->
+<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[60%] relative group">
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">T</span>
+</div>
+<!-- Bar 3 -->
+<div class="w-full bg-primary hover:bg-primary-container transition-colors rounded-t-sm h-[80%] relative group">
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant font-bold text-primary">W</span>
+</div>
+<!-- Bar 4 -->
+<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[50%] relative group">
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">T</span>
+</div>
+<!-- Bar 5 -->
+<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[90%] relative group">
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">F</span>
+</div>
+</div>
+<!-- X axis line -->
+<div class="absolute bottom-6 left-4 right-0 h-px bg-outline-variant"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FloatingActionButton -->
+<button onclick="window.location.href='{% url 'core:chatbot' %}'" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed font-label-md text-label-md shadow-xl hover:scale-110 hover:shadow-2xl transition-all z-50 flex items-center justify-center group">
+<span class="material-symbols-outlined transition-transform group-hover:rotate-12">smart_toy</span>
+</button>
+</body></html>
