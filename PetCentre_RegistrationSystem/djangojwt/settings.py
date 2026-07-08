@@ -44,6 +44,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,8 +56,18 @@ INSTALLED_APPS = [
     'channels',
     'myapp',
     'chat',
+    'core',
     'corsheaders',
     'drf_spectacular',
+]
+
+# Lets the pet-owner login page's "Email or Phone" field authenticate
+# by username OR email, since AUTH_USER_MODEL's USERNAME_FIELD is
+# still 'username'. ModelBackend stays as a fallback for code paths
+# that only ever pass a username (e.g. the DRF JWT login view).
+AUTHENTICATION_BACKENDS = [
+    'core.backends.UsernameOrEmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 MIDDLEWARE = [
@@ -110,8 +121,9 @@ ROOT_URLCONF = 'djangojwt.urls'
 
 TEMPLATES = [
     {
+    
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Global templates directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -216,8 +228,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Where @login_required sends unauthenticated users for the
+# session-based web pages (login page, dashboards, chat).
+LOGIN_URL = 'login_page'
 
+# ------------------------------------------------------------------
 # Production hardening (only kicks in when DEBUG=False)
+# ------------------------------------------------------------------
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').strip().lower() in ('true', '1', 'yes')
     SESSION_COOKIE_SECURE = True
