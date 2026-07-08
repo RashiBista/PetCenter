@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pet Centre - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#f1ecf2",
+                      "on-tertiary-fixed-variant": "#534600",
+                      "inverse-surface": "#313034",
+                      "on-tertiary-container": "#4c4000",
+                      "surface": "#fdf8fd",
+                      "primary-fixed": "#e5deff",
+                      "on-surface-variant": "#48454f",
+                      "primary": "#5f578f",
+                      "inverse-on-surface": "#f4eff5",
+                      "on-primary-fixed": "#1b1248",
+                      "on-primary": "#ffffff",
+                      "outline": "#797580",
+                      "surface-container-low": "#f7f2f8",
+                      "surface-tint": "#5f578f",
+                      "inverse-primary": "#c8bfff",
+                      "on-surface": "#1c1b1f",
+                      "on-secondary-container": "#616470",
+                      "secondary-fixed": "#e0e1f0",
+                      "error": "#ba1a1a",
+                      "primary-container": "#afa6e4",
+                      "secondary-fixed-dim": "#c4c6d4",
+                      "on-primary-fixed-variant": "#473f76",
+                      "error-container": "#ffdad6",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#dac671",
+                      "surface-variant": "#e5e1e6",
+                      "on-primary-container": "#413a70",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#6d5e13",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#444652",
+                      "tertiary-fixed": "#f8e28a",
+                      "surface-bright": "#fdf8fd",
+                      "on-tertiary": "#ffffff",
+                      "secondary-container": "#e0e1f0",
+                      "on-secondary-fixed": "#181b26",
+                      "outline-variant": "#c9c4d0",
+                      "surface-container-high": "#ebe7ec",
+                      "background": "#fdf8fd",
+                      "on-background": "#1c1b1f",
+                      "surface-container-highest": "#e5e1e6",
+                      "primary-fixed-dim": "#c8bfff",
+                      "secondary": "#5b5e6a",
+                      "surface-dim": "#ddd9de",
+                      "tertiary-container": "#c0ad5b",
+                      "on-tertiary-fixed": "#221b00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "container-padding-desktop": "40px",
+                      "card-gap": "24px",
+                      "gutter": "24px",
+                      "section-margin": "64px",
+                      "container-padding-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "title-lg": ["Plus Jakarta Sans"],
+                      "display-lg": ["Manrope"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "title-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "600"}],
+                      "display-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0px 8px 32px rgba(46, 46, 56, 0.05);
+        }
+        .input-focus-ring:focus-within {
+            border-color: #5f578f;
+            box-shadow: 0 0 0 1px #5f578f;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen flex items-center justify-center p-4 antialiased relative overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-container rounded-full mix-blend-multiply filter blur-[100px] opacity-30 pointer-events-none"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-surface-container-high rounded-full mix-blend-multiply filter blur-[120px] opacity-40 pointer-events-none"></div>
+<main class="w-full max-w-[440px] z-10 relative">
+<div class="glass-panel rounded-2xl p-8 md:p-10 border border-white">
+<div class="flex flex-col items-center mb-8">
+<div class="w-16 h-16 bg-surface-container-low rounded-xl shadow-sm flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-[32px]">pets</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface text-center">Create your PetCentre account</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 text-center">Sign up as a pet owner to get started.</p>
+</div>
+
+{% if errors %}
+<div class="mb-6 px-4 py-3 rounded-lg bg-error-container text-on-error-container text-body-md">
+  <ul class="list-disc pl-5">
+    {% for field, msgs in errors.items %}
+      {% for msg in msgs %}<li>{{ msg }}</li>{% endfor %}
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<form class="space-y-5" method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="username">Username</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="username" name="username" required type="text" value="{{ form_data.username|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="email">Email</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="email" name="email" required type="email" value="{{ form_data.email|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="phone_number">Phone Number (optional)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="phone_number" name="phone_number" type="text" value="{{ form_data.phone_number|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="password">Password</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password" name="password" required type="password"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="password2">Confirm Password</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password2" name="password2" required type="password"/>
+</div>
+
+<div class="pt-2 border-t border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-3 pt-4">Add your pet (optional)</p>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_name">Pet Name</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="pet_name" name="pet_name" type="text" value="{{ form_data.pet_name|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_species">Species</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="pet_species" name="pet_species" type="text" placeholder="Dog, Cat, ..." value="{{ form_data.pet_species|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_breed">Breed (optional)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="pet_breed" name="pet_breed" type="text" value="{{ form_data.pet_breed|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_photo">Pet Photo (optional)</label>
+<input class="w-full text-body-md text-on-surface-variant file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-primary-container file:text-on-primary-container file:font-label-md hover:file:bg-primary-container/80 cursor-pointer" id="pet_photo" name="pet_photo" type="file" accept="image/*"/>
+<p class="text-label-sm text-on-surface-variant">Uploaded photos are stored securely via Cloudinary.</p>
+</div>
+
+<button class="w-full h-12 bg-primary text-on-primary rounded-full font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-all duration-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(95,87,143,0.25)] mt-2" type="submit">
+<span>Create account</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</form>
+
+<div class="mt-8 text-center border-t border-outline-variant pt-6">
+<p class="font-body-md text-body-md text-on-surface-variant">
+  Already have an account?
+  <a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant transition-colors ml-1" href="{% url 'core:pet_owner_login' %}">Log in</a>
+</p>
+</div>
+</div>
+</main>
+</body></html>

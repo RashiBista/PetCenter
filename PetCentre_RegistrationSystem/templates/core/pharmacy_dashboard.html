@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Pharmacy Dashboard — PetCentre{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-16 text-center">
+  <div class="inline-block bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-4">
+    Pharmacy Portal
+  </div>
+  <h1 class="text-2xl font-bold text-gray-800 mb-2">Welcome, {{ request.user.get_full_name|default:request.user.username }}</h1>
+  <p class="text-gray-500">Pharmacy-specific tools (prescription queue, inventory) go here.</p>
+
+  <a href="{% url 'chat:inbox' %}" class="inline-block mt-6 bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+    Go to Messages
+  </a>
+  <br/>
+  <a href="{% url 'core:logout' %}" class="inline-block mt-4 text-sm text-red-500 hover:underline">
+    Log out
+  </a>
+</div>
+{% endblock %}

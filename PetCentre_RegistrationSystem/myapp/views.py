@@ -7,6 +7,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Q
 from .permissions import IsPetOwner, IsVet
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
+from .decorators import role_required
 from .serializers import (
     LoginSerializer,
     UserPublicSerializer,
@@ -186,3 +191,85 @@ class UserSearchView(APIView):
             })
         return Response({'results': results})
 
+# ------------------------------------------------------------------
+# Session-based login -> role redirect
+#
+# Append this block to the bottom of myapp/views.py, and add this
+# import near the top of that file:
+#     from .decorators import role_required
+#
+# These are intentionally separate from the JWT/DRF views above (used
+# by API clients). This flow is for the browser session — plain login
+# form, Django session cookie, then redirect by role. The dashboard
+# views below just confirm which branch was hit; swap the render()
+# template argument for your real UI once redirection is verified.
+
+
+
+def login_page(request):
+    """
+    GET  -> renders the login form
+    POST -> authenticates, starts a session, redirects by role
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard_redirect')
+
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard_redirect')
+        error = 'Invalid username or password.'
+
+    return render(request, 'myapp/login.html', {'error': error, 'page_title': 'Login'})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login_page')
+
+
+@login_required(login_url='login_page')
+def dashboard_redirect(request):
+    """
+    Single entry point after login. This is the actual redirection
+    logic — everything else in this file is just there to render
+    something visible so you can confirm each branch works.
+    """
+    user = request.user
+
+    if user.is_superuser or user.is_staff:
+        return redirect('admin:index')
+
+    if user.is_vet:
+        return redirect('vet_dashboard_page')
+
+    return redirect('user_dashboard_page')
+
+
+@role_required(User.Role.USER)
+def user_dashboard_page(request):
+    # Placeholder — replace this render() call with your real
+    # dashboard template once you're satisfied redirection is correct.
+    return render(request, 'myapp/dashboard_placeholder.html', {
+        'page_title': 'User Dashboard',
+        'role_label': 'Pet Owner',
+    })
+
+
+@role_required(User.Role.VET)
+def vet_dashboard_page(request):
+    return render(request, 'myapp/dashboard_placeholder.html', {
+        'page_title': 'Vet Dashboard',
+        'role_label': 'Veterinarian',
+    })
+
+@role_required(User.Role.PHARMACY)
+def pharmacy_dashboard_page(request):
+    return render(request, 'myapp/dashboard_placeholder.html', {
+        'page_title': 'Pharmacy Dashboard',
+        'role_label': 'Pharmacy',
+    })

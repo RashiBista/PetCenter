@@ -13,6 +13,7 @@ from myapp.views import (
 )
 
 urlpatterns = [
+    path('', include('core.urls')),
     path('admin/', admin.site.urls),
 
     # --- API schema / interactive docs ---
