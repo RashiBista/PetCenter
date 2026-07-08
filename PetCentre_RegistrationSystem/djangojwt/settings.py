@@ -230,7 +230,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Where @login_required sends unauthenticated users for the
 # session-based web pages (login page, dashboards, chat).
-LOGIN_URL = 'login_page'
+LOGIN_URL = 'core:landing_page'
 
 # ------------------------------------------------------------------
 # Production hardening (only kicks in when DEBUG=False)

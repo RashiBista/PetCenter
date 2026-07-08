@@ -266,3 +266,10 @@ def vet_dashboard_page(request):
         'page_title': 'Vet Dashboard',
         'role_label': 'Veterinarian',
     })
+
+@role_required(User.Role.PHARMACY)
+def pharmacy_dashboard_page(request):
+    return render(request, 'myapp/dashboard_placeholder.html', {
+        'page_title': 'Pharmacy Dashboard',
+        'role_label': 'Pharmacy',
+    })

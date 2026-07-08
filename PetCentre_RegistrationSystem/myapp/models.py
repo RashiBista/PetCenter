@@ -17,6 +17,7 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         USER = 'user', 'User'
         VET = 'vet', 'Veterinarian'
+        PHARMACY = 'pharmacy', 'Pharmacy'
 
     role = models.CharField(
         max_length=10,
@@ -93,3 +94,29 @@ class Pet(models.Model):
 
     def __str__(self):
         return f"{self.name} → {self.owner.username}"
+@property
+def is_pharmacy(self):
+    return self.role == self.Role.PHARMACY
+ 
+ 
+# 3. Add a new PharmacyProfile model, alongside UserProfile/VetProfile:
+ 
+class PharmacyProfile(models.Model):
+    """
+    Extra profile data for the 'pharmacy' role. Kept minimal for now,
+    same pattern as VetProfile — fields like license number, address,
+    or operating hours can be added here later without touching the
+    User/auth model.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='pharmacy_profile',
+        limit_choices_to={'role': User.Role.PHARMACY},
+    )
+    pharmacy_name = models.CharField(max_length=150, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+ 
+    def __str__(self):
+        return f'PharmacyProfile<{self.user.username}>'

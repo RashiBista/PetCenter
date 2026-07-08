@@ -10,24 +10,11 @@ from myapp.views import (
     UserSearchView,
     VetDashboardView,
     VetRegisterView,
-    # Session-based redirect flow
-    login_page,
-    logout_view,
-    dashboard_redirect,
-    user_dashboard_page,
-    vet_dashboard_page,
 )
 
 urlpatterns = [
     path('', include('core.urls')),
     path('admin/', admin.site.urls),
-
-    # --- Session-based login -> role redirect ---
-    path('login/', login_page, name='login_page'),
-    path('logout/', logout_view, name='logout_view'),
-    path('dashboard/', dashboard_redirect, name='dashboard_redirect'),
-    path('dashboard/user/', user_dashboard_page, name='user_dashboard_page'),
-    path('dashboard/vet/', vet_dashboard_page, name='vet_dashboard_page'),
 
     # --- API schema / interactive docs ---
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

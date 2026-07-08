@@ -187,7 +187,7 @@
 <!-- Header -->
 <div class="mb-section-margin flex justify-between items-end">
 <div>
-<h2 class="font-display-lg text-display-lg text-on-surface mb-2">Hello, Vet A</h2>
+<h2 class="font-display-lg text-display-lg text-on-surface mb-2">Hello, Dr. {{ request.user.get_full_name|default:request.user.username }}</h2>
 <p class="font-body-lg text-body-lg text-on-surface-variant">Here's what's happening at the sanctuary today.</p>
 </div>
 <div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant shadow-sm">

@@ -229,7 +229,7 @@
 <div class="h-8 w-px bg-outline-variant mx-2 hidden sm:block"></div>
 <div class="flex items-center gap-3 cursor-pointer group">
 <div class="hidden sm:block text-right">
-<p class="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">User A</p>
+<p class="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">{{ request.user.get_full_name|default:request.user.username }}</p>
 </div>
 <img alt="User A" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container shadow-sm" data-alt="A small, soft-lit portrait photograph of a smiling person, serving as a user profile avatar. Clean white background, modern soft corporate style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz4Ryy9ciiT_c5XsAEKp1RAeSwc1IEsMuT074frMfJOGsN12hmcwh86gGc4YMXzvasgiokfLzQsFQeSlK9ZHGzcvz54DZM-45htrred-W1fMs8I45xRhe0pBy8TJSFUFdchkjeE-JhAB2ZDgQnMZ4BwSA2FNTP0A1A1jWJnKxzh-Klscfxj78071GG9L41AeUVO8lhgd0-cu0yv-WKvx1rKwoTwduJxwOOOMHwKRb8HUMJWXrsSWaLeoLfrJV8fsIy4k3JlitG5y2Q"/>
 </div>
@@ -239,7 +239,7 @@
 <div class="pt-24 px-container-padding-mobile md:px-container-padding-desktop max-w-[1360px] mx-auto space-y-section-margin pb-10">
 <!-- Greeting Section -->
 <section>
-<h2 class="font-display-lg text-display-lg text-on-surface">Hello, User A</h2>
+<h2 class="font-display-lg text-display-lg text-on-surface">Hello, {{ request.user.get_full_name|default:request.user.username }}</h2>
 <p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">Welcome back to your pet's wellness sanctuary. Here is an overview of your upcoming care activities.</p>
 </section>
 <!-- Quick Action Cards (4-column grid) -->

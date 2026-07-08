@@ -142,13 +142,44 @@
 </nav>
 <!-- CTA / Login -->
 <div class="hidden md:flex items-center gap-4">
-<button onclick="window.location.href='{% url 'core:pet_owner_login' %}'" class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors px-4 py-2">
+<div class="relative">
+<button onclick="toggleLoginMenu()" id="login-menu-btn" class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors px-4 py-2 flex items-center gap-1">
                     Log In
-                </button>
+                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<div id="login-menu" class="hidden absolute right-0 mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/30 py-2 z-50">
+<a href="{% url 'core:pet_owner_login' %}" class="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px] text-primary">person</span> Pet Owner
+</a>
+<a href="{% url 'core:veterinary_login' %}" class="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px] text-primary">medical_services</span> Veterinary Professional
+</a>
+<a href="{% url 'core:admin_login' %}" class="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px] text-primary">admin_panel_settings</span> Administrator
+</a>
+<a href="{% url 'core:pharmacy_login' %}" class="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px] text-primary">local_pharmacy</span> Pharmacy
+</a>
+</div>
+</div>
 <button onclick="window.location.href='{% url 'core:pet_owner_signup' %}'" class="font-label-md text-label-md bg-primary text-on-primary px-6 py-2.5 rounded-full hover:bg-primary/90 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
                     Sign Up
                 </button>
 </div>
+
+<script>
+  function toggleLoginMenu() {
+    document.getElementById('login-menu').classList.toggle('hidden');
+  }
+  // Close the dropdown when clicking anywhere outside it
+  document.addEventListener('click', function (e) {
+    const menu = document.getElementById('login-menu');
+    const btn = document.getElementById('login-menu-btn');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+</script>
 <!-- Mobile Menu Toggle -->
 <button class="md:hidden p-2 text-on-surface-variant rounded-full hover:bg-surface-variant transition-colors">
 <span class="material-symbols-outlined">menu</span>
@@ -190,6 +221,7 @@
 <option value="owner">Pet Owner</option>
 <option value="vet">Veterinary Professional</option>
 <option value="admin">Administrator</option>
+<option value="pharmacy">Pharmacy</option>
 </select>
 <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
 </div>
@@ -216,12 +248,14 @@
   const loginUrls = {
     owner: "{% url 'core:pet_owner_login' %}",
     vet: "{% url 'core:veterinary_login' %}",
-    admin: "{% url 'core:admin_login' %}"
+    admin: "{% url 'core:admin_login' %}",
+    pharmacy: "{% url 'core:pharmacy_login' %}"
   };
   const signupUrls = {
     owner: "{% url 'core:pet_owner_signup' %}",
-    vet: "{% url 'core:veterinary_login' %}",
-    admin: "{% url 'core:admin_login' %}"
+    vet: "{% url 'core:veterinary_signup' %}",
+    admin: "{% url 'core:admin_login' %}",
+    pharmacy: "{% url 'core:pharmacy_signup' %}"
   };
 
   function selectedRole() {

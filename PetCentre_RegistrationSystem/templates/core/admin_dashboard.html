@@ -217,7 +217,7 @@
 <div class="pt-28 px-10 pb-20 max-w-[1360px] mx-auto">
 <!-- Greeting Section -->
 <section class="mb-10">
-<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Hello, Admin A</h2>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Hello, {{ request.user.get_full_name|default:request.user.username }}</h2>
 <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Here's what's happening in the sanctuary today.</p>
 </section>
 <!-- Overview Bento Grid -->
