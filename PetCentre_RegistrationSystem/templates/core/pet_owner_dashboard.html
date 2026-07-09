@@ -271,7 +271,9 @@
 </div>
 <div>
 <h3 class="font-title-lg text-title-lg text-on-surface">Pet Profile</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage health records.</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+{% if pet_count %}{{ pet_count }} pet{{ pet_count|pluralize }} registered.{% else %}No pets added yet.{% endif %}
+</p>
 </div>
 </button>
 <!-- Action 4 -->
@@ -299,38 +301,47 @@
 <button class="text-primary font-label-md text-label-md hover:underline">View All</button>
 </div>
 <div class="flex flex-col md:flex-row gap-6 bg-surface-container-low p-6 rounded-2xl relative z-10 border border-surface-container">
+{% if next_appointment %}
 <!-- Pet Info -->
 <div class="flex items-center gap-4 flex-1">
-<img class="w-16 h-16 rounded-full object-cover shadow-sm" data-alt="A soft, beautifully lit portrait of a golden retriever dog looking happy. Modern, bright sanctuary style photography with a blurred off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtaJeWVMAs5_ONUGLoRN_aqxRV9Cs2ody_RpjulcVsEAi-tW3pq7FPpBMEW4t-skebhfwd1CTXbXTLOpolqeHXiNmOHxiB__s9wVKHbq5qS65YnzoLduy9vez7lisvpe_RsjToiRCBqezPNXx6spxHUb4ILEEos30DTPwUuAyIeerihVO0l-QBho4Royus8iyGTAJDhZ-5xgkZabNwM9DlpDbUadx6e987xDD8kvAI-FbcNB5dSuJoqZCCbVEIYR7-ELgwL7AoHbt-"/>
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl shadow-sm">
+{{ next_appointment.pet.name|first|upper }}
+</div>
 <div>
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Patient</p>
-<h4 class="font-title-lg text-title-lg text-on-surface">Pet A</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">Golden Retriever</p>
+<h4 class="font-title-lg text-title-lg text-on-surface">{{ next_appointment.pet.name }}</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">{{ next_appointment.pet.species }}{% if next_appointment.pet.breed %} — {{ next_appointment.pet.breed }}{% endif %}</p>
 </div>
 </div>
-<!-- Divider -->
 <div class="hidden md:block w-px bg-outline-variant self-stretch"></div>
 <!-- Vet Info -->
 <div class="flex items-center gap-4 flex-1">
-<img class="w-16 h-16 rounded-full object-cover shadow-sm" data-alt="A professional, warm portrait of a veterinarian in soft lighting, smiling reassuringly. Lavender mist ambient light, modern clinical sanctuary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCISNBdEaX5_oAIwvB1rRNWg9bjyM8BL8zKtsqP3UW-_RIqKqiY-tbs6ms351ySP57Nr_x7Ld0HHawbcwUKIEfOkuxH2JbThJqTkwOC0aluW2h5vouUFrEo--UFW2RTLmFLZUIJATmYatJ5zqxCnMXOllYACabLfvOmI-nURAPRQxVCKC2g5kxeHUOygJZ75lJNXVa3MNO_5zDITL3c7R-k9ZqB49KijOrrH67VgWpOw30-l6I284txUPEt7WE82EmBEcCFD2aPTCnZ"/>
+<div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-xl shadow-sm">
+{{ next_appointment.vet.get_full_name|default:next_appointment.vet.username|first|upper }}
+</div>
 <div>
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Veterinarian</p>
-<h4 class="font-title-lg text-title-lg text-on-surface">Dr. Vet A</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">General Wellness</p>
+<h4 class="font-title-lg text-title-lg text-on-surface">Dr. {{ next_appointment.vet.get_full_name|default:next_appointment.vet.username }}</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">{{ next_appointment.reason|default:"General Wellness" }}</p>
 </div>
 </div>
-<!-- Divider -->
 <div class="hidden md:block w-px bg-outline-variant self-stretch"></div>
 <!-- Time Info -->
 <div class="flex-1 flex flex-col justify-center">
 <div class="bg-primary text-on-primary rounded-xl p-3 inline-flex items-center gap-2 shadow-soft w-fit">
 <span class="material-symbols-outlined" data-weight="fill">schedule</span>
 <div>
-<p class="font-label-md text-label-md font-bold">Oct 24, 2023</p>
-<p class="font-label-sm text-label-sm opacity-90">10:00 AM</p>
+<p class="font-label-md text-label-md font-bold">{{ next_appointment.scheduled_time|date:"M d, Y" }}</p>
+<p class="font-label-sm text-label-sm opacity-90">{{ next_appointment.scheduled_time|date:"g:i A" }}</p>
 </div>
 </div>
 </div>
+{% else %}
+<div class="flex-1 flex flex-col items-center justify-center text-center py-6 gap-2">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">event_available</span>
+<p class="font-body-md text-body-md text-on-surface-variant">No upcoming appointments booked.</p>
+</div>
+{% endif %}
 </div>
 </div>
 <!-- Recent Notifications (Spans 4 cols on desktop) -->

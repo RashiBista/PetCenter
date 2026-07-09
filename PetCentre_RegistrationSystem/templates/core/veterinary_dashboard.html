@@ -246,61 +246,31 @@
 <button class="text-primary font-label-md text-label-md hover:underline">View All</button>
 </div>
 <div class="space-y-4">
-<!-- Appt 1 -->
+<!-- Appointments — real data from Appointment model, filtered to this vet + today -->
+{% for appt in todays_appointments %}
 <div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-outline-variant/30">
 <div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
-<img alt="User A Pet" class="w-full h-full object-cover" data-alt="A portrait of a golden retriever dog looking happy and healthy in a softly lit, modern veterinary clinic room. Clean aesthetic, soft lavender backgrounds." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb-gLFYP_pHkUQ9x-FCvvxQiS4TVGbb_XTlrhMBdhtyBBZC5NkxM606u4_NZsnmh4WYI724DcUjGoiAXnWX14JtoIg44RAqP_ks6ddb0NSSLoIJZEJ5RlZUULtpJX84VqMVXq28EsRqVhvCPs8g3vde-bRwPb1y-Lt6ouirCNnmsUcKaNAATUBHnNy3Td37x4cvUfRaxT7OKpFJOo0s5zUd7hHm0yzf6YSFqw8zBUf32RkAAVjgOzyNwtKwfsjCeeUUA8GwljbhWMi"/>
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold">
+{{ appt.pet.name|first|upper }}
 </div>
 <div>
-<h4 class="font-label-md text-label-md text-on-surface font-bold">Max (Golden Retriever)</h4>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: User A • 09:00 AM</p>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">{{ appt.pet.name }} ({{ appt.pet.breed|default:appt.pet.species }})</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: {{ appt.pet.owner.get_full_name|default:appt.pet.owner.username }} • {{ appt.scheduled_time|date:"g:i A" }}</p>
 </div>
 </div>
 <div class="flex items-center gap-3">
-<span class="px-3 py-1 rounded-full bg-primary-container/30 text-on-primary-container font-label-sm text-label-sm">Checkup</span>
+<span class="px-3 py-1 rounded-full bg-primary-container/30 text-on-primary-container font-label-sm text-label-sm">{{ appt.get_status_display }}</span>
 <button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
 <span class="material-symbols-outlined">more_vert</span>
 </button>
 </div>
 </div>
-<!-- Appt 2 -->
-<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-outline-variant/30">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
-<img alt="User B Pet" class="w-full h-full object-cover" data-alt="A fluffy white Persian cat resting calmly on a clean examination table. Soft lighting, modern veterinary sanctuary aesthetic, calming tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv85odTVyYJMFNKt9QyKjPvJ6eor-HfZDPjgh93ANfVfChtnc-2rJvomEYXdG5Ab3SQBx5DA5lmiu5dUrrsmwTKD_3wljCq4YZ6kJ04rAJ4AZcuQBeWgz8vECMcutEKLuqaE-ueKDYWOZT3U4fueElCU0plyaOWDIUhhBaQU_KOpfJ8T09IiumPp9LuzESTatWBnpXugNCTq1YIc2AhnLyHknY378Dt5R2d9ulN1kYN4Gq5HnqRC1aHb7AqS6BflVjGvqMalWrdFrN"/>
+{% empty %}
+<div class="flex flex-col items-center justify-center text-center py-10 gap-2">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">event_available</span>
+<p class="font-body-md text-body-md text-on-surface-variant">No appointments scheduled for today.</p>
 </div>
-<div>
-<h4 class="font-label-md text-label-md text-on-surface font-bold">Luna (Persian Cat)</h4>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: User B • 11:30 AM</p>
-</div>
-</div>
-<div class="flex items-center gap-3">
-<span class="px-3 py-1 rounded-full bg-tertiary-container/30 text-on-tertiary-container font-label-sm text-label-sm">Vaccination</span>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-<span class="material-symbols-outlined">more_vert</span>
-</button>
-</div>
-</div>
-<!-- Appt 3 -->
-<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-variant transition-colors group cursor-pointer border border-transparent hover:border-outline-variant/30">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
-<img alt="User C Pet" class="w-full h-full object-cover" data-alt="A small brown dachshund puppy looking curious, sitting on a soft surface in a modern vet clinic. Bright, clean, welcoming environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkTArsH9Fp_rVHZZLvny0M8V-yJ6H4tZK0TlAu5npu0iCNbqnFzSEyZ9tZsMN9P6cpQpD7Znl56qNNyvYG9fb41Yv9hG-Apwlnl9ql5SGbn-UNCeVVIpJm4cwj73_tWB7LIVKXRVH8wUAh-kkrX0vn4SrtA1_B5ZIXAhv8XCSiPQilRj-ynWcauauM1hXcPsMIix-XuMuAfY20xq6qY1ckuZ8B6dbaJUK5RG2fsbhEsB9L_3QOKlh_ZWaSQH1mnzZO2QAdaUQr2VvN"/>
-</div>
-<div>
-<h4 class="font-label-md text-label-md text-on-surface font-bold">Buster (Dachshund)</h4>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Owner: User C • 02:15 PM</p>
-</div>
-</div>
-<div class="flex items-center gap-3">
-<span class="px-3 py-1 rounded-full bg-error-container/30 text-on-error-container font-label-sm text-label-sm">Follow-up</span>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-<span class="material-symbols-outlined">more_vert</span>
-</button>
-</div>
-</div>
-</div>
+{% endfor %}
 </div>
 <!-- Right Column (spans 4) -->
 <div class="lg:col-span-4 flex flex-col gap-card-gap">
