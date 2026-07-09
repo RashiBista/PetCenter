@@ -120,3 +120,64 @@ class PharmacyProfile(models.Model):
  
     def __str__(self):
         return f'PharmacyProfile<{self.user.username}>'
+
+class Appointment(models.Model):
+    class Status(models.TextChoices):
+        REQUESTED = 'requested', 'Requested'
+        CONFIRMED = 'confirmed', 'Confirmed'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+ 
+    pet = models.ForeignKey(
+        'myapp.Pet', on_delete=models.CASCADE, related_name='appointments',
+    )
+    vet = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='vet_appointments',
+        limit_choices_to={'role': User.Role.VET},
+    )
+    scheduled_time = models.DateTimeField()
+    reason = models.CharField(max_length=200, blank=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.REQUESTED)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    class Meta:
+        ordering = ['scheduled_time']
+ 
+    def __str__(self):
+        return f"{self.pet.name} with Dr. {self.vet.username} @ {self.scheduled_time:%b %d, %I:%M %p}"
+ 
+    @property
+    def owner(self):
+        return self.pet.owner        
+class Prescription(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        FULFILLED = 'fulfilled', 'Fulfilled'
+        CANCELLED = 'cancelled', 'Cancelled'
+ 
+    pet = models.ForeignKey(
+        'myapp.Pet', on_delete=models.CASCADE, related_name='prescriptions',
+    )
+    vet = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='issued_prescriptions',
+        limit_choices_to={'role': User.Role.VET},
+    )
+    # Nullable/blank: a prescription can exist before any pharmacy claims it —
+    # any pharmacy account can see and fulfill unclaimed ones.
+    pharmacy = models.ForeignKey(
+        'myapp.User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='fulfilled_prescriptions',
+        limit_choices_to={'role': User.Role.PHARMACY},
+    )
+    medicine_name = models.CharField(max_length=150)
+    dosage = models.CharField(max_length=100, blank=True)
+    instructions = models.TextField(blank=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    fulfilled_at = models.DateTimeField(null=True, blank=True)
+ 
+    class Meta:
+        ordering = ['-created_at']
+ 
+    def __str__(self):
+        return f"{self.medicine_name} for {self.pet.name} ({self.get_status_display()})"

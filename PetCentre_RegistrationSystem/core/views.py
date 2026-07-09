@@ -4,9 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
+from django.utils import timezone
 
 from myapp.decorators import role_required
-from myapp.models import Pet, User, UserProfile, VetProfile, PharmacyProfile
+from myapp.models import Appointment, Pet, Prescription, User, UserProfile, VetProfile, PharmacyProfile
 
 
 def landing_page(request):
@@ -227,17 +228,65 @@ def logout_view(request):
 
 @role_required(User.Role.USER)
 def pet_owner_dashboard(request):
-    return render(request, 'core/pet_owner_dashboard.html')
+    pets = Pet.objects.filter(owner=request.user)
+    next_appointment = Appointment.objects.filter(
+        pet__owner=request.user,
+        scheduled_time__gte=timezone.now(),
+        status__in=[Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED],
+    ).select_related('pet', 'vet').first()
+
+    return render(request, 'core/pet_owner_dashboard.html', {
+        'pets': pets,
+        'pet_count': pets.count(),
+        'next_appointment': next_appointment,
+    })
 
 
 @role_required(User.Role.VET)
 def veterinary_dashboard(request):
-    return render(request, 'core/veterinary_dashboard.html')
+    today = timezone.localdate()
+    todays_appointments = Appointment.objects.filter(
+        vet=request.user,
+        scheduled_time__date=today,
+    ).select_related('pet', 'pet__owner').order_by('scheduled_time')
+
+    total_patients = Pet.objects.filter(
+        appointments__vet=request.user
+    ).distinct().count()
+
+    return render(request, 'core/veterinary_dashboard.html', {
+        'todays_appointments': todays_appointments,
+        'total_patients': total_patients,
+    })
 
 
 @role_required(User.Role.PHARMACY)
 def pharmacy_dashboard(request):
-    return render(request, 'core/pharmacy_dashboard.html')
+    if request.method == 'POST':
+        # Fulfill action: mark a pending prescription as fulfilled by this pharmacy.
+        prescription_id = request.POST.get('prescription_id')
+        Prescription.objects.filter(
+            id=prescription_id, status=Prescription.Status.PENDING
+        ).update(
+            status=Prescription.Status.FULFILLED,
+            pharmacy=request.user,
+            fulfilled_at=timezone.now(),
+        )
+        return redirect('core:pharmacy_dashboard')
+
+    pending_prescriptions = Prescription.objects.filter(
+        status=Prescription.Status.PENDING
+    ).select_related('pet', 'pet__owner', 'vet')
+
+    recently_fulfilled = Prescription.objects.filter(
+        status=Prescription.Status.FULFILLED, pharmacy=request.user
+    ).select_related('pet', 'vet')[:5]
+
+    return render(request, 'core/pharmacy_dashboard.html', {
+        'pending_prescriptions': pending_prescriptions,
+        'pending_count': pending_prescriptions.count(),
+        'recently_fulfilled': recently_fulfilled,
+    })
 
 
 @login_required(login_url='core:admin_login')
