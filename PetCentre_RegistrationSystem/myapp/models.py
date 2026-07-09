@@ -149,3 +149,35 @@ class Appointment(models.Model):
     @property
     def owner(self):
         return self.pet.owner        
+class Prescription(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        FULFILLED = 'fulfilled', 'Fulfilled'
+        CANCELLED = 'cancelled', 'Cancelled'
+ 
+    pet = models.ForeignKey(
+        'myapp.Pet', on_delete=models.CASCADE, related_name='prescriptions',
+    )
+    vet = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='issued_prescriptions',
+        limit_choices_to={'role': User.Role.VET},
+    )
+    # Nullable/blank: a prescription can exist before any pharmacy claims it —
+    # any pharmacy account can see and fulfill unclaimed ones.
+    pharmacy = models.ForeignKey(
+        'myapp.User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='fulfilled_prescriptions',
+        limit_choices_to={'role': User.Role.PHARMACY},
+    )
+    medicine_name = models.CharField(max_length=150)
+    dosage = models.CharField(max_length=100, blank=True)
+    instructions = models.TextField(blank=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    fulfilled_at = models.DateTimeField(null=True, blank=True)
+ 
+    class Meta:
+        ordering = ['-created_at']
+ 
+    def __str__(self):
+        return f"{self.medicine_name} for {self.pet.name} ({self.get_status_display()})"

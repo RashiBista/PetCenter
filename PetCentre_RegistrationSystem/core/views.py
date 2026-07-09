@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from myapp.decorators import role_required
-from myapp.models import Appointment, Pet, User, UserProfile, VetProfile, PharmacyProfile
+from myapp.models import Appointment, Pet, Prescription, User, UserProfile, VetProfile, PharmacyProfile
 
 
 def landing_page(request):
@@ -262,7 +262,31 @@ def veterinary_dashboard(request):
 
 @role_required(User.Role.PHARMACY)
 def pharmacy_dashboard(request):
-    return render(request, 'core/pharmacy_dashboard.html')
+    if request.method == 'POST':
+        # Fulfill action: mark a pending prescription as fulfilled by this pharmacy.
+        prescription_id = request.POST.get('prescription_id')
+        Prescription.objects.filter(
+            id=prescription_id, status=Prescription.Status.PENDING
+        ).update(
+            status=Prescription.Status.FULFILLED,
+            pharmacy=request.user,
+            fulfilled_at=timezone.now(),
+        )
+        return redirect('core:pharmacy_dashboard')
+
+    pending_prescriptions = Prescription.objects.filter(
+        status=Prescription.Status.PENDING
+    ).select_related('pet', 'pet__owner', 'vet')
+
+    recently_fulfilled = Prescription.objects.filter(
+        status=Prescription.Status.FULFILLED, pharmacy=request.user
+    ).select_related('pet', 'vet')[:5]
+
+    return render(request, 'core/pharmacy_dashboard.html', {
+        'pending_prescriptions': pending_prescriptions,
+        'pending_count': pending_prescriptions.count(),
+        'recently_fulfilled': recently_fulfilled,
+    })
 
 
 @login_required(login_url='core:admin_login')
