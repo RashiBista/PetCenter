@@ -120,3 +120,32 @@ class PharmacyProfile(models.Model):
  
     def __str__(self):
         return f'PharmacyProfile<{self.user.username}>'
+
+ass Appointment(models.Model):
+    class Status(models.TextChoices):
+        REQUESTED = 'requested', 'Requested'
+        CONFIRMED = 'confirmed', 'Confirmed'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+ 
+    pet = models.ForeignKey(
+        'myapp.Pet', on_delete=models.CASCADE, related_name='appointments',
+    )
+    vet = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='vet_appointments',
+        limit_choices_to={'role': User.Role.VET},
+    )
+    scheduled_time = models.DateTimeField()
+    reason = models.CharField(max_length=200, blank=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.REQUESTED)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    class Meta:
+        ordering = ['scheduled_time']
+ 
+    def __str__(self):
+        return f"{self.pet.name} with Dr. {self.vet.username} @ {self.scheduled_time:%b %d, %I:%M %p}"
+ 
+    @property
+    def owner(self):
+        return self.pet.owner        
