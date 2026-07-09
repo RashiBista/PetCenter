@@ -121,7 +121,7 @@ class PharmacyProfile(models.Model):
     def __str__(self):
         return f'PharmacyProfile<{self.user.username}>'
 
-ass Appointment(models.Model):
+class Appointment(models.Model):
     class Status(models.TextChoices):
         REQUESTED = 'requested', 'Requested'
         CONFIRMED = 'confirmed', 'Confirmed'
