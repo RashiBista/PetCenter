@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 
 <html lang="en"><head>
@@ -116,69 +115,83 @@
         }
     </style>
 </head>
-<body class="bg-surface font-body-md text-on-surface min-h-screen flex items-center justify-center p-4 antialiased relative overflow-hidden">
-<!-- Abstract Background Decor -->
+<body class="bg-surface font-body-md text-on-surface min-h-screen flex items-center justify-center p-4 antialiased relative overflow-y-auto">
 <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-container rounded-full mix-blend-multiply filter blur-[100px] opacity-30 pointer-events-none"></div>
 <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-surface-container-high rounded-full mix-blend-multiply filter blur-[120px] opacity-40 pointer-events-none"></div>
 <main class="w-full max-w-[440px] z-10 relative">
-<!-- Login Card -->
 <div class="glass-panel rounded-2xl p-8 md:p-10 border border-white">
-<!-- Logo / Brand Anchor -->
 <div class="flex flex-col items-center mb-8">
 <div class="w-16 h-16 bg-surface-container-low rounded-xl shadow-sm flex items-center justify-center mb-4">
 <span class="material-symbols-outlined text-primary text-[32px]">pets</span>
 </div>
-<h1 class="font-headline-md text-headline-md text-on-surface text-center">Login to Pet Centre</h1>
-<p class="font-body-md text-body-md text-on-surface-variant mt-2 text-center">Welcome back! Please enter your details.</p>
-<!-- Role Indicator Badge -->
-<div class="mt-4 px-3 py-1 bg-surface-container-low rounded-full border border-outline-variant flex items-center gap-2">
-<span class="material-symbols-outlined text-on-surface-variant text-[16px]">person</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Pet Owner</span>
+<h1 class="font-headline-md text-headline-md text-on-surface text-center">Create your PetCentre account</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 text-center">Sign up as a pet owner to get started.</p>
 </div>
+
+{% if errors %}
+<div class="mb-6 px-4 py-3 rounded-lg bg-error-container text-on-error-container text-body-md">
+  <ul class="list-disc pl-5">
+    {% for field, msgs in errors.items %}
+      {% for msg in msgs %}<li>{{ msg }}</li>{% endfor %}
+    {% endfor %}
+  </ul>
 </div>
-<!-- Login Form -->
-{% if error %}
-<div class="mb-2 px-4 py-3 rounded-lg bg-error-container text-on-error-container text-body-md">{{ error }}</div>
 {% endif %}
-<form class="space-y-6" method="post">
+
+<form class="space-y-5" method="post" enctype="multipart/form-data">
 {% csrf_token %}
-<!-- Email Field -->
 <div class="space-y-2">
-<label class="font-label-md text-label-md text-on-surface block" for="email">Email or Phone</label>
-<div class="relative rounded-lg input-focus-ring border border-outline-variant bg-surface transition-colors duration-200">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-<span class="material-symbols-outlined text-outline">mail</span>
+<label class="font-label-md text-label-md text-on-surface block" for="username">Username</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="username" name="username" required type="text" value="{{ form_data.username|default:'' }}"/>
 </div>
-<input class="w-full pl-10 pr-4 py-3 bg-transparent border-none rounded-lg focus:ring-0 font-body-md text-body-md placeholder-outline-variant text-on-surface h-12" id="email" name="email" placeholder="Enter your email or phone" type="text"/>
-</div>
-</div>
-<!-- Password Field -->
 <div class="space-y-2">
-<div class="flex justify-between items-center">
+<label class="font-label-md text-label-md text-on-surface block" for="email">Email</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="email" name="email" required type="email" value="{{ form_data.email|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="phone_number">Phone Number (optional)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="phone_number" name="phone_number" type="text" value="{{ form_data.phone_number|default:'' }}"/>
+</div>
+<div class="space-y-2">
 <label class="font-label-md text-label-md text-on-surface block" for="password">Password</label>
-<a class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant transition-colors" href="#">Forgot password?</a>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password" name="password" required type="password"/>
 </div>
-<div class="relative rounded-lg input-focus-ring border border-outline-variant bg-surface transition-colors duration-200">
-<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-<span class="material-symbols-outlined text-outline">lock</span>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="password2">Confirm Password</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password2" name="password2" required type="password"/>
 </div>
-<input class="w-full pl-10 pr-10 py-3 bg-transparent border-none rounded-lg focus:ring-0 font-body-md text-body-md placeholder-outline-variant text-on-surface h-12" id="password" name="password" placeholder="••••••••" type="password"/>
-<button class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface-variant" type="button">
-<span class="material-symbols-outlined">visibility</span>
-</button>
+
+<div class="pt-2 border-t border-outline-variant">
+<p class="font-label-md text-label-md text-on-surface-variant mb-3 pt-4">Add your pet (optional)</p>
 </div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_name">Pet Name</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="pet_name" name="pet_name" type="text" value="{{ form_data.pet_name|default:'' }}"/>
 </div>
-<!-- Action Button -->
-<button class="w-full h-12 bg-primary text-on-primary rounded-full font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-all duration-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(95,87,143,0.25)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_6px_16px_rgba(95,87,143,0.35)] active:scale-[0.98]" type="submit">
-<span>Login</span>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_species">Species</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="pet_species" name="pet_species" type="text" placeholder="Dog, Cat, ..." value="{{ form_data.pet_species|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_breed">Breed (optional)</label>
+<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="pet_breed" name="pet_breed" type="text" value="{{ form_data.pet_breed|default:'' }}"/>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block" for="pet_photo">Pet Photo (optional)</label>
+<input class="w-full text-body-md text-on-surface-variant file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-primary-container file:text-on-primary-container file:font-label-md hover:file:bg-primary-container/80 cursor-pointer" id="pet_photo" name="pet_photo" type="file" accept="image/*"/>
+<p class="text-label-sm text-on-surface-variant">Uploaded photos are stored securely via Cloudinary.</p>
+</div>
+
+<button class="w-full h-12 bg-primary text-on-primary rounded-full font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-on-primary-fixed-variant transition-all duration-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(95,87,143,0.25)] mt-2" type="submit">
+<span>Create account</span>
 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
 </button>
 </form>
-<!-- Registration Link -->
+
 <div class="mt-8 text-center border-t border-outline-variant pt-6">
 <p class="font-body-md text-body-md text-on-surface-variant">
-                    New to Pet Centre? 
-                    <a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant transition-colors ml-1" href="#">Create an account</a>
+  Already have an account?
+  <a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant transition-colors ml-1" href="{% url 'core:pet_owner_login' %}">Log in</a>
 </p>
 </div>
 </div>
