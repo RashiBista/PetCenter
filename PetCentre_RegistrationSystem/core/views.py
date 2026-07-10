@@ -1,13 +1,21 @@
+import random
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from myapp.decorators import role_required
-from myapp.models import Appointment, Pet, Prescription, User, UserProfile, VetProfile, PharmacyProfile
+from myapp.models import (
+    Appointment, PasswordResetOTP, Pet, Prescription,
+    User, UserProfile, VetProfile, PharmacyProfile,
+)
 
 
 def landing_page(request):
@@ -220,6 +228,108 @@ def admin_login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('core:landing_page')
+
+
+# ------------------------------------------------------------------
+# Password reset — email OTP flow. Works for any role (pet owner,
+# vet, pharmacy, admin) since it just looks up by email/username.
+# ------------------------------------------------------------------
+
+def forgot_password_view(request):
+    sent = False
+    error = None
+    if request.method == 'POST':
+        identifier = request.POST.get('email', '').strip()
+        try:
+            user = User.objects.get(Q(email__iexact=identifier) | Q(username__iexact=identifier))
+        except User.DoesNotExist:
+            error = "No account found with that email or username."
+        else:
+            code = f"{random.randint(0, 999999):06d}"
+            PasswordResetOTP.objects.create(user=user, code=code)
+            send_mail(
+                subject="Your PetCentre password reset code",
+                message=f"Your one-time code is: {code}\nIt expires in 10 minutes. If you didn't request this, ignore this email.",
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+            request.session['reset_user_id'] = user.id
+            sent = True
+    return render(request, 'core/forgot_password.html', {'sent': sent, 'error': error})
+
+
+def reset_password_view(request):
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        return redirect('core:forgot_password')
+
+    error = None
+    if request.method == 'POST':
+        code = request.POST.get('otp', '').strip()
+        new_password = request.POST.get('password', '')
+        password2 = request.POST.get('password2', '')
+
+        try:
+            user = User.objects.get(id=user_id)
+            otp = PasswordResetOTP.objects.filter(user=user, code=code).latest('created_at')
+        except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
+            error = "Invalid code."
+        else:
+            if not otp.is_valid():
+                error = "This code has expired or was already used. Request a new one."
+            elif new_password != password2:
+                error = "Passwords don't match."
+            else:
+                try:
+                    validate_password(new_password)
+                except ValidationError as e:
+                    error = " ".join(e.messages)
+                else:
+                    user.set_password(new_password)
+                    user.save()
+                    otp.is_used = True
+                    otp.save()
+                    del request.session['reset_user_id']
+                    messages.success(request, "Password reset successful — please log in.")
+                    return redirect('core:landing_page')
+
+    return render(request, 'core/reset_password.html', {'error': error})
+
+
+# ------------------------------------------------------------------
+# Appointment booking
+# ------------------------------------------------------------------
+
+@role_required(User.Role.USER)
+def book_appointment_view(request):
+    pets = Pet.objects.filter(owner=request.user)
+    vets = User.objects.filter(role=User.Role.VET)
+    error = None
+
+    if request.method == 'POST':
+        pet_id = request.POST.get('pet')
+        vet_id = request.POST.get('vet')
+        date_str = request.POST.get('date', '')
+        time_str = request.POST.get('time', '')
+        reason = request.POST.get('reason', '').strip()
+
+        try:
+            pet = pets.get(id=pet_id)
+            vet = vets.get(id=vet_id)
+            naive_dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+            scheduled_time = timezone.make_aware(naive_dt)
+        except Exception:
+            error = "Please fill out every field with a valid pet, vet, date, and time."
+        else:
+            if scheduled_time < timezone.now():
+                error = "Please choose a future date and time."
+            else:
+                Appointment.objects.create(pet=pet, vet=vet, scheduled_time=scheduled_time, reason=reason)
+                messages.success(request, f"Appointment requested with Dr. {vet.get_full_name() or vet.username}.")
+                return redirect('core:pet_owner_dashboard')
+
+    return render(request, 'core/book_appointment.html', {'pets': pets, 'vets': vets, 'error': error})
 
 
 # ------------------------------------------------------------------

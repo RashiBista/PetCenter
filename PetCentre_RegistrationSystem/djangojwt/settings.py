@@ -121,9 +121,8 @@ ROOT_URLCONF = 'djangojwt.urls'
 
 TEMPLATES = [
     {
-    
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Global templates directory
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -230,7 +229,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Where @login_required sends unauthenticated users for the
 # session-based web pages (login page, dashboards, chat).
+# Where @login_required sends unauthenticated users for session-based
+# pages (chat, etc.). Points to the landing page's role picker, since
+# there's no single generic login page — the person chooses pet owner
+# / vet / admin from there.
 LOGIN_URL = 'core:landing_page'
+
+# --- Email (used for password-reset OTP codes) ---
+# Defaults to printing emails to the console/terminal in dev, so OTP
+# codes are visible without any real email provider configured. Set
+# EMAIL_BACKEND and the SMTP_* vars in .env once you have a real
+# provider (e.g. SendGrid, Mailgun, or plain SMTP).
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@petcentre.local')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').strip().lower() in ('true', '1', 'yes')
 
 # ------------------------------------------------------------------
 # Production hardening (only kicks in when DEBUG=False)
