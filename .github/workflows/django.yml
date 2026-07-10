@@ -53,5 +53,17 @@ jobs:
           pip install -r requirements.txt
       - name: Run Tests
         working-directory: ./${{ matrix.project }}
+        # DJANGO_SECRET_KEY / DJANGO_DEBUG: settings.py raises RuntimeError
+        # and refuses to start if these aren't set and DEBUG=False (see
+        # settings.py's fail-fast SECRET_KEY guard). manage.py test puts
+        # 'test' into sys.argv, so the DB_PASSWORD/Postgres checks and
+        # the real Neon connection are already bypassed by settings.py's
+        # own `if 'test' in sys.argv` branches — only the secret key is
+        # still required here. This value is a CI-only dummy, never used
+        # outside this ephemeral container, so it's fine hardcoded rather
+        # than routed through GitHub Secrets.
+        env:
+          DJANGO_DEBUG: "True"
+          DJANGO_SECRET_KEY: "ci-test-secret-key-not-for-production-use"
         run: |
           python manage.py test
