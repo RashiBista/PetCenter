@@ -200,7 +200,7 @@
 </a>
 </nav>
 <!-- CTA -->
-<button class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
+<button onclick="window.location.href='{% url 'core:book_appointment' %}'" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
 <span class="material-symbols-outlined" data-weight="fill">add_circle</span>
             Book Appointment
         </button>
@@ -261,7 +261,7 @@
 </div>
 </button>
 <!-- Action 2 -->
-<button class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
+<button onclick="window.location.href='{% url 'core:book_appointment' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined">calendar_add_on</span>
 </div>
