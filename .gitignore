@@ -1,2 +1,57 @@
+# --- Environment / secrets ---
+.env
+*.env
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+
+# --- Virtual environments ---
+venv/
+env/
+.venv/
+ENV/
+
+# --- Django ---
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# Migrations are normally committed so the schema history is shared
+# across the team. Uncomment the next two lines only if your team has
+# deliberately decided to regenerate migrations per-environment instead
+# (uncommon, usually not what you want):
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS-generated files ---
 .DS_Store
-ChatbotApp/.DS_Store
+Thumbs.db
+
+# --- Testing / coverage ---
+.coverage
+htmlcov/
+.pytest_cache/
+*.cover
+
+#  Node (if a separate frontend is ever added) 
+node_modules/
+npm-debug.log*
+
+dump.rdb
