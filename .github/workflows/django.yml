@@ -8,14 +8,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      # Previously: group: ${{ github.workflow }}-${{ github.ref }}
-      # That key didn't include the matrix values, so all 4 matrix
-      # combinations (2 python-versions x 2 projects) resolved to the
-      # SAME group. cancel-in-progress then killed whichever job had
-      # started earlier every time another one in the matrix started —
-      # this is why jobs kept getting cancelled after "1 was done."
-      # Adding matrix.python-version and matrix.project here gives each
-      # combination its own independent concurrency slot.
+      # NOTE: this group key includes matrix.python-version and
+      # matrix.project so each matrix combination gets its own
+      # independent concurrency slot. Without those, all 4 combinations
+      # (2 python-versions x 2 projects) collide into the same group and
+      # cancel-in-progress kills whichever one started earlier every
+      # time another one starts.
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.python-version }}-${{ matrix.project }}
       cancel-in-progress: true
     strategy:
@@ -53,8 +51,17 @@ jobs:
           pip install -r requirements.txt
       - name: Run Tests
         working-directory: ./${{ matrix.project }}
+        # DJANGO_SECRET_KEY / DJANGO_DEBUG: settings.py raises RuntimeError
+        # and refuses to start if these aren't set and DEBUG=False (see
+        # settings.py's fail-fast SECRET_KEY guard). manage.py test puts
+        # 'test' into sys.argv, so the DB_PASSWORD/Postgres checks and
+        # the real Neon connection are already bypassed by settings.py's
+        # own `if 'test' in sys.argv` branches — only the secret key is
+        # still required here. This value is a CI-only dummy, never used
+        # outside this ephemeral container, so it's fine hardcoded rather
+        # than routed through GitHub Secrets.
         env:
           DJANGO_DEBUG: "True"
-          DJANGO_SECRET_KEY: "ci-test-key-not-used-in-prod"
+          DJANGO_SECRET_KEY: "ci-test-secret-key-not-for-production-use"
         run: |
           python manage.py test
