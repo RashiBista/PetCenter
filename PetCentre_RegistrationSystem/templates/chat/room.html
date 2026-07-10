@@ -1,128 +1,128 @@
-{% extends "base.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{{ other_user.get_full_name|default:other_user.username }} — PetCentre</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed-variant": "#444652","on-error": "#ffffff","tertiary-container": "#c0ad5b",
+        "on-primary-fixed-variant": "#473f76","surface-container-low": "#f7f2f8","inverse-primary": "#c8bfff",
+        "surface-container-highest": "#e5e1e6","on-tertiary-container": "#4c4000","on-error-container": "#93000a",
+        "on-background": "#1c1b1f","error": "#ba1a1a","on-primary-fixed": "#1b1248","on-secondary": "#ffffff",
+        "on-secondary-container": "#616470","surface-container-high": "#ebe7ec","inverse-surface": "#313034",
+        "secondary-container": "#e0e1f0","on-surface": "#1c1b1f","primary-fixed": "#e5deff","on-tertiary": "#ffffff",
+        "outline": "#797580","on-surface-variant": "#48454f","surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#e0e1f0","on-tertiary-fixed": "#221b00","inverse-on-surface": "#f4eff5",
+        "surface-bright": "#fdf8fd","surface-tint": "#5f578f","on-primary-container": "#413a70",
+        "primary-container": "#afa6e4","surface-variant": "#e5e1e6","on-secondary-fixed": "#181b26",
+        "secondary": "#5b5e6a","surface-dim": "#ddd9de","primary": "#5f578f","background": "#fdf8fd",
+        "secondary-fixed-dim": "#c4c6d4","surface-container": "#f1ecf2","tertiary": "#6d5e13",
+        "on-tertiary-fixed-variant": "#534600","surface": "#fdf8fd","error-container": "#ffdad6",
+        "on-primary": "#ffffff","tertiary-fixed-dim": "#dac671","tertiary-fixed": "#f8e28a",
+        "primary-fixed-dim": "#c8bfff","outline-variant": "#c9c4d0"
+      },
+      "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+      "fontFamily": {
+        "body-lg": ["Plus Jakarta Sans"],"title-lg": ["Plus Jakarta Sans"],"headline-lg-mobile": ["Manrope"],
+        "label-md": ["Plus Jakarta Sans"],"label-sm": ["Plus Jakarta Sans"],"body-md": ["Plus Jakarta Sans"],
+        "display-lg": ["Manrope"],"headline-md": ["Manrope"],"headline-lg": ["Manrope"]
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col">
 
-{% block title %}{{ page_title }} — PetCentre{% endblock %}
+<div class="flex flex-col h-screen max-w-3xl mx-auto w-full">
 
-{% block content %}
-<div class="flex flex-col h-[calc(100vh-64px)] max-w-3xl mx-auto">
-
-  {# ── Header ─────────────────────────────────────────────────────────── #}
-  <div class="flex items-center gap-3 bg-white border-b px-4 py-3 shadow-sm">
-    <a href="{% url 'chat:inbox' %}"
-       class="text-gray-400 hover:text-green-600 transition-colors mr-1">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
+  <!-- Header -->
+  <div class="flex items-center gap-3 bg-surface-container-lowest border-b border-surface-container-high px-4 py-3 shadow-sm">
+    <a href="{% url 'chat:inbox' %}" class="text-on-surface-variant hover:text-primary transition-colors mr-1">
+      <span class="material-symbols-outlined">arrow_back</span>
     </a>
-
-    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center
-                text-green-700 font-bold flex-shrink-0">
+    <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold flex-shrink-0">
       {{ other_user.get_full_name|default:other_user.username|first|upper }}
     </div>
-
-    <div>
-      <p class="font-semibold text-gray-800 leading-tight">
+    <div class="flex-1">
+      <p class="font-label-md text-label-md text-on-surface font-semibold leading-tight">
         {{ other_user.get_full_name|default:other_user.username }}
       </p>
-      <p class="text-xs text-gray-400">{{ other_user.email }}</p>
+      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ other_user.email }}</p>
     </div>
-
-    {# Online indicator — updated by JS #}
-    <span id="online-dot"
-          class="ml-auto w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors duration-300"
-          title="Connecting…"></span>
+    <span id="online-dot" class="w-2.5 h-2.5 rounded-full bg-outline-variant transition-colors duration-300" title="Connecting…"></span>
   </div>
 
-  {# ── Message area ────────────────────────────────────────────────────── #}
-  <div id="message-list"
-       class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gray-50">
-
+  <!-- Message list -->
+  <div id="message-list" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-surface-container-low">
     {% for msg in messages %}
       {% if msg.sender == request.user %}
-        {# Outgoing #}
         <div class="flex justify-end">
           <div class="max-w-[70%]">
-            <div class="bg-green-500 text-white rounded-2xl rounded-br-sm px-4 py-2 shadow-sm">
-              <p class="text-sm leading-relaxed">{{ msg.content }}</p>
+            <div class="bg-primary text-on-primary rounded-2xl rounded-br-sm px-4 py-2 shadow-sm">
+              <p class="font-body-md text-body-md leading-relaxed">{{ msg.content }}</p>
             </div>
-            <p class="text-[11px] text-gray-400 text-right mt-1 pr-1">
-              {{ msg.timestamp|date:"H:i" }}
-            </p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant text-right mt-1 pr-1">{{ msg.timestamp|date:"H:i" }}</p>
           </div>
         </div>
       {% else %}
-        {# Incoming #}
         <div class="flex justify-start">
           <div class="max-w-[70%]">
-            <div class="bg-white text-gray-800 rounded-2xl rounded-bl-sm px-4 py-2 shadow-sm border border-gray-100">
-              <p class="text-sm leading-relaxed">{{ msg.content }}</p>
+            <div class="bg-surface-container-lowest text-on-surface rounded-2xl rounded-bl-sm px-4 py-2 shadow-sm border border-surface-container-high">
+              <p class="font-body-md text-body-md leading-relaxed">{{ msg.content }}</p>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1 pl-1">
-              {{ msg.timestamp|date:"H:i" }}
-            </p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant mt-1 pl-1">{{ msg.timestamp|date:"H:i" }}</p>
           </div>
         </div>
       {% endif %}
     {% endfor %}
-
-    {# Typing indicator — hidden by default #}
     <div id="typing-indicator" class="hidden flex justify-start">
-      <div class="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
+      <div class="bg-surface-container-lowest rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-surface-container-high">
         <div class="flex gap-1 items-center">
-          <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
-          <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
-          <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+          <span class="w-2 h-2 bg-outline rounded-full animate-bounce" style="animation-delay:0ms"></span>
+          <span class="w-2 h-2 bg-outline rounded-full animate-bounce" style="animation-delay:150ms"></span>
+          <span class="w-2 h-2 bg-outline rounded-full animate-bounce" style="animation-delay:300ms"></span>
         </div>
       </div>
     </div>
-
   </div>
 
-  {# ── Input bar ───────────────────────────────────────────────────────── #}
-  <div class="bg-white border-t px-4 py-3 flex gap-3 items-end shadow-sm">
-    <textarea id="message-input"
-              rows="1"
-              maxlength="2000"
-              placeholder="Type a message…"
-              class="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50
-                     px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400
-                     focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent
+  <!-- Input bar -->
+  <div class="bg-surface-container-lowest border-t border-surface-container-high px-4 py-3 flex gap-3 items-end shadow-sm">
+    <textarea id="message-input" rows="1" maxlength="2000" placeholder="Type a message…"
+              class="flex-1 resize-none rounded-xl border border-outline-variant bg-surface-container-low
+                     px-4 py-2.5 font-body-md text-body-md text-on-surface placeholder-on-surface-variant/60
+                     focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
                      transition-all duration-150 max-h-32 overflow-y-auto"></textarea>
-
     <button id="send-btn"
-            class="flex-shrink-0 bg-green-500 hover:bg-green-600 disabled:bg-gray-300
-                   text-white rounded-xl p-2.5 transition-colors duration-150"
-            disabled>
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-      </svg>
+            class="flex-shrink-0 bg-primary hover:bg-surface-tint disabled:bg-outline-variant
+                   text-on-primary rounded-xl p-2.5 transition-colors duration-150" disabled>
+      <span class="material-symbols-outlined">send</span>
     </button>
   </div>
 
 </div>
 
-{# ── WebSocket JavaScript ──────────────────────────────────────────────── #}
+{# ── WebSocket JavaScript — logic unchanged from the working version, only visual classes above changed ── #}
 <script>
   const ROOM_ID = "{{ room.pk }}";
   const CURRENT_USER_ID = {{ request.user.pk|default:0 }};
   const WS_TOKEN = "{{ ws_token }}";
 
-  // ── Elements
-  const messageList   = document.getElementById("message-list");
-  const input         = document.getElementById("message-input");
-  const sendBtn       = document.getElementById("send-btn");
-  const onlineDot     = document.getElementById("online-dot");
+  const messageList = document.getElementById("message-list");
+  const input = document.getElementById("message-input");
+  const sendBtn = document.getElementById("send-btn");
+  const onlineDot = document.getElementById("online-dot");
   const typingIndicator = document.getElementById("typing-indicator");
 
-  // ── WebSocket setup
-  // NOTE: previously this file declared `const socket = new WebSocket(...)`
-  // here AND `let socket = null` below — a duplicate declaration that
-  // threw a SyntaxError and silently killed this entire <script> block,
-  // meaning connect() never ran and the send button never enabled.
-  // Also, the token was never appended to the reconnecting wsUrl below,
-  // so even a fixed script would have gotten WSREJECT from the backend
-  // (AnonymousUser, since JWTAuthMiddleware saw no token).
   const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
   const wsUrl = wsProtocol + window.location.host + "/ws/chat/" + ROOM_ID + "/?token=" + WS_TOKEN;
   let socket = null;
@@ -132,17 +132,18 @@
     socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
-      onlineDot.classList.replace("bg-gray-300", "bg-green-400");
+      onlineDot.classList.remove("bg-outline-variant");
+      onlineDot.classList.add("bg-primary");
       onlineDot.title = "Connected";
       reconnectDelay = 1000;
       sendBtn.disabled = input.value.trim() === "";
     };
 
     socket.onclose = () => {
-      onlineDot.classList.replace("bg-green-400", "bg-gray-300");
+      onlineDot.classList.remove("bg-primary");
+      onlineDot.classList.add("bg-outline-variant");
       onlineDot.title = "Reconnecting…";
       sendBtn.disabled = true;
-      // Exponential back-off reconnect (max 30 s)
       setTimeout(connect, Math.min(reconnectDelay, 30000));
       reconnectDelay *= 2;
     };
@@ -151,57 +152,41 @@
 
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      if (data.error) {
-        console.error("Chat error:", data.error);
-        return;
-      }
+      if (data.error) { console.error("Chat error:", data.error); return; }
       appendMessage(data);
       scrollToBottom();
     };
   }
-
   connect();
 
-  // ── Helpers
-  function scrollToBottom() {
-    messageList.scrollTop = messageList.scrollHeight;
-  }
+  function scrollToBottom() { messageList.scrollTop = messageList.scrollHeight; }
 
   function formatTime(isoString) {
     const d = new Date(isoString);
-    return d.getHours().toString().padStart(2,"0") + ":" +
-           d.getMinutes().toString().padStart(2,"0");
+    return d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
   }
 
   function appendMessage(data) {
     const isOwn = data.sender_id === CURRENT_USER_ID;
     const wrapper = document.createElement("div");
     wrapper.className = "flex " + (isOwn ? "justify-end" : "justify-start");
-
     wrapper.innerHTML = `
       <div class="max-w-[70%]">
         <div class="${isOwn
-          ? "bg-green-500 text-white rounded-2xl rounded-br-sm"
-          : "bg-white text-gray-800 rounded-2xl rounded-bl-sm border border-gray-100"
+          ? "bg-primary text-on-primary rounded-2xl rounded-br-sm"
+          : "bg-surface-container-lowest text-on-surface rounded-2xl rounded-bl-sm border border-surface-container-high"
         } px-4 py-2 shadow-sm">
-          <p class="text-sm leading-relaxed">${escapeHtml(data.message)}</p>
+          <p class="font-body-md text-body-md leading-relaxed">${escapeHtml(data.message)}</p>
         </div>
-        <p class="text-[11px] text-gray-400 mt-1 ${isOwn ? "text-right pr-1" : "pl-1"}">
+        <p class="font-label-sm text-label-sm text-on-surface-variant mt-1 ${isOwn ? "text-right pr-1" : "pl-1"}">
           ${formatTime(data.timestamp)}
         </p>
       </div>`;
-
-    // Insert before typing indicator
     messageList.insertBefore(wrapper, typingIndicator);
   }
 
   function escapeHtml(text) {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
   }
 
   function sendMessage() {
@@ -213,25 +198,17 @@
     sendBtn.disabled = true;
   }
 
-  // ── Input events
   input.addEventListener("input", () => {
-    // Auto-grow textarea
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 128) + "px";
     sendBtn.disabled = input.value.trim() === "" || !socket || socket.readyState !== WebSocket.OPEN;
   });
 
   input.addEventListener("keydown", (e) => {
-    // Send on Enter (not Shift+Enter)
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
 
   sendBtn.addEventListener("click", sendMessage);
-
-  // ── Scroll to bottom on page load
   scrollToBottom();
 </script>
-{% endblock %}
+</body></html>

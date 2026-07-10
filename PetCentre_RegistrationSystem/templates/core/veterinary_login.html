@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 
 <html lang="en"><head>
@@ -117,7 +116,7 @@
         }
     </style>
 </head>
-<body class="bg-surface-container-low min-h-screen flex items-center justify-center p-container-padding-mobile md:p-container-padding-desktop font-body-md text-on-surface ambient-bg relative overflow-hidden">
+<body class="bg-surface-container-low min-h-screen flex items-center justify-center p-container-padding-mobile md:p-container-padding-desktop font-body-md text-on-surface ambient-bg relative overflow-y-auto">
 <!-- Decorative subtle shapes behind card -->
 <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
 <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-tertiary-container rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -163,7 +162,7 @@
 <input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-surface-container-lowest bg-surface-container-lowest cursor-pointer transition-colors" type="checkbox"/>
 <span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">Remember me</span>
 </label>
-<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors" href="#">Forgot password?</a>
+<a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors" href="{% url 'core:forgot_password' %}">Forgot password?</a>
 </div>
 <!-- Submit Action -->
 <button class="w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-full shadow-sm hover:shadow-md hover:bg-opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-2" type="submit">

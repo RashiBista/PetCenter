@@ -18,6 +18,11 @@ urlpatterns = [
     path('login/admin/', views.admin_login_view, name='admin_login'),
     path('logout/', views.logout_view, name='logout'),
 
+    path('forgot-password/', views.forgot_password_view, name='forgot_password'),
+    path('reset-password/', views.reset_password_view, name='reset_password'),
+
+    path('appointments/book/', views.book_appointment_view, name='book_appointment'),
+
     path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
     path('dashboard/pharmacy/', views.pharmacy_dashboard, name='pharmacy_dashboard'),
