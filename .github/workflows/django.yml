@@ -53,5 +53,8 @@ jobs:
           pip install -r requirements.txt
       - name: Run Tests
         working-directory: ./${{ matrix.project }}
+        env:
+          DJANGO_DEBUG: "True"
+          DJANGO_SECRET_KEY: "ci-test-key-not-used-in-prod"
         run: |
           python manage.py test
