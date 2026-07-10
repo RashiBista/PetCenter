@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medicine Search - Pet Centre</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#f1ecf2",
+                      "on-tertiary-fixed-variant": "#534600",
+                      "inverse-surface": "#313034",
+                      "on-tertiary-container": "#4c4000",
+                      "surface": "#fdf8fd",
+                      "primary-fixed": "#e5deff",
+                      "on-surface-variant": "#48454f",
+                      "primary": "#5f578f",
+                      "inverse-on-surface": "#f4eff5",
+                      "on-primary-fixed": "#1b1248",
+                      "on-primary": "#ffffff",
+                      "outline": "#797580",
+                      "surface-container-low": "#f7f2f8",
+                      "surface-tint": "#5f578f",
+                      "inverse-primary": "#c8bfff",
+                      "on-surface": "#1c1b1f",
+                      "on-secondary-container": "#616470",
+                      "secondary-fixed": "#e0e1f0",
+                      "error": "#ba1a1a",
+                      "primary-container": "#afa6e4",
+                      "secondary-fixed-dim": "#c4c6d4",
+                      "on-primary-fixed-variant": "#473f76",
+                      "error-container": "#ffdad6",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#dac671",
+                      "surface-variant": "#e5e1e6",
+                      "on-primary-container": "#413a70",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#6d5e13",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#444652",
+                      "tertiary-fixed": "#f8e28a",
+                      "surface-bright": "#fdf8fd",
+                      "on-tertiary": "#ffffff",
+                      "secondary-container": "#e0e1f0",
+                      "on-secondary-fixed": "#181b26",
+                      "outline-variant": "#c9c4d0",
+                      "surface-container-high": "#ebe7ec",
+                      "background": "#fdf8fd",
+                      "on-background": "#1c1b1f",
+                      "surface-container-highest": "#e5e1e6",
+                      "primary-fixed-dim": "#c8bfff",
+                      "secondary": "#5b5e6a",
+                      "surface-dim": "#ddd9de",
+                      "tertiary-container": "#c0ad5b",
+                      "on-tertiary-fixed": "#221b00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "container-padding-desktop": "40px",
+                      "card-gap": "24px",
+                      "gutter": "24px",
+                      "section-margin": "64px",
+                      "container-padding-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "title-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-[280px] bg-surface dark:bg-surface-dim bg-surface-container-low dark:bg-surface-container-low shadow-sm z-50 flex flex-col gap-2 p-4 h-full border-r border-outline-variant">
+<div class="flex items-center gap-4 px-4 py-6 mb-4">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img alt="Pet Centre Logo" class="w-full h-full object-cover" data-alt="A minimalist logo for a premium pet care center, featuring a subtle abstract shape in soft lavender and charcoal tones, exuding calmness and professionalism. Set against a clean off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5zP0WVSuhwKqATwFW6dRxuxQLRtS9mcaOieiUB5OFV41NlMlaRUqaIakpbJnk0EEa3ELI8iAyGMv04UJS8DdtBR_7Ao4NQVwAR8D-0fWnWoJ7HD86of43Ul_rfODp__3hCN9LVsCifAUaSU9lr7B6isC4ei5Nvp-UU1Q7Ffy2v_pzqiNJmAJxlv24rquF2RpI-t06o5IYhG2OWb2qjrFZSmtplURloeEvVzLKC4oy0Q9tos_J9C97e9x6tJqdUW4w4vw8PhQf05by"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Pet Centre</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_dashboard' %}">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary hover:bg-surface-container-highest transition-colors duration-200 Active: scale-[0.98] transition-transform" href="{% url 'core:medicine_search' %}">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-md text-label-md font-semibold">Medicine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:appointment_booking' %}">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:chatbot' %}">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_notifications' %}">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-label-md text-label-md">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_profile' %}">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</div>
+<div class="mt-auto pt-4">
+<button class="w-full py-3 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:shadow-lg transition-shadow duration-200">
+                Book Appointment
+            </button>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="hidden md:flex fixed top-0 right-0 w-[calc(100%-280px)] h-20 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm z-40 flex justify-between items-center px-10 w-full h-20 z-40">
+<div class="flex-1 max-w-xl">
+<div class="relative flex items-center w-full h-12 rounded-full bg-surface-container-high px-4 focus-within:ring-2 focus-within:ring-primary transition-all">
+<span class="material-symbols-outlined text-outline mr-2" data-icon="search">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder-on-surface-variant font-body-md text-body-md outline-none" placeholder="Search medicines, treatments..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6 ml-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors Active: opacity-80 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors Active: opacity-80">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors Active: opacity-80">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-variant ml-2">
+<img alt="User A" class="w-full h-full object-cover" data-alt="A portrait of a serene pet owner, smiling gently in a bright, modern sanctuary space with soft lavender lighting accents, conveying trust and warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2cNzgEirXWG2GvewyuIC6Gx3JSUcX45a4k95mTYfZZ8Rd2sRakeRPvW05ea9wB2aMY2sGCkAlFysYmPVNGQRXr7egQf2XfznvmAdaY7qkOIoGatn9nE-qI4i8G8g-pKvMqgQfJA463ZNgkFJ6eklgvmX_4f-OtEUmylutMi_Aq_E9zv21_V0XmlB4hCeSS2Y6c10MaP9qsMNMQhd7lWtGQDVNuTjisD7MVmOX-mvtInlu2bgQbGORIDpbopibg1Nh7TIJKGGLGpwx"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full md:pl-[280px] pt-20 pb-24 md:pb-10 min-h-screen">
+<div class="p-container-padding-mobile md:p-container-padding-desktop max-w-[1360px] mx-auto flex flex-col gap-section-margin">
+<!-- Page Header & Filters -->
+<section class="flex flex-col gap-6">
+<div>
+<h2 class="font-display-lg text-display-lg md:font-display-lg md:text-display-lg text-on-surface">Pharmacy &amp; Medicines</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Find and request prescriptions for your companion.</p>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="px-4 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-variant transition-colors font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                        All Filters
+                    </button>
+<button class="px-4 py-2 rounded-full border border-primary bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center gap-2">
+                        Medicine Type
+                        <span class="material-symbols-outlined text-[18px]" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-variant transition-colors font-label-md text-label-md flex items-center gap-2">
+                        Pet Type
+                        <span class="material-symbols-outlined text-[18px]" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-variant transition-colors font-label-md text-label-md flex items-center gap-2">
+                        Availability
+                        <span class="material-symbols-outlined text-[18px]" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+</div>
+</section>
+<!-- Medicine Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-card-gap">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-surface-variant">
+<div class="flex justify-between items-start mb-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-low flex items-center justify-center overflow-hidden p-2">
+<img class="w-full h-full object-contain" data-alt="A clean, modern medical bottle with a soft lavender label, sitting on a pristine white surface under soft, natural lighting, conveying a premium and safe healthcare product." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1dGqen2KSp4XQW1soAlScGgIpj7nNYL45AIWWyDMSWpc-pwJwU99t060WItuVWW2YdXvR9VaYHdkv8nFHqIz4X8djqP-mLlYF4yexkkI-oxfbCL4m5CHWzrAgdNXWV2boPhQl5aozSbNEZNzg23AfFbbdGmnFIxwDyWwqr90pQry8n3ynZCO6SW8MXgAUKvMc6LetzIHxj4DlZpXCxoz0AICIT6ZWKZgCxj9kXJaQLcSPL__FEIFpba-1dZDTibdkZiiF_uLC1RC3"/>
+</div>
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm border border-primary/20">In Stock</span>
+</div>
+<div class="flex flex-col flex-grow">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-1">NexGard Spectra</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-3">Chewables for Dogs</p>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-3 mb-6 flex-grow">Comprehensive protection against fleas, ticks, heartworm, and intestinal worms in a tasty beef-flavored chew.</p>
+</div>
+<div class="pt-4 border-t border-surface-variant mt-auto flex justify-between items-center">
+<span class="font-title-lg text-title-lg text-primary">$45.00</span>
+<button class="px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed-dim transition-colors font-label-md text-label-md">
+                            View Details
+                        </button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-surface-variant">
+<div class="flex justify-between items-start mb-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-low flex items-center justify-center overflow-hidden p-2">
+<img class="w-full h-full object-contain" data-alt="A small, elegant dropper bottle designed for pet care, placed against a minimalist light gray background with subtle lavender accents, highlighting a calm and soothing atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfUHEgGpd-OHAHOrLa5lO25xVVtdgqqgZu7doUwqx7ksOXc7BC9ggevUhAubI02JX1lbFTej2IGQHMYB7hAiCiqAYrPHGXK62bm7YZlUEK3JZM5vYte8Mx4CG0dDBB_j-xpDvtfk-FhNKG7JMyIy8Qfto4EPG6eBadlTmJOFje8KBC29dmzuF9ILZove6B73mWL6fyhjxxg0h-6A1fLuF86kAdc4FRL4IgHuVXsq9qI-nt7PhzMCecEHtw21FLuuOrzUH8jqZCxolo"/>
+</div>
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm border border-primary/20">In Stock</span>
+</div>
+<div class="flex flex-col flex-grow">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-1">Apoquel</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-3">Tablets for Dogs</p>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-3 mb-6 flex-grow">Fast-acting relief from itching and inflammation associated with allergic dermatitis. Controls symptoms within 4 hours.</p>
+</div>
+<div class="pt-4 border-t border-surface-variant mt-auto flex justify-between items-center">
+<span class="font-title-lg text-title-lg text-primary">$68.50</span>
+<button class="px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed-dim transition-colors font-label-md text-label-md">
+                            View Details
+                        </button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full border border-surface-variant">
+<div class="flex justify-between items-start mb-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container-low flex items-center justify-center overflow-hidden p-2">
+<img class="w-full h-full object-contain" data-alt="A modern tube of pet ointment with clean, sophisticated branding, set on a smooth white surface, bathed in soft, diffused light, evoking professional veterinary care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQpCxUnN8bcDRAmwx3zeeEdH4YdPvjfafDI9lRC-D0lJyCJcSvbk90SWETPM4EWG4qTSzQUNpeexMJa5OYQeKikxMokNFZgbxPBTW_VsmRFvz8vHSsUDBVQxkx5Nc8G-j_jEDZe_fR1tEvK4eXTxolrbsvEKiQ4FFP_08YrxfSqYJDif_O7QW-aCuzDXzyS9M7qK6iOKO20CVIJmIQtjtjsUxdIJPE3VLuNMmbZzjrFHQuVgiKh_ppGgHJ-wi6Zi2iGs6oRQEJIRDO"/>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">Low Stock</span>
+</div>
+<div class="flex flex-col flex-grow">
+<h3 class="font-title-lg text-title-lg text-on-surface mb-1">Surolan Drops</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-3">Ear Treatment</p>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-3 mb-6 flex-grow">Topical treatment for otitis externa and skin infections caused by fungi, yeasts, and susceptible bacteria in dogs and cats.</p>
+</div>
+<div class="pt-4 border-t border-surface-variant mt-auto flex justify-between items-center">
+<span class="font-title-lg text-title-lg text-primary">$32.00</span>
+<button class="px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed-dim transition-colors font-label-md text-label-md">
+                            View Details
+                        </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FloatingActionButton -->
+<button class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed shadow-xl hover:scale-110 hover:shadow-2xl transition-all Active: scale-95 duration-100 z-50 flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-md text-label-md hidden group-hover:block px-1 overflow-hidden whitespace-nowrap">Assistant</span>
+</button>
+</body></html>

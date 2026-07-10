@@ -147,6 +147,9 @@
 <span class="font-label-sm text-label-sm">Appointments</span>
 </a>
 <a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'chat:inbox' %}">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-sm text-label-sm">Chat</span>
+</a>
 <a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
 <span class="material-symbols-outlined">person</span>
 <span class="font-label-sm text-label-sm">Profile</span>
@@ -180,6 +183,9 @@
 <span class="font-label-md text-label-md">Appointments</span>
 </a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'chat:inbox' %}">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="#">
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
@@ -194,7 +200,7 @@
 </a>
 </nav>
 <!-- CTA -->
-<button class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
+<button onclick="window.location.href='{% url 'core:book_appointment' %}'" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
 <span class="material-symbols-outlined" data-weight="fill">add_circle</span>
             Book Appointment
         </button>
@@ -255,7 +261,7 @@
 </div>
 </button>
 <!-- Action 2 -->
-<button class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
+<button onclick="window.location.href='{% url 'core:book_appointment' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined">calendar_add_on</span>
 </div>

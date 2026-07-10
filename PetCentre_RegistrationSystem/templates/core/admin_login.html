@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 
 <html lang="en"><head>
@@ -158,7 +157,7 @@
 </div>
 <span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">Remember me</span>
 </label>
-<a class="font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors" href="#">Forgot password?</a>
+<a class="font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors" href="{% url 'core:forgot_password' %}">Forgot password?</a>
 </div>
 <!-- Login Button -->
 <button class="w-full h-14 rounded-full bg-primary text-on-primary font-title-lg text-title-lg hover:bg-surface-tint shadow-md hover:shadow-lg hover:-translate-y-[1px] active:translate-y-[1px] active:shadow-sm transition-all duration-200 flex items-center justify-center gap-2 mt-8" type="submit">

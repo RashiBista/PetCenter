@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.utils import timezone
 
 class User(AbstractUser):
     """
@@ -181,3 +181,20 @@ class Prescription(models.Model):
  
     def __str__(self):
         return f"{self.medicine_name} for {self.pet.name} ({self.get_status_display()})"
+
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='reset_otps',
+    )
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        if self.is_used:
+            return False
+        return (timezone.now() - self.created_at).total_seconds() < 600  # 10 minutes
+
+    def __str__(self):
+        return f"OTP for {self.user.username} ({'used' if self.is_used else 'active'})"

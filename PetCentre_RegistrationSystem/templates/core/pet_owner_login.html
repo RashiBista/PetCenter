@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 
 <html lang="en"><head>
@@ -116,7 +115,7 @@
         }
     </style>
 </head>
-<body class="bg-surface font-body-md text-on-surface min-h-screen flex items-center justify-center p-4 antialiased relative overflow-hidden">
+<body class="bg-surface font-body-md text-on-surface min-h-screen flex items-center justify-center p-4 antialiased relative overflow-y-auto">
 <!-- Abstract Background Decor -->
 <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-container rounded-full mix-blend-multiply filter blur-[100px] opacity-30 pointer-events-none"></div>
 <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-surface-container-high rounded-full mix-blend-multiply filter blur-[120px] opacity-40 pointer-events-none"></div>
@@ -156,7 +155,7 @@
 <div class="space-y-2">
 <div class="flex justify-between items-center">
 <label class="font-label-md text-label-md text-on-surface block" for="password">Password</label>
-<a class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant transition-colors" href="#">Forgot password?</a>
+<a class="font-label-sm text-label-sm text-primary hover:text-on-primary-fixed-variant transition-colors" href="{% url 'core:forgot_password' %}">Forgot password?</a>
 </div>
 <div class="relative rounded-lg input-focus-ring border border-outline-variant bg-surface transition-colors duration-200">
 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -178,7 +177,7 @@
 <div class="mt-8 text-center border-t border-outline-variant pt-6">
 <p class="font-body-md text-body-md text-on-surface-variant">
                     New to Pet Centre? 
-                    <a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant transition-colors ml-1" href="#">Create an account</a>
+                    <a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant transition-colors ml-1" href="{% url 'core:pet_owner_signup' %}">Create an account</a>
 </p>
 </div>
 </div>
