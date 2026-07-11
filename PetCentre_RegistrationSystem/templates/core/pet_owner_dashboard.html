@@ -138,11 +138,11 @@
 <body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
 <!-- Mobile Nav Shell (Bottom Bar Pivot) -->
 <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface shadow-[0_-4px_16px_rgba(46,46,56,0.04)] z-50 flex justify-around items-center h-20 px-4">
-<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<a class="flex flex-col items-center gap-1 text-primary" href="{% url 'core:pet_owner_dashboard' %}">
 <span class="material-symbols-outlined" data-weight="fill">dashboard</span>
 <span class="font-label-sm text-label-sm">Dashboard</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'core:appointment_booking' %}">
 <span class="material-symbols-outlined">calendar_today</span>
 <span class="font-label-sm text-label-sm">Appointments</span>
 </a>
@@ -150,7 +150,7 @@
 <span class="material-symbols-outlined">chat</span>
 <span class="font-label-sm text-label-sm">Chat</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'core:pet_profile' %}">
 <span class="material-symbols-outlined">person</span>
 <span class="font-label-sm text-label-sm">Profile</span>
 </a>
@@ -170,15 +170,15 @@
 <!-- Navigation Links -->
 <nav class="flex-1 flex flex-col gap-2">
 <!-- Active Tab -->
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary hover:bg-surface-container-highest transition-colors duration-200 group" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary hover:bg-surface-container-highest transition-colors duration-200 group" href="{% url 'core:pet_owner_dashboard' %}">
 <span class="material-symbols-outlined" data-weight="fill">dashboard</span>
 <span class="font-label-md text-label-md font-semibold">Dashboard</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
 <span class="font-label-md text-label-md">Medicine</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:appointment_booking' %}">
 <span class="material-symbols-outlined">calendar_today</span>
 <span class="font-label-md text-label-md">Appointments</span>
 </a>
@@ -186,11 +186,11 @@
 <span class="material-symbols-outlined">chat</span>
 <span class="font-label-md text-label-md">Chat</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:pet_owner_notifications' %}">
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:pet_profile' %}">
 <span class="material-symbols-outlined">person</span>
 <span class="font-label-md text-label-md">Profile</span>
 </a>
@@ -200,7 +200,7 @@
 </a>
 </nav>
 <!-- CTA -->
-<button onclick="window.location.href='{% url 'core:book_appointment' %}'" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
+<button onclick="window.location.href='{% url 'core:appointment_booking' %}'" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
 <span class="material-symbols-outlined" data-weight="fill">add_circle</span>
             Book Appointment
         </button>
@@ -251,7 +251,7 @@
 <!-- Quick Action Cards (4-column grid) -->
 <section class="grid grid-cols-2 lg:grid-cols-4 gap-card-gap">
 <!-- Action 1 -->
-<button class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
+<button onclick="window.location.href='{% url 'core:medicine_search' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined">medical_services</span>
 </div>
@@ -261,7 +261,7 @@
 </div>
 </button>
 <!-- Action 2 -->
-<button onclick="window.location.href='{% url 'core:book_appointment' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
+<button onclick="window.location.href='{% url 'core:appointment_booking' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined">calendar_add_on</span>
 </div>
@@ -271,7 +271,7 @@
 </div>
 </button>
 <!-- Action 3 -->
-<button class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
+<button onclick="window.location.href='{% url 'core:pet_profile' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined">pets</span>
 </div>

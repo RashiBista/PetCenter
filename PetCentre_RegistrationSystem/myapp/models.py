@@ -198,3 +198,56 @@ class PasswordResetOTP(models.Model):
 
     def __str__(self):
         return f"OTP for {self.user.username} ({'used' if self.is_used else 'active'})"
+
+class Medicine(models.Model):
+    name = models.CharField(max_length=150)
+    category = models.CharField(max_length=100, blank=True)  # e.g. "Chewables for Dogs"
+    description = models.TextField(blank=True)
+    dosage_info = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    in_stock = models.BooleanField(default=True)
+    photo = models.ImageField(upload_to='medicines/', blank=True, null=True)  # Cloudinary-backed, same as Pet.photo
+    pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
+    pharmacy_contact = models.CharField(max_length=50, blank=True)
+    pharmacy_hours = models.CharField(max_length=100, blank=True, default="Mon-Fri: 8am - 6pm")
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    def __str__(self):
+        return self.name
+ 
+ 
+class Notification(models.Model):
+    class NotifType(models.TextChoices):
+        APPOINTMENT = 'appointment', 'Appointment'
+        VACCINATION = 'vaccination', 'Vaccination'
+        MESSAGE = 'message', 'Message'
+        COMMUNITY = 'community', 'Community Alert'
+        PRESCRIPTION = 'prescription', 'Prescription'
+        OTHER = 'other', 'Other'
+ 
+    user = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='notifications',
+    )
+    notif_type = models.CharField(max_length=20, choices=NotifType.choices, default=NotifType.OTHER)
+    title = models.CharField(max_length=150)
+    message = models.TextField()
+    link_url = models.CharField(max_length=255, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    class Meta:
+        ordering = ['-created_at']
+ 
+    def __str__(self):
+        return f"{self.title} -> {self.user.username}"
+ 
+ 
+# ------------------------------------------------------------------
+# REQUIRED addition to the existing VetProfile class — appointment
+# booking and the vet-finder page both display this field.
+# Add this line inside VetProfile's class body (anywhere after
+# `user = models.OneToOneField(...)`):
+#
+#     specialization = models.CharField(max_length=150, blank=True, default="General Practice")
+#
+# ------------------------------------------------------------------    
