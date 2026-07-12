@@ -161,6 +161,20 @@
 <input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password2" name="password2" required type="password"/>
 </div>
 
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface block">Send verification code via</label>
+<div class="flex gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="radio" name="otp_channel" value="email" checked class="accent-primary"/>
+<span class="text-body-md text-on-surface">Email</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="radio" name="otp_channel" value="phone" class="accent-primary"/>
+<span class="text-body-md text-on-surface">Phone (SMS)</span>
+</label>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Phone requires a phone number entered above.</p>
+
 <div class="pt-2 border-t border-outline-variant">
 <p class="font-label-md text-label-md text-on-surface-variant mb-3 pt-4">Add your pet (optional)</p>
 </div>
