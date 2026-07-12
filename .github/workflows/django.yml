@@ -44,6 +44,14 @@ jobs:
           ls -la || true
           test -f ${{ matrix.project }}/manage.py || { echo "manage.py not found in ${{ matrix.project }}" >&2; exit 1; }
           test -f ${{ matrix.project }}/requirements.txt || { echo "requirements.txt not found in ${{ matrix.project }}" >&2; exit 1; }
+      - name: Install GDAL/GEOS/PROJ (required by django.contrib.gis / PostGIS)
+        # Only PetCentre_RegistrationSystem uses django.contrib.gis —
+        # final_chat doesn't need these packages, so this step is
+        # skipped for that matrix entry to save CI time.
+        if: matrix.project == 'PetCentre_RegistrationSystem'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libgeos-dev libproj-dev
       - name: Install Dependencies
         working-directory: ./${{ matrix.project }}
         run: |
