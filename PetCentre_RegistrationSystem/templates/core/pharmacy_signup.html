@@ -165,6 +165,20 @@
 <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password2">Confirm Password</label>
 <input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="password2" name="password2" required type="password"/>
 </div>
+
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1">Send verification code via</label>
+<div class="flex gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="radio" name="otp_channel" value="email" checked class="accent-primary"/>
+<span class="text-body-md text-on-surface">Email</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="radio" name="otp_channel" value="phone" class="accent-primary"/>
+<span class="text-body-md text-on-surface">Phone (SMS)</span>
+</label>
+</div>
+</div>
 <button class="w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-full shadow-sm hover:shadow-md hover:bg-opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-2" type="submit">
 <span>Create Account</span>
 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>

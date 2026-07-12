@@ -241,13 +241,50 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.title} -> {self.user.username}"
  
- 
+ # ------------------------------------------------------------------
+# Add to myapp/models.py, then:
+#   python manage.py makemigrations myapp
+#   python manage.py migrate
 # ------------------------------------------------------------------
-# REQUIRED addition to the existing VetProfile class — appointment
-# booking and the vet-finder page both display this field.
-# Add this line inside VetProfile's class body (anywhere after
-# `user = models.OneToOneField(...)`):
-#
-#     specialization = models.CharField(max_length=150, blank=True, default="General Practice")
-#
-# ------------------------------------------------------------------    
+
+class SignupOTP(models.Model):
+    """
+    OTP verification sent DURING signup, before the account exists.
+    Unlike PasswordResetOTP, there's no `user` FK yet — the signup
+    form data lives in the session (see core/views.py) until this
+    code is verified, so abandoned signups never create orphaned
+    unverified User rows.
+    """
+    class Channel(models.TextChoices):
+        EMAIL = 'email', 'Email'
+        PHONE = 'phone', 'Phone'
+
+    session_key = models.CharField(max_length=40)  # ties this OTP to a specific pending signup session
+    channel = models.CharField(max_length=10, choices=Channel.choices)
+    destination = models.CharField(max_length=150)  # the email or phone number the code was sent to
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        if self.is_used:
+            return False
+        return (timezone.now() - self.created_at).total_seconds() < 600  # 10 minutes
+
+    def __str__(self):
+        return f"Signup OTP for {self.destination} ({'used' if self.is_used else 'active'})"
+
+
+class LoginAttempt(models.Model):
+    """
+    Tracks failed login attempts for lockout purposes. Only failed
+    attempts count toward the limit — a successful login doesn't
+    reset or add to the count, it's simply not a failure.
+    """
+    user = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='login_attempts',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['user', 'created_at'])]
