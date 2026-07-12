@@ -52,10 +52,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not message_text:
             return
 
-        # Enforce the same limit as Message.content's max_length. TextField's
-        # max_length is NOT enforced by the database, and this consumer
-        # bypasses any serializer validation, so without this check a
-        # client could persist an arbitrarily long message.
         if len(message_text) > MAX_MESSAGE_LENGTH:
             await self.send(text_data=json.dumps({
                 'error': f'Message exceeds {MAX_MESSAGE_LENGTH} character limit.',
@@ -63,6 +59,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         message = await self.save_message(message_text)
+
+        # Notify the other participant — this creates a real Notification
+        # row and schedules a real email via notifications.services, same
+        # as the appointment-booking trigger in core/views.py.
+        await self.notify_other_participant(message_text)
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -99,4 +100,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
             room=room,
             sender=self.user,
             content=content
+        )
+
+    @database_sync_to_async
+    def notify_other_participant(self, message_text):
+        from myapp.models import User
+        from notifications.models import Notification
+        from notifications.services import create_notification
+
+        room = ChatRoom.objects.get(pk=self.room_id)
+        other_user = room.get_other_participant(self.user)
+
+        recipient_role = (
+            Notification.RecipientRole.VET
+            if other_user.role == User.Role.VET
+            else Notification.RecipientRole.CLIENT
+        )
+
+        preview = message_text if len(message_text) <= 100 else message_text[:97] + "..."
+        create_notification(
+            recipient=other_user,
+            recipient_role=recipient_role,
+            notification_type='chat',
+            title=f"New message from {self.user.get_full_name() or self.user.username}",
+            message=preview,
+            action_url=f"/chat/room/{room.pk}/",
         )
