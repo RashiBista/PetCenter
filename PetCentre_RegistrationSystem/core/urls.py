@@ -8,6 +8,8 @@ urlpatterns = [
 
     path('login/pet-owner/', views.pet_owner_login_view, name='pet_owner_login'),
     path('signup/pet-owner/', views.pet_owner_signup_view, name='pet_owner_signup'),
+    path('signup/verify/', views.verify_signup_view, name='verify_signup'),
+    path('signup/resend-otp/', views.resend_signup_otp_view, name='resend_signup_otp'),
 
     path('login/veterinary/', views.veterinary_login_view, name='veterinary_login'),
     path('signup/veterinary/', views.veterinary_signup_view, name='veterinary_signup'),
@@ -21,7 +23,14 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
     path('reset-password/', views.reset_password_view, name='reset_password'),
 
-    path('appointments/book/', views.book_appointment_view, name='book_appointment'),
+    path('appointments/book/', views.book_appointment_view, name='appointment_booking'),
+
+    path('medicine/', views.medicine_search_view, name='medicine_search'),
+    path('medicine/<int:pk>/', views.medicine_detail_view, name='medicine_detail'),
+
+    path('notifications/', views.pet_owner_notifications_view, name='pet_owner_notifications'),
+    path('profile/', views.pet_profile_view, name='pet_profile'),
+    path('find-vets/', views.find_nearest_vets_view, name='find_nearest_vets'),
 
     path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
