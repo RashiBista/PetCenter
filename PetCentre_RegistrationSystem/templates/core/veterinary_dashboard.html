@@ -122,11 +122,11 @@
 </div>
 </div>
 <div class="flex-1 overflow-y-auto flex flex-col gap-1 mt-4">
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary transition-transform scale-[0.98]" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary transition-transform scale-[0.98]" href="{% url 'core:veterinary_dashboard' %}">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
 <span class="font-label-md text-label-md font-bold">Dashboard</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
 <span class="font-label-md text-label-md">Medicine</span>
 </a>
@@ -138,7 +138,7 @@
 <span class="material-symbols-outlined">chat</span>
 <span class="font-label-md text-label-md">Chat</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_notifications' %}">
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
 </a>
