@@ -135,12 +135,12 @@
 <!-- Navigation Links -->
 <nav class="flex flex-col gap-2 flex-1">
 <!-- Dashboard (Active) -->
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="{% url 'core:admin_dashboard' %}">
 <span class="material-symbols-outlined icon-filled text-primary">dashboard</span>
 <span class="font-label-md text-label-md font-bold">Dashboard</span>
 </a>
 <!-- Medicine -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
 <span class="font-label-md text-label-md">Medicine</span>
 </a>
@@ -155,7 +155,7 @@
 <span class="font-label-md text-label-md">Chat</span>
 </a>
 <!-- Notifications -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_notifications' %}">
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
 </a>
