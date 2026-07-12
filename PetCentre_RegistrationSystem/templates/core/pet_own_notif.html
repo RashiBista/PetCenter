@@ -283,15 +283,17 @@
 <div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0px_8px_16px_rgba(46,46,56,0.04)] hover:shadow-[0px_12px_24px_rgba(46,46,56,0.08)] transition-shadow duration-300 flex gap-4 items-start {% if not n.is_read %}border-l-4 border-primary relative{% else %}opacity-80{% endif %}">
 {% if not n.is_read %}<div class="w-2 h-2 rounded-full bg-primary absolute top-8 right-6"></div>{% endif %}
 <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0
-  {% if n.notif_type == 'appointment' %}bg-primary-container text-on-primary-container
-  {% elif n.notif_type == 'community' %}bg-tertiary-container text-on-tertiary-container
+  {% if n.notification_type == 'appointment' %}bg-primary-container text-on-primary-container
+  {% elif n.notification_type == 'lost_found' %}bg-tertiary-container text-on-tertiary-container
   {% else %}bg-secondary-container text-on-secondary-container{% endif %}">
 <span class="material-symbols-outlined">
-  {% if n.notif_type == 'appointment' %}calendar_today
-  {% elif n.notif_type == 'vaccination' %}vaccines
-  {% elif n.notif_type == 'message' %}forum
-  {% elif n.notif_type == 'community' %}pets
-  {% elif n.notif_type == 'prescription' %}medication
+  {% if n.notification_type == 'appointment' %}calendar_today
+  {% elif n.notification_type == 'medicine' %}medication
+  {% elif n.notification_type == 'chat' %}forum
+  {% elif n.notification_type == 'adoption' %}pets
+  {% elif n.notification_type == 'lost_found' %}search
+  {% elif n.notification_type == 'report' %}flag
+  {% elif n.notification_type == 'system' %}settings
   {% else %}notifications{% endif %}
 </span>
 </div>

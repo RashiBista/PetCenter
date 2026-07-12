@@ -32,6 +32,8 @@ urlpatterns = [
     path('api/auth/dashboard/user/', UserDashboardView.as_view(), name='dashboard_user'),
     path('api/auth/dashboard/vet/', VetDashboardView.as_view(), name='dashboard_vet'),
 
-    # --- Chat (previously missing — chat/urls.py existed but was never included) ---
+    #chat and notifications
     path('chat/', include('chat.urls')),
+    path('api/notifications/', include('notifications.urls')),
+    
 ]
