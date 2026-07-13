@@ -19,7 +19,10 @@ django-cors-headers==4.9.0
 
 # --- Database (Neon Postgres + PostGIS) ---
 psycopg2-binary==2.9.12
-
+# NOTE: GDAL/GEOS/PROJ are NOT pip packages — django.contrib.gis calls
+# the native system libraries directly via ctypes. Those are installed
+# via apt-get in the Dockerfile (gdal-bin/libgdal-dev/libgeos-dev/
+# libproj-dev), not here.
 
 # --- Media storage (Cloudinary) ---
 cloudinary==1.*
