@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from django.contrib.gis.db.models import PointField
+
+
 class User(AbstractUser):
     """
     Custom user model for PetCentre.
@@ -28,9 +30,6 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True)
     email = models.EmailField(unique=True)
 
-    # Email is required and used as the natural unique login identifier
-    # alongside username; keep username for compatibility with existing
-    # AbstractUser-based auth (login still accepts username, see views.py).
     REQUIRED_FIELDS = ['email']
 
     def __str__(self):
@@ -43,6 +42,10 @@ class User(AbstractUser):
     @property
     def is_pet_owner(self):
         return self.role == self.Role.USER
+
+    @property
+    def is_pharmacy(self):
+        return self.role == self.Role.PHARMACY
 
 
 class UserProfile(models.Model):
@@ -66,10 +69,7 @@ class UserProfile(models.Model):
 
 class VetProfile(models.Model):
     """
-    Extra profile data for the 'vet' role. Kept intentionally minimal
-    for now (basic info + role only); credential/clinic fields such as
-    license number, clinic name, and specialization can be added here
-    later without touching the User/auth model.
+    Extra profile data for the 'vet' role.
     """
     user = models.OneToOneField(
         User,
@@ -79,28 +79,14 @@ class VetProfile(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-class Pet(models.Model):
-    owner = models.ForeignKey(
-        'myapp.User',
-        on_delete=models.CASCADE,
-        related_name='pets',
-        limit_choices_to={'role': User.Role.USER},
-    )
-    name = models.CharField(max_length=100)
-    species = models.CharField(max_length=50)
-    breed = models.CharField(max_length=100, blank=True)
-    photo = models.ImageField(upload_to='pets/', blank=True, null=True)
+    # geography=True makes distance queries return real-world meters
+    # (accounting for the Earth's curvature) rather than flat-plane units.
+    location = PointField(geography=True, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} → {self.owner.username}"
-@property
-def is_pharmacy(self):
-    return self.role == self.Role.PHARMACY
- 
- 
-# 3. Add a new PharmacyProfile model, alongside UserProfile/VetProfile:
- 
+        return f'VetProfile<{self.user.username}>'
+
+
 class PharmacyProfile(models.Model):
     """
     Extra profile data for the 'pharmacy' role. Kept minimal for now,
@@ -117,9 +103,26 @@ class PharmacyProfile(models.Model):
     pharmacy_name = models.CharField(max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
- 
+
     def __str__(self):
         return f'PharmacyProfile<{self.user.username}>'
+
+
+class Pet(models.Model):
+    owner = models.ForeignKey(
+        'myapp.User',
+        on_delete=models.CASCADE,
+        related_name='pets',
+        limit_choices_to={'role': User.Role.USER},
+    )
+    name = models.CharField(max_length=100)
+    species = models.CharField(max_length=50)
+    breed = models.CharField(max_length=100, blank=True)
+    photo = models.ImageField(upload_to='pets/', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} → {self.owner.username}"
+
 
 class Appointment(models.Model):
     class Status(models.TextChoices):
@@ -127,7 +130,7 @@ class Appointment(models.Model):
         CONFIRMED = 'confirmed', 'Confirmed'
         COMPLETED = 'completed', 'Completed'
         CANCELLED = 'cancelled', 'Cancelled'
- 
+
     pet = models.ForeignKey(
         'myapp.Pet', on_delete=models.CASCADE, related_name='appointments',
     )
@@ -139,22 +142,24 @@ class Appointment(models.Model):
     reason = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.REQUESTED)
     created_at = models.DateTimeField(auto_now_add=True)
- 
+
     class Meta:
         ordering = ['scheduled_time']
- 
+
     def __str__(self):
         return f"{self.pet.name} with Dr. {self.vet.username} @ {self.scheduled_time:%b %d, %I:%M %p}"
- 
+
     @property
     def owner(self):
-        return self.pet.owner        
+        return self.pet.owner
+
+
 class Prescription(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         FULFILLED = 'fulfilled', 'Fulfilled'
         CANCELLED = 'cancelled', 'Cancelled'
- 
+
     pet = models.ForeignKey(
         'myapp.Pet', on_delete=models.CASCADE, related_name='prescriptions',
     )
@@ -162,8 +167,6 @@ class Prescription(models.Model):
         'myapp.User', on_delete=models.CASCADE, related_name='issued_prescriptions',
         limit_choices_to={'role': User.Role.VET},
     )
-    # Nullable/blank: a prescription can exist before any pharmacy claims it —
-    # any pharmacy account can see and fulfill unclaimed ones.
     pharmacy = models.ForeignKey(
         'myapp.User', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='fulfilled_prescriptions',
@@ -175,10 +178,10 @@ class Prescription(models.Model):
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     fulfilled_at = models.DateTimeField(null=True, blank=True)
- 
+
     class Meta:
         ordering = ['-created_at']
- 
+
     def __str__(self):
         return f"{self.medicine_name} for {self.pet.name} ({self.get_status_display()})"
 
@@ -199,53 +202,31 @@ class PasswordResetOTP(models.Model):
     def __str__(self):
         return f"OTP for {self.user.username} ({'used' if self.is_used else 'active'})"
 
+
 class Medicine(models.Model):
     name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100, blank=True)  # e.g. "Chewables for Dogs"
+    category = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     dosage_info = models.TextField(blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     in_stock = models.BooleanField(default=True)
-    photo = models.ImageField(upload_to='medicines/', blank=True, null=True)  # Cloudinary-backed, same as Pet.photo
+    photo = models.ImageField(upload_to='medicines/', blank=True, null=True)
     pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
     pharmacy_contact = models.CharField(max_length=50, blank=True)
     pharmacy_hours = models.CharField(max_length=100, blank=True, default="Mon-Fri: 8am - 6pm")
     created_at = models.DateTimeField(auto_now_add=True)
- 
+
     def __str__(self):
         return self.name
- 
- 
-class Notification(models.Model):
-    class NotifType(models.TextChoices):
-        APPOINTMENT = 'appointment', 'Appointment'
-        VACCINATION = 'vaccination', 'Vaccination'
-        MESSAGE = 'message', 'Message'
-        COMMUNITY = 'community', 'Community Alert'
-        PRESCRIPTION = 'prescription', 'Prescription'
-        OTHER = 'other', 'Other'
- 
-    user = models.ForeignKey(
-        'myapp.User', on_delete=models.CASCADE, related_name='notifications',
-    )
-    notif_type = models.CharField(max_length=20, choices=NotifType.choices, default=NotifType.OTHER)
-    title = models.CharField(max_length=150)
-    message = models.TextField()
-    link_url = models.CharField(max_length=255, blank=True)
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
- 
-    class Meta:
-        ordering = ['-created_at']
- 
-    def __str__(self):
-        return f"{self.title} -> {self.user.username}"
- 
- # ------------------------------------------------------------------
-# Add to myapp/models.py, then:
-#   python manage.py makemigrations myapp
-#   python manage.py migrate
-# ------------------------------------------------------------------
+
+
+# NOTE: the old myapp.Notification model has been removed. Notifications
+# are now handled entirely by the separate `notifications` app (see
+# notifications/models.py), which has a more complete schema
+# (recipient_role, notification_type, email_sent tracking, etc.) and is
+# what core/views.py and chat/consumers.py actually use. Keeping both
+# would risk accidentally writing to the wrong one.
+
 
 class SignupOTP(models.Model):
     """
@@ -259,9 +240,9 @@ class SignupOTP(models.Model):
         EMAIL = 'email', 'Email'
         PHONE = 'phone', 'Phone'
 
-    session_key = models.CharField(max_length=40)  # ties this OTP to a specific pending signup session
+    session_key = models.CharField(max_length=40)
     channel = models.CharField(max_length=10, choices=Channel.choices)
-    destination = models.CharField(max_length=150)  # the email or phone number the code was sent to
+    destination = models.CharField(max_length=150)
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
@@ -269,7 +250,7 @@ class SignupOTP(models.Model):
     def is_valid(self):
         if self.is_used:
             return False
-        return (timezone.now() - self.created_at).total_seconds() < 600  # 10 minutes
+        return (timezone.now() - self.created_at).total_seconds() < 600
 
     def __str__(self):
         return f"Signup OTP for {self.destination} ({'used' if self.is_used else 'active'})"
@@ -277,9 +258,8 @@ class SignupOTP(models.Model):
 
 class LoginAttempt(models.Model):
     """
-    Tracks failed login attempts for lockout purposes. Only failed
-    attempts count toward the limit — a successful login doesn't
-    reset or add to the count, it's simply not a failure.
+    Tracks failed login attempts (per account) for lockout purposes.
+    Only failed attempts count toward the limit.
     """
     user = models.ForeignKey(
         'myapp.User', on_delete=models.CASCADE, related_name='login_attempts',
@@ -288,3 +268,16 @@ class LoginAttempt(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['user', 'created_at'])]
+
+
+class IPLoginAttempt(models.Model):
+    """
+    Tracks failed login attempts by IP address, independent of which
+    username/email was targeted — closes the gap where hammering many
+    different usernames from the same machine wasn't rate-limited.
+    """
+    ip_address = models.GenericIPAddressField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['ip_address', 'created_at'])]
