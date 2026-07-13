@@ -79,6 +79,7 @@ class VetProfile(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    specialization = models.CharField(max_length=150, blank=True, default="General Practice")
     # geography=True makes distance queries return real-world meters
     # (accounting for the Earth's curvature) rather than flat-plane units.
     location = PointField(geography=True, null=True, blank=True)

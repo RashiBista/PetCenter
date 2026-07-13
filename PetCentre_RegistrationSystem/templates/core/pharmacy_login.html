@@ -141,7 +141,7 @@
 </div>
 <div class="flex flex-col gap-1.5">
 <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password">Password</label>
-<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="password" name="password" type="password"/>
+<div class="relative"><input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200 pr-12" id="password" name="password" type="password"/><button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility</span></button></div>
 </div>
 <button class="w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-full shadow-sm hover:shadow-md hover:bg-opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-2" type="submit">
 <span>Sign In</span>

@@ -141,7 +141,7 @@
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">lock</span>
 <input class="w-full h-14 pl-12 pr-12 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 outline-none font-body-md text-body-md" id="password" name="password" required="" placeholder="••••••••" type="password"/>
-<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none" type="button">
+<button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none" type="button">
 <span class="material-symbols-outlined">visibility_off</span>
 </button>
 </div>
@@ -171,4 +171,20 @@
 <span class="font-label-sm text-label-sm">Secure connection established</span>
 </div>
 </div>
+<script>
+  function togglePasswordVisibility(btn) {
+    const input = btn.closest("div").querySelector("input[type=password], input[type=text].pw-revealed");
+    if (!input) return;
+    const icon = btn.querySelector(".material-symbols-outlined");
+    if (input.type === "password") {
+      input.type = "text";
+      input.classList.add("pw-revealed");
+      icon.textContent = "visibility_off";
+    } else {
+      input.type = "password";
+      input.classList.remove("pw-revealed");
+      icon.textContent = "visibility";
+    }
+  }
+</script>
 </body></html>
