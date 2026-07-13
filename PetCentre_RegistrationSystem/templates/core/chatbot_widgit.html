@@ -1,0 +1,134 @@
+{# ------------------------------------------------------------------
+   Floating chatbot widget — include this on any page with:
+     {% include 'core/_chatbot_widget.html' %}
+
+   Replaces the old full-page /chatbot/ navigation with an
+   Intercom/Drift-style floating bubble that expands into a small
+   panel without leaving the current page. The conversation logic
+   (append message, typing indicator, backend integration point) is
+   the same as before — just repackaged into a widget instead of a
+   dedicated page. core/chatbot_assistant.html and the /chatbot/ route
+   can stay as a fallback/direct link, but this is now the primary way
+   people will actually reach it.
+
+   Real AI backend integration is intentionally still a stub — see the
+   BACKEND INTEGRATION POINT comment in the script below. Planned for
+   after the 19th; everything here works end-to-end except the actual
+   AI reply.
+------------------------------------------------------------------ #}
+
+<!-- Floating button -->
+<button id="chatbot-fab" onclick="toggleChatbotWidget()"
+        class="fixed bottom-6 right-6 rounded-full p-4 bg-primary text-on-primary shadow-xl z-50 flex items-center justify-center hover:scale-110 hover:shadow-2xl active:scale-95 transition-all duration-200">
+  <span id="chatbot-fab-icon" class="material-symbols-outlined text-2xl">smart_toy</span>
+</button>
+
+<!-- Panel -->
+<div id="chatbot-panel"
+     class="hidden fixed bottom-24 right-6 w-[360px] max-w-[90vw] h-[500px] max-h-[70vh] bg-surface-container-lowest rounded-2xl shadow-2xl border border-surface-container-high z-50 flex flex-col overflow-hidden">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-4 py-3 bg-primary text-on-primary flex-shrink-0">
+    <span class="material-symbols-outlined">smart_toy</span>
+    <div class="flex-1">
+      <p class="font-label-md text-label-md font-semibold">PetCentre Assistant</p>
+      <p class="text-[11px] opacity-80">Usually replies instantly</p>
+    </div>
+    <button onclick="toggleChatbotWidget()" class="hover:bg-white/10 rounded-full p-1 transition-colors">
+      <span class="material-symbols-outlined text-xl">close</span>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div id="chatbot-widget-messages" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 bg-surface">
+    <div class="flex items-start gap-3 max-w-[85%]">
+      <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
+      </div>
+      <div class="bg-surface-container-lowest shadow-sm rounded-2xl rounded-tl-sm p-3 text-on-surface">
+        <p class="text-sm">Hi! How can I help — find medicine, book an appointment, or answer a pet-care question?</p>
+      </div>
+    </div>
+    <div id="chatbot-widget-typing" class="hidden flex items-start gap-3 max-w-[85%]">
+      <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
+      </div>
+      <div class="bg-surface-container-lowest shadow-sm rounded-2xl rounded-tl-sm p-3 flex items-center gap-1 w-16 h-9">
+        <div class="w-1.5 h-1.5 rounded-full bg-outline-variant animate-bounce"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-outline-variant animate-bounce" style="animation-delay:0.2s"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-outline-variant animate-bounce" style="animation-delay:0.4s"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="flex items-center gap-2 p-3 border-t border-surface-container-high flex-shrink-0">
+    <input id="chatbot-widget-input" type="text" placeholder="Type a message..."
+           class="flex-1 bg-surface-container-low border border-outline-variant rounded-full px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"/>
+    <button id="chatbot-widget-send" class="bg-primary text-on-primary rounded-full p-2 hover:bg-primary/90 transition-colors flex-shrink-0">
+      <span class="material-symbols-outlined text-xl">send</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  function toggleChatbotWidget() {
+    const panel = document.getElementById('chatbot-panel');
+    const icon = document.getElementById('chatbot-fab-icon');
+    const isHidden = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    icon.textContent = isHidden ? 'close' : 'smart_toy';
+  }
+
+  (function () {
+    const messages = document.getElementById('chatbot-widget-messages');
+    const typing = document.getElementById('chatbot-widget-typing');
+    const input = document.getElementById('chatbot-widget-input');
+    const sendBtn = document.getElementById('chatbot-widget-send');
+
+    function escapeHtml(text) {
+      return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    function appendUserMessage(text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-start gap-3 self-end max-w-[85%] flex-row-reverse';
+      wrapper.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-on-surface-variant text-[18px]">person</span>
+        </div>
+        <div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tr-sm p-3">
+          <p class="text-sm">${escapeHtml(text)}</p>
+        </div>`;
+      messages.insertBefore(wrapper, typing);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendWidgetMessage(text) {
+      if (!text.trim()) return;
+      appendUserMessage(text);
+      input.value = '';
+      typing.classList.remove('hidden');
+      messages.scrollTop = messages.scrollHeight;
+
+      // ------------------------------------------------------------
+      // BACKEND INTEGRATION POINT — same contract as the full-page
+      // version this replaced. Planned after the 19th.
+      //   const res = await fetch("/api/chatbot/message/", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ message: text }),
+      //   });
+      //   const data = await res.json();
+      //   typing.classList.add('hidden');
+      //   appendAssistantMessage(data.reply);
+      // ------------------------------------------------------------
+      typing.classList.add('hidden');
+    }
+
+    sendBtn.addEventListener('click', () => sendWidgetMessage(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); sendWidgetMessage(input.value); }
+    });
+  })();
+</script>

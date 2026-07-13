@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from myapp.decorators import role_required
 from myapp.models import (
-    Appointment, LoginAttempt, Medicine, PasswordResetOTP, Pet, Prescription,
+    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Pet, Prescription,
     SignupOTP, User, UserProfile, VetProfile, PharmacyProfile,
 )
 from notifications.models import Notification
@@ -34,28 +34,13 @@ def _send_otp(channel, destination, code, purpose="verification"):
     """
     channel: SignupOTP.Channel.EMAIL or .PHONE
     Email sends via EMAIL_BACKEND (console in dev, real SMTP once
-    configured). Phone sends a real SMS via Twilio — falls back to a
-    console log if TWILIO_* env vars aren't set, so local dev without
-    Twilio credentials still works end-to-end for testing the flow.
+    configured). Phone has no real SMS provider connected — a paid
+    provider like Twilio would be needed for that, which isn't worth
+    the cost for this project right now. This just logs the code so
+    the signup flow is still fully testable locally in the meantime.
     """
     if channel == SignupOTP.Channel.PHONE:
-        from django.conf import settings as dj_settings
-        if not (dj_settings.TWILIO_ACCOUNT_SID and dj_settings.TWILIO_AUTH_TOKEN and dj_settings.TWILIO_FROM_NUMBER):
-            print(f"[SMS STUB — Twilio not configured] Would send to {destination}: your {purpose} code is {code}")
-            return
-        try:
-            from twilio.rest import Client
-            client = Client(dj_settings.TWILIO_ACCOUNT_SID, dj_settings.TWILIO_AUTH_TOKEN)
-            client.messages.create(
-                body=f"Your PetCentre {purpose} code is: {code}",
-                from_=dj_settings.TWILIO_FROM_NUMBER,
-                to=destination,
-            )
-        except Exception as e:
-            # Twilio trial accounts can only send to pre-verified numbers —
-            # this is the most common failure while testing. Log it
-            # rather than crashing the whole signup flow.
-            print(f"[Twilio SMS failed] {destination}: {e}")
+        print(f"[SMS STUB — no SMS provider configured] Would send to {destination}: your {purpose} code is {code}")
         return
     send_mail(
         subject=f"Your PetCentre {purpose} code",
@@ -83,6 +68,26 @@ def _is_locked_out(user):
 
 def _record_failed_attempt(user):
     LoginAttempt.objects.create(user=user)
+
+
+def _get_client_ip(request):
+    # X-Forwarded-For is used when behind a proxy/load balancer (not
+    # currently the case for local dev or the current Docker setup,
+    # but harmless to check first — falls back to REMOTE_ADDR either way).
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '0.0.0.0')
+
+
+def _is_ip_locked_out(ip_address):
+    cutoff = timezone.now() - timedelta(hours=24)
+    recent_failures = IPLoginAttempt.objects.filter(ip_address=ip_address, created_at__gte=cutoff).count()
+    return recent_failures >= MAX_ATTEMPTS_PER_24H
+
+
+def _record_failed_ip_attempt(ip_address):
+    IPLoginAttempt.objects.create(ip_address=ip_address)
 
 
 def landing_page(request):
@@ -368,13 +373,17 @@ def pet_owner_login_view(request):
     if request.method == 'POST':
         identifier = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
+        client_ip = _get_client_ip(request)
         target_user = _find_user_by_identifier(identifier)
 
-        if target_user and _is_locked_out(target_user):
+        if _is_ip_locked_out(client_ip):
+            error = "Too many failed attempts from this network. Try again in 24 hours."
+        elif target_user and _is_locked_out(target_user):
             error = "Too many failed attempts. Try again in 24 hours."
         else:
             user = authenticate(request, username=identifier, password=password)
             if user is None:
+                _record_failed_ip_attempt(client_ip)
                 if target_user:
                     _record_failed_attempt(target_user)
                 error = 'Invalid email/username or password.'
@@ -391,13 +400,17 @@ def veterinary_login_view(request):
     if request.method == 'POST':
         identifier = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
+        client_ip = _get_client_ip(request)
         target_user = _find_user_by_identifier(identifier)
 
-        if target_user and _is_locked_out(target_user):
+        if _is_ip_locked_out(client_ip):
+            error = "Too many failed attempts from this network. Try again in 24 hours."
+        elif target_user and _is_locked_out(target_user):
             error = "Too many failed attempts. Try again in 24 hours."
         else:
             user = authenticate(request, username=identifier, password=password)
             if user is None:
+                _record_failed_ip_attempt(client_ip)
                 if target_user:
                     _record_failed_attempt(target_user)
                 error = 'Invalid email or password.'
@@ -414,13 +427,17 @@ def pharmacy_login_view(request):
     if request.method == 'POST':
         identifier = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
+        client_ip = _get_client_ip(request)
         target_user = _find_user_by_identifier(identifier)
 
-        if target_user and _is_locked_out(target_user):
+        if _is_ip_locked_out(client_ip):
+            error = "Too many failed attempts from this network. Try again in 24 hours."
+        elif target_user and _is_locked_out(target_user):
             error = "Too many failed attempts. Try again in 24 hours."
         else:
             user = authenticate(request, username=identifier, password=password)
             if user is None:
+                _record_failed_ip_attempt(client_ip)
                 if target_user:
                     _record_failed_attempt(target_user)
                 error = 'Invalid email or password.'
@@ -437,13 +454,17 @@ def admin_login_view(request):
     if request.method == 'POST':
         identifier = request.POST.get('adminId', '').strip()
         password = request.POST.get('password', '')
+        client_ip = _get_client_ip(request)
         target_user = _find_user_by_identifier(identifier)
 
-        if target_user and _is_locked_out(target_user):
+        if _is_ip_locked_out(client_ip):
+            error = "Too many failed attempts from this network. Try again in 24 hours."
+        elif target_user and _is_locked_out(target_user):
             error = "Too many failed attempts. Try again in 24 hours."
         else:
             user = authenticate(request, username=identifier, password=password)
             if user is None:
+                _record_failed_ip_attempt(client_ip)
                 if target_user:
                     _record_failed_attempt(target_user)
                 error = 'Invalid credentials.'
@@ -545,6 +566,39 @@ def _recipient_role_for(user):
     return Notification.RecipientRole.VET if user.role == User.Role.VET else Notification.RecipientRole.CLIENT
 
 
+@role_required(User.Role.VET)
+def update_appointment_status_view(request, appointment_id):
+    """
+    Closes the loop the vet dashboard previously left open — until now,
+    appointments just sat as 'Requested' forever with no way for the
+    vet to confirm or cancel them, and the owner never heard back.
+    """
+    appointment = Appointment.objects.filter(id=appointment_id, vet=request.user).select_related('pet', 'pet__owner').first()
+    if not appointment:
+        return redirect('core:veterinary_dashboard')
+
+    new_status = request.POST.get('status')
+    if new_status in (Appointment.Status.CONFIRMED, Appointment.Status.CANCELLED, Appointment.Status.COMPLETED):
+        appointment.status = new_status
+        appointment.save()
+
+        owner = appointment.pet.owner
+        create_notification(
+            recipient=owner,
+            recipient_role=_recipient_role_for(owner),
+            notification_type='appointment',
+            title=f"Appointment {appointment.get_status_display()}",
+            message=(
+                f"Dr. {request.user.get_full_name() or request.user.username} has "
+                f"{appointment.get_status_display().lower()} your appointment for "
+                f"{appointment.pet.name} on {appointment.scheduled_time:%b %d, %Y at %I:%M %p}."
+            ),
+            action_url="/dashboard/pet-owner/",
+        )
+
+    return redirect('core:veterinary_dashboard')
+
+
 @role_required(User.Role.USER)
 def book_appointment_view(request):
     """
@@ -615,6 +669,53 @@ def medicine_detail_view(request, pk):
     from django.shortcuts import get_object_or_404
     medicine = get_object_or_404(Medicine, pk=pk)
     return render(request, 'core/medicine_detail.html', {'medicine': medicine})
+
+
+@login_required(login_url='core:pet_owner_login')
+def accessory_detail_view(request, pk):
+    from django.shortcuts import get_object_or_404
+    accessory = get_object_or_404(Accessory, pk=pk)
+    return render(request, 'core/accessory_detail.html', {'accessory': accessory})
+
+
+# ------------------------------------------------------------------
+# Unified search module — the "Search for medicine, vets..." bar
+# visible in every dashboard header feeds into this one view. Two
+# modes, switchable via ?category=:
+#   'people'     — search registered pet owners/vets/pharmacies, each
+#                  result links straight to starting a chat with them
+#   'pet_things' — search Medicine + Accessory together
+#   'all' (default) — shows both sections on one page
+# ------------------------------------------------------------------
+
+@login_required(login_url='core:pet_owner_login')
+def search_view(request):
+    query = request.GET.get('q', '').strip()
+    category = request.GET.get('category', 'all')
+
+    people_results = []
+    pet_things_results = []
+
+    if query and category in ('people', 'all'):
+        people_results = User.objects.filter(
+            Q(username__icontains=query) | Q(email__icontains=query) |
+            Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        ).exclude(id=request.user.id).exclude(is_superuser=True)[:20]
+
+    if query and category in ('pet_things', 'all'):
+        medicines = Medicine.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
+        accessories = Accessory.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
+        pet_things_results = (
+            [{'kind': 'medicine', 'obj': m} for m in medicines] +
+            [{'kind': 'accessory', 'obj': a} for a in accessories]
+        )
+
+    return render(request, 'core/search.html', {
+        'query': query,
+        'category': category,
+        'people_results': people_results,
+        'pet_things_results': pet_things_results,
+    })
 
 
 # ------------------------------------------------------------------

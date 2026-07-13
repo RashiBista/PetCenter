@@ -161,10 +161,11 @@
 <!-- TopNavBar -->
 <header class="hidden md:flex fixed top-0 right-0 w-[calc(100%-280px)] h-20 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md justify-between items-center px-10 z-40 shadow-sm">
 <div class="flex-1 flex items-center">
-<div class="relative w-96">
+<form method="get" action="{% url 'core:search' %}" class="relative w-96">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-<input class="w-full bg-surface-container-low border border-outline-variant rounded-full py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none" placeholder="Search patients, owners, records..." type="text"/>
-</div>
+<input name="q" class="w-full bg-surface-container-low border border-outline-variant rounded-full py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none" placeholder="Search patients, owners, records..." type="text"/>
+<input type="hidden" name="category" value="people"/>
+</form>
 </div>
 <div class="flex items-center gap-6">
 <button class="text-on-surface-variant hover:text-primary transition-colors relative">
@@ -258,11 +259,26 @@
 <p class="font-label-sm text-label-sm text-on-surface-variant">Owner: {{ appt.pet.owner.get_full_name|default:appt.pet.owner.username }} • {{ appt.scheduled_time|date:"g:i A" }}</p>
 </div>
 </div>
-<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
 <span class="px-3 py-1 rounded-full bg-primary-container/30 text-on-primary-container font-label-sm text-label-sm">{{ appt.get_status_display }}</span>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-<span class="material-symbols-outlined">more_vert</span>
-</button>
+{% if appt.status == 'requested' %}
+<form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
+{% csrf_token %}
+<input type="hidden" name="status" value="confirmed">
+<button type="submit" class="px-3 py-1 rounded-full bg-primary text-on-primary text-xs font-medium hover:bg-primary/90 transition-colors">Confirm</button>
+</form>
+<form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
+{% csrf_token %}
+<input type="hidden" name="status" value="cancelled">
+<button type="submit" class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-xs font-medium hover:bg-error-container/80 transition-colors">Cancel</button>
+</form>
+{% elif appt.status == 'confirmed' %}
+<form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
+{% csrf_token %}
+<input type="hidden" name="status" value="completed">
+<button type="submit" class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-medium hover:bg-secondary-container/80 transition-colors">Mark Completed</button>
+</form>
+{% endif %}
 </div>
 </div>
 {% empty %}
@@ -350,7 +366,5 @@
 </div>
 </main>
 <!-- FloatingActionButton -->
-<button onclick="window.location.href='{% url 'core:chatbot' %}'" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed font-label-md text-label-md shadow-xl hover:scale-110 hover:shadow-2xl transition-all z-50 flex items-center justify-center group">
-<span class="material-symbols-outlined transition-transform group-hover:rotate-12">smart_toy</span>
-</button>
+{% include "core/_chatbot_widget.html" %}
 </body></html>
