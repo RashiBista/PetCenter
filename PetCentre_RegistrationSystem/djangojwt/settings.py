@@ -51,13 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'rest_framework',
     'rest_framework_simplejwt',
     'channels',
-    'notifications',
     'myapp',
     'chat',
     'core',
+    'notifications',
     'corsheaders',
     'drf_spectacular',
 ]
@@ -168,22 +169,40 @@ if not _db_password and 'test' not in sys.argv:
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+        # Switched from django.db.backends.postgresql to the PostGIS
+        # backend — this is a drop-in replacement, same connection
+        # params, same Neon host. It just adds spatial query support
+        # (PointField, Distance, etc.) on top of the same Postgres
+        # connection. Requires `CREATE EXTENSION postgis;` to have been
+        # run once on the Neon database (via the Neon SQL Editor or
+        # psql) — Neon supports this extension natively.
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
         'NAME': os.environ.get('DB_NAME', 'petcenter_db'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': _db_password,
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
-        # Neon (and most managed Postgres providers) require SSL.
-        # Defaults to 'require' so this is safe even if DB_SSLMODE is
-        # unset — plain localhost Postgres in dev generally accepts
-        # sslmode=require too (it just negotiates SSL if available),
-        # but override to 'disable' locally if that ever causes issues.
         'OPTIONS': {
             'sslmode': os.environ.get('DB_SSLMODE', 'require'),
         },
     }
 }
+
+# ------------------------------------------------------------------
+# GDAL/GEOS native library paths — ONLY needed for local `runserver`
+# on Windows, where these libraries aren't on the system path the way
+# they are inside the Docker image (which installs gdal-bin/libgeos
+# via apt-get — see Dockerfile). Leave these unset entirely if running
+# via Docker, or if GDAL/GEOS are already discoverable on your system.
+# Set them in .env only if you hit "Could not find the GDAL/GEOS
+# library" errors when running manage.py directly on Windows.
+# Typical Windows paths after `pip install GDAL` via a wheel, e.g.:
+#   GDAL_LIBRARY_PATH=C:\...\venv\Lib\site-packages\osgeo\gdal304.dll
+#   GEOS_LIBRARY_PATH=C:\...\venv\Lib\site-packages\osgeo\geos_c.dll
+if os.environ.get('GDAL_LIBRARY_PATH'):
+    GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH')
+if os.environ.get('GEOS_LIBRARY_PATH'):
+    GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH')
 
 ASGI_APPLICATION = 'djangojwt.asgi.application'
 
@@ -242,7 +261,7 @@ LOGIN_URL = 'core:landing_page'
 # EMAIL_BACKEND and the SMTP_* vars in .env once you have a real
 # provider (e.g. SendGrid, Mailgun, or plain SMTP).
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Pet Centre <noreply@petcentre.local>')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@petcentre.local')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')

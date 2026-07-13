@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-
+from django.contrib.gis.db.models import PointField
 class User(AbstractUser):
     """
     Custom user model for PetCentre.
