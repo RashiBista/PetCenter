@@ -135,12 +135,12 @@
 <!-- Navigation Links -->
 <nav class="flex flex-col gap-2 flex-1">
 <!-- Dashboard (Active) -->
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="{% url 'core:admin_dashboard' %}">
 <span class="material-symbols-outlined icon-filled text-primary">dashboard</span>
 <span class="font-label-md text-label-md font-bold">Dashboard</span>
 </a>
 <!-- Medicine -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
 <span class="font-label-md text-label-md">Medicine</span>
 </a>
@@ -155,7 +155,7 @@
 <span class="font-label-md text-label-md">Chat</span>
 </a>
 <!-- Notifications -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_notifications' %}">
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
 </a>
@@ -185,12 +185,12 @@
 <div class="flex justify-between items-center px-10 w-full h-20 z-40">
 <!-- Search Bar (Left) -->
 <div class="flex-1 max-w-md">
-<div class="relative flex items-center w-full h-12 rounded-full bg-surface-container-low border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary overflow-hidden transition-all">
+<form method="get" action="{% url 'core:search' %}" class="relative flex items-center w-full h-12 rounded-full bg-surface-container-low border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary overflow-hidden transition-all">
 <div class="grid place-items-center h-full w-12 text-on-surface-variant">
 <span class="material-symbols-outlined">search</span>
 </div>
-<input class="peer h-full w-full outline-none text-body-md font-body-md text-on-surface bg-transparent pr-4 placeholder-on-surface-variant/50" id="search" placeholder="Search..." type="text"/>
-</div>
+<input name="q" class="peer h-full w-full outline-none text-body-md font-body-md text-on-surface bg-transparent pr-4 placeholder-on-surface-variant/50" id="search" placeholder="Search..." type="text"/>
+</form>
 </div>
 <!-- Trailing Actions -->
 <div class="flex items-center gap-4">
@@ -377,8 +377,5 @@
 </div>
 </main>
 <!-- FloatingActionButton -->
-<button onclick="window.location.href='{% url 'core:chatbot' %}'" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary text-on-primary font-label-md text-label-md shadow-xl hover:scale-110 hover:shadow-2xl transition-all active:scale-95 duration-100 z-50 flex items-center justify-center gap-2 group">
-<span class="material-symbols-outlined">smart_toy</span>
-<span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:ml-1 group-hover:mr-2">Assistant</span>
-</button>
+{% include "core/_chatbot_widget.html" %}
 </body></html>

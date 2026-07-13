@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pet Centre - Notification History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#f8e28a",
+                      "primary": "#5f578f",
+                      "on-secondary-container": "#616470",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed": "#181b26",
+                      "surface-bright": "#fdf8fd",
+                      "on-tertiary-fixed": "#221b00",
+                      "secondary-container": "#e0e1f0",
+                      "surface-container-high": "#ebe7ec",
+                      "surface-variant": "#e5e1e6",
+                      "surface-tint": "#5f578f",
+                      "on-secondary-fixed-variant": "#444652",
+                      "on-background": "#1c1b1f",
+                      "on-primary-container": "#413a70",
+                      "surface-dim": "#ddd9de",
+                      "secondary-fixed-dim": "#c4c6d4",
+                      "inverse-on-surface": "#f4eff5",
+                      "background": "#fdf8fd",
+                      "tertiary-fixed-dim": "#dac671",
+                      "error-container": "#ffdad6",
+                      "secondary": "#5b5e6a",
+                      "primary-fixed": "#e5deff",
+                      "error": "#ba1a1a",
+                      "on-primary": "#ffffff",
+                      "on-surface-variant": "#48454f",
+                      "secondary-fixed": "#e0e1f0",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#6d5e13",
+                      "primary-container": "#afa6e4",
+                      "on-primary-fixed-variant": "#473f76",
+                      "on-tertiary-fixed-variant": "#534600",
+                      "primary-fixed-dim": "#c8bfff",
+                      "surface-container": "#f1ecf2",
+                      "on-tertiary-container": "#4c4000",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#1b1248",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#c9c4d0",
+                      "outline": "#797580",
+                      "surface-container-low": "#f7f2f8",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#c8bfff",
+                      "surface-container-highest": "#e5e1e6",
+                      "inverse-surface": "#313034",
+                      "tertiary-container": "#c0ad5b",
+                      "surface": "#fdf8fd",
+                      "on-surface": "#1c1b1f"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "card-gap": "24px",
+                      "unit": "8px",
+                      "section-margin": "64px",
+                      "container-padding-mobile": "20px",
+                      "container-padding-desktop": "40px"
+              },
+              "fontFamily": {
+                      "title-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "title-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fdf8fd;
+            color: #1c1b1f;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased overflow-x-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col gap-2 p-4 h-full border-r border-outline-variant bg-surface shadow-sm fixed left-0 top-0 w-[280px] z-50">
+<div class="flex items-center gap-4 mb-8 px-4 py-2">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-md text-headline-md font-bold overflow-hidden">
+<img alt="Pet Centre Logo" class="w-full h-full object-cover" data-alt="A minimalist, modern vector logo of a stylized pet paw print or abstract sanctuary archway, using soft lavender mist and off-white tones. The design is extremely clean, communicating professional yet gentle healthcare. It is presented on a plain white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuACp5-5LlyfM3VGsBWaxlNqqo_ufEp9GDzWTLwvNP4y3QOW0vYyIdP50Uf9DbjMa2kEpTAoXFww8EHBr7RVr2bpERC7ZIOYYhiSbH8OsxMgQ9pMXezQ6msAfrgW9nKl8obvHL5uQnl33zt0BZ0xP44aVSx7muV2mfjlbXy7AN5VDnQuRFA5grHEFaLn1Pd2HlO0Zqhvqtm-edBxvzDHCB13eRyuTe7rMSQQYHcXYdvHBLBZ8ZwXDmOrCgtrTSPXYwA8ZblyiCmHXr1r"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Pet Centre</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_dashboard' %}">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-title-lg text-title-lg">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:medicine_search' %}">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-title-lg text-title-lg">Medicine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:appointment_booking' %}">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-title-lg text-title-lg">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:chatbot' %}">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-title-lg text-title-lg">Chat</span>
+</a>
+<!-- Active Tab: Notifications -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="{% url 'core:pet_owner_notifications' %}">
+<span class="material-symbols-outlined filled" data-icon="notifications" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="font-title-lg text-title-lg">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_profile' %}">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-title-lg text-title-lg">Profile</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-title-lg text-title-lg">Settings</span>
+</a>
+</div>
+<div class="mt-auto">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-3 rounded-full hover:bg-surface-tint hover:shadow-lg transition-all duration-200 shadow-sm flex items-center justify-center gap-2">
+<span>Book Appointment</span>
+</button>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="hidden md:flex justify-between items-center px-10 w-[calc(100%-280px)] h-20 z-40 fixed top-0 right-0 bg-surface/80 backdrop-blur-md shadow-sm">
+<div class="flex-1 flex items-center">
+<!-- Search on Left -->
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-full bg-surface-container-highest border-none focus:ring-2 focus:ring-primary text-on-surface font-body-md text-body-md transition-shadow" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button aria-label="Notifications" class="text-primary font-bold border-b-2 border-primary pb-1 opacity-80">
+<span class="material-symbols-outlined filled" data-icon="notifications" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications</span>
+</button>
+<button aria-label="Chat" class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+</button>
+<button aria-label="Support" class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant ml-2">
+<img alt="User A" class="w-full h-full object-cover" data-alt="A close-up, soft-focus portrait of a relaxed golden retriever looking gently into the camera. The lighting is bright and warm, creating a comforting, calm atmosphere consistent with a modern pet care sanctuary. The background is a highly blurred, airy lavender mist studio setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMtb4ILximV6LzWEahbcxGFoCVi-0kP5W0g0Iqp1H7jizmDGZNFZ08ucVHMWSAkzEVGNbtqlVawe4eiXIeVMRycZA8o-3HBxAUZ_f7klVax_qbXa7oCIUgxpR54sKdxCieOV8KoCJNniAyVVpIeOS7Y59AdliwRedjzmdaZV-yd6BrPVfY6uMOM-V9-_Fx-m5GkZ-vh7IwXiMf2Z_TSw7_ZKX8_fpCEz9fQ_OdYISqTTo2Nhos3XsbMqYDnVG_KzpObYJx-PUvjcZD"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] md:mt-20 p-container-padding-mobile md:p-container-padding-desktop min-h-screen">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-section-margin gap-4">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-background">Notification History</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Stay updated on your pet's care journey.</p>
+</div>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="mark_all_read">
+<button type="submit" class="font-label-md text-label-md text-primary hover:text-surface-tint hover:bg-primary-container/20 px-4 py-2 rounded-full transition-colors duration-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+                Mark all as read
+            </button>
+</form>
+</div>
+<!-- Notifications List -->
+<div class="max-w-3xl flex flex-col gap-4">
+{% for n in notifications %}
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0px_8px_16px_rgba(46,46,56,0.04)] hover:shadow-[0px_12px_24px_rgba(46,46,56,0.08)] transition-shadow duration-300 flex gap-4 items-start {% if not n.is_read %}border-l-4 border-primary relative{% else %}opacity-80{% endif %}">
+{% if not n.is_read %}<div class="w-2 h-2 rounded-full bg-primary absolute top-8 right-6"></div>{% endif %}
+<div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0
+  {% if n.notification_type == 'appointment' %}bg-primary-container text-on-primary-container
+  {% elif n.notification_type == 'lost_found' %}bg-tertiary-container text-on-tertiary-container
+  {% else %}bg-secondary-container text-on-secondary-container{% endif %}">
+<span class="material-symbols-outlined">
+  {% if n.notification_type == 'appointment' %}calendar_today
+  {% elif n.notification_type == 'medicine' %}medication
+  {% elif n.notification_type == 'chat' %}forum
+  {% elif n.notification_type == 'adoption' %}pets
+  {% elif n.notification_type == 'lost_found' %}search
+  {% elif n.notification_type == 'report' %}flag
+  {% elif n.notification_type == 'system' %}settings
+  {% else %}notifications{% endif %}
+</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1 gap-2">
+<h3 class="font-title-lg text-title-lg text-on-background">{{ n.title }}</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">{{ n.created_at|timesince }} ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">{{ n.message }}</p>
+</div>
+</div>
+{% empty %}
+<div class="flex flex-col items-center justify-center text-center py-16 gap-3">
+<span class="material-symbols-outlined text-5xl text-on-surface-variant">notifications</span>
+<p class="font-body-md text-body-md text-on-surface-variant">No notifications yet.</p>
+</div>
+{% endfor %}
+</div>
+</main>
+<!-- FloatingActionButton -->
+<button aria-label="Assistant" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed shadow-xl hover:scale-110 hover:shadow-2xl transition-all active:scale-95 duration-100 z-50 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</button>
+</body></html>

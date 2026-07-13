@@ -1,12 +1,34 @@
-Django>=5.0,<7.0
-djangorestframework>=3.15
-djangorestframework-simplejwt>=5.3
-psycopg2-binary>=2.9
-channels
-channels-redis
-daphne
-python-dotenv
-Pillow
-django-cors-headers
-drf-spectacular
-django-cloudinary-storage
+# --- Core Django ---
+Django==6.0.6
+python-dotenv==1.2.2
+
+# --- Real-time chat (Channels + Redis) ---
+channels==4.*
+channels_redis==4.*
+daphne==4.2.2
+# Pinned <5 — newer redis-py releases changed async timeout handling in
+# ways channels_redis doesn't yet handle gracefully (caused
+# TimeoutError crashes on every WebSocket message send).
+redis>=4.2,<5
+
+# --- REST API / JWT auth ---
+djangorestframework==3.17.1
+djangorestframework-simplejwt==5.5.1
+drf-spectacular==0.29.0
+django-cors-headers==4.9.0
+
+# --- Database (Neon Postgres + PostGIS) ---
+psycopg2-binary==2.9.12
+# NOTE: GDAL/GEOS/PROJ are NOT pip packages — django.contrib.gis calls
+# the native system libraries directly via ctypes. Those are installed
+# via apt-get in the Dockerfile (gdal-bin/libgdal-dev/libgeos-dev/
+# libproj-dev), not here.
+
+# --- Media storage (Cloudinary) ---
+cloudinary==1.*
+django-cloudinary-storage==0.3.0
+Pillow==12.2.0
+
+# --- Misc ---
+sqlparse==0.5.5
+asgiref==3.11.1

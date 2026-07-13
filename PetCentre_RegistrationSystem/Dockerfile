@@ -7,10 +7,22 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# System deps needed to build psycopg2 and other native packages
+# NOTE: previously this installed build-essential + libpq-dev to compile
+# psycopg2 from source — that's what was slowly downloading ~86MB of
+# compiler toolchain on every fresh build. Switching requirements.txt to
+# psycopg2-binary (a pre-compiled wheel) removes the need for a C
+# compiler entirely, so that step is no longer necessary.
+#
+# gdal-bin/libgdal-dev/libgeos-dev/libproj-dev ARE needed now that
+# django.contrib.gis is enabled for PostGIS support (find-nearest-vets
+# feature) — GeoDjango calls these native libraries directly via ctypes.
+# This is the reliable way to get GDAL/GEOS working (vs. fighting
+# Windows-native installs for local dev) — apt-get just works here.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps first (separate layer so `docker build` caches this
