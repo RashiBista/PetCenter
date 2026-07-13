@@ -214,10 +214,10 @@
 <span class="material-symbols-outlined">menu</span>
 </button>
 <!-- Search (Left aligned as per JSON) -->
-<div class="hidden md:flex relative w-64 md:w-96">
+<form method="get" action="{% url 'core:search' %}" class="hidden md:flex relative w-64 md:w-96">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-<input class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container-low border border-outline-variant text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md" placeholder="Search for medicine, vets..." type="text"/>
-</div>
+<input name="q" class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container-low border border-outline-variant text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md" placeholder="Search for medicine, vets..." type="text"/>
+</form>
 <!-- Mobile Title -->
 <h1 class="md:hidden font-title-lg text-title-lg text-primary font-bold">Pet Centre</h1>
 <!-- Trailing Actions & Profile -->
@@ -395,11 +395,5 @@
 </div>
 </main>
 <!-- Floating Action Button (Contextual Assistant) -->
-<button onclick="window.location.href='{% url 'core:chatbot' %}'" class="fixed bottom-24 md:bottom-10 right-6 md:right-10 rounded-full p-4 bg-primary text-on-primary shadow-xl z-50 flex items-center justify-center hover:scale-110 hover:shadow-2xl active:scale-95 transition-all duration-200 group">
-<span class="material-symbols-outlined" data-weight="fill">smart_toy</span>
-<!-- Tooltip -->
-<span class="absolute right-full mr-4 bg-inverse-surface text-inverse-on-surface px-3 py-1.5 rounded-lg font-label-sm text-label-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-            Assistant
-        </span>
-</button>
+{% include "core/_chatbot_widget.html" %}
 </body></html>

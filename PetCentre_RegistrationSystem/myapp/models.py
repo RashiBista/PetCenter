@@ -281,3 +281,24 @@ class IPLoginAttempt(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['ip_address', 'created_at'])]
+class Accessory(models.Model):
+    """
+    Mirrors Medicine's structure — same pattern, different content
+    category (leashes, bowls, toys, grooming, etc. instead of drugs).
+    Kept as a separate model rather than a shared "Product" base since
+    medicines have prescription-relevant fields (dosage_info) that
+    accessories never need, and vice versa (accessories may want size/
+    color later) — cleaner to let them diverge independently.
+    """
+    name = models.CharField(max_length=150)
+    category = models.CharField(max_length=100, blank=True)  # e.g. "Leashes", "Grooming"
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    in_stock = models.BooleanField(default=True)
+    photo = models.ImageField(upload_to='accessories/', blank=True, null=True)
+    pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
+    pharmacy_contact = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+ 
+    def __str__(self):
+        return self.name        
