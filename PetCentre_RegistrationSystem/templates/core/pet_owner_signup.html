@@ -211,4 +211,20 @@
 </div>
 </div>
 </main>
+<script>
+  function togglePasswordVisibility(btn) {
+    const input = btn.closest("div").querySelector("input[type=password], input.pw-revealed");
+    if (!input) return;
+    const icon = btn.querySelector(".material-symbols-outlined");
+    if (input.type === "password") {
+      input.type = "text";
+      input.classList.add("pw-revealed");
+      icon.textContent = "visibility_off";
+    } else {
+      input.type = "password";
+      input.classList.remove("pw-revealed");
+      icon.textContent = "visibility";
+    }
+  }
+</script>
 </body></html>
