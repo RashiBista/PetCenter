@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from myapp.decorators import role_required
 from myapp.models import (
-    Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Pet, Prescription,
+    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Pet, Prescription,
     SignupOTP, User, UserProfile, VetProfile, PharmacyProfile,
 )
 from notifications.models import Notification
@@ -636,6 +636,53 @@ def medicine_detail_view(request, pk):
     from django.shortcuts import get_object_or_404
     medicine = get_object_or_404(Medicine, pk=pk)
     return render(request, 'core/medicine_detail.html', {'medicine': medicine})
+
+
+@login_required(login_url='core:pet_owner_login')
+def accessory_detail_view(request, pk):
+    from django.shortcuts import get_object_or_404
+    accessory = get_object_or_404(Accessory, pk=pk)
+    return render(request, 'core/accessory_detail.html', {'accessory': accessory})
+
+
+# ------------------------------------------------------------------
+# Unified search module — the "Search for medicine, vets..." bar
+# visible in every dashboard header feeds into this one view. Two
+# modes, switchable via ?category=:
+#   'people'     — search registered pet owners/vets/pharmacies, each
+#                  result links straight to starting a chat with them
+#   'pet_things' — search Medicine + Accessory together
+#   'all' (default) — shows both sections on one page
+# ------------------------------------------------------------------
+
+@login_required(login_url='core:pet_owner_login')
+def search_view(request):
+    query = request.GET.get('q', '').strip()
+    category = request.GET.get('category', 'all')
+
+    people_results = []
+    pet_things_results = []
+
+    if query and category in ('people', 'all'):
+        people_results = User.objects.filter(
+            Q(username__icontains=query) | Q(email__icontains=query) |
+            Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        ).exclude(id=request.user.id).exclude(is_superuser=True)[:20]
+
+    if query and category in ('pet_things', 'all'):
+        medicines = Medicine.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
+        accessories = Accessory.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
+        pet_things_results = (
+            [{'kind': 'medicine', 'obj': m} for m in medicines] +
+            [{'kind': 'accessory', 'obj': a} for a in accessories]
+        )
+
+    return render(request, 'core/search.html', {
+        'query': query,
+        'category': category,
+        'people_results': people_results,
+        'pet_things_results': pet_things_results,
+    })
 
 
 # ------------------------------------------------------------------
