@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.gis.admin import GISModelAdmin
 
 from .models import (
-    Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP,
+    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP,
     Pet, PharmacyProfile, Prescription, SignupOTP, User, UserProfile, VetProfile,
 )
 
@@ -51,6 +51,13 @@ class PetAdmin(admin.ModelAdmin):
 class MedicineAdmin(admin.ModelAdmin):
     # This is currently the ONLY way to create Medicine records — the
     # app itself has no add/edit form for them, only search/detail.
+    list_display = ('name', 'category', 'price', 'in_stock', 'pharmacy_name', 'created_at')
+    list_filter = ('in_stock', 'category')
+    search_fields = ('name', 'category', 'pharmacy_name')
+
+
+@admin.register(Accessory)
+class AccessoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'in_stock', 'pharmacy_name', 'created_at')
     list_filter = ('in_stock', 'category')
     search_fields = ('name', 'category', 'pharmacy_name')

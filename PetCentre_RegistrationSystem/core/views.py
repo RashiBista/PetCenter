@@ -566,6 +566,39 @@ def _recipient_role_for(user):
     return Notification.RecipientRole.VET if user.role == User.Role.VET else Notification.RecipientRole.CLIENT
 
 
+@role_required(User.Role.VET)
+def update_appointment_status_view(request, appointment_id):
+    """
+    Closes the loop the vet dashboard previously left open — until now,
+    appointments just sat as 'Requested' forever with no way for the
+    vet to confirm or cancel them, and the owner never heard back.
+    """
+    appointment = Appointment.objects.filter(id=appointment_id, vet=request.user).select_related('pet', 'pet__owner').first()
+    if not appointment:
+        return redirect('core:veterinary_dashboard')
+
+    new_status = request.POST.get('status')
+    if new_status in (Appointment.Status.CONFIRMED, Appointment.Status.CANCELLED, Appointment.Status.COMPLETED):
+        appointment.status = new_status
+        appointment.save()
+
+        owner = appointment.pet.owner
+        create_notification(
+            recipient=owner,
+            recipient_role=_recipient_role_for(owner),
+            notification_type='appointment',
+            title=f"Appointment {appointment.get_status_display()}",
+            message=(
+                f"Dr. {request.user.get_full_name() or request.user.username} has "
+                f"{appointment.get_status_display().lower()} your appointment for "
+                f"{appointment.pet.name} on {appointment.scheduled_time:%b %d, %Y at %I:%M %p}."
+            ),
+            action_url="/dashboard/pet-owner/",
+        )
+
+    return redirect('core:veterinary_dashboard')
+
+
 @role_required(User.Role.USER)
 def book_appointment_view(request):
     """

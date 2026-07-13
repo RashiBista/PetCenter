@@ -24,9 +24,12 @@ urlpatterns = [
     path('reset-password/', views.reset_password_view, name='reset_password'),
 
     path('appointments/book/', views.book_appointment_view, name='appointment_booking'),
+    path('appointments/<int:appointment_id>/status/', views.update_appointment_status_view, name='update_appointment_status'),
 
     path('medicine/', views.medicine_search_view, name='medicine_search'),
     path('medicine/<int:pk>/', views.medicine_detail_view, name='medicine_detail'),
+    path('accessory/<int:pk>/', views.accessory_detail_view, name='accessory_detail'),
+    path('search/', views.search_view, name='search'),
 
     path('notifications/', views.pet_owner_notifications_view, name='pet_owner_notifications'),
     path('profile/', views.pet_profile_view, name='pet_profile'),
