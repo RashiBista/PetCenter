@@ -1,0 +1,34 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}Change {{ pet.name }}'s photo{% endblock %}
+{% block content %}
+<section class="form-shell card narrow-form">
+    <div class="form-heading">
+        <div>
+            <p class="eyebrow">Pet profile</p>
+            <h1>Change {{ pet.name }}’s photo</h1>
+        </div>
+    </div>
+
+    <div class="photo-form-preview" data-photo-preview>
+        {% if pet.photo %}
+            <img src="{{ pet.photo.url }}" alt="Current photo of {{ pet.name }}">
+        {% else %}
+            <div class="photo-placeholder">{{ pet.name|first|upper }}</div>
+        {% endif %}
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.photo.id_for_label }}">Choose a new photo</label>
+            {{ form.photo }}
+            {% for error in form.photo.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            <small>PNG, JPG, or WebP. Maximum 5 MB.</small>
+        </div>
+        <div class="form-actions">
+            <a class="button button-ghost" href="{% url 'pet_profiles:detail' pet.pk %}">Cancel</a>
+            <button class="button button-primary" type="submit">Update photo</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
