@@ -79,12 +79,10 @@ def _get_client_ip(request):
         return forwarded.split(',')[0].strip()
     return request.META.get('REMOTE_ADDR', '0.0.0.0')
 
-
 def _is_ip_locked_out(ip_address):
     cutoff = timezone.now() - timedelta(hours=24)
     recent_failures = IPLoginAttempt.objects.filter(ip_address=ip_address, created_at__gte=cutoff).count()
     return recent_failures >= MAX_ATTEMPTS_PER_24H
-
 
 def _record_failed_ip_attempt(ip_address):
     IPLoginAttempt.objects.create(ip_address=ip_address)

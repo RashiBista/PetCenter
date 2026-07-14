@@ -16,10 +16,8 @@ load_dotenv()  # Load environment variables from .env file
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ------------------------------------------------------------------
 # Core / security
-# ------------------------------------------------------------------
-# SECURITY: No hardcoded fallback secrets. In production these MUST be
+#In production these MUST be
 # set via environment variables (.env locally, real secret storage in
 # prod — e.g. AWS Secrets Manager, Doppler, Vault, platform env vars).
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').strip().lower() in ('true', '1', 'yes')
@@ -139,9 +137,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangojwt.wsgi.application'
 
-# ------------------------------------------------------------------
 # Custom user model
-# ------------------------------------------------------------------
 AUTH_USER_MODEL = 'myapp.User'
 
 # SECURITY: Wildcard CORS is fine for early local dev but should be
@@ -154,13 +150,11 @@ if not CORS_ALLOW_ALL_ORIGINS:
         o.strip() for o in os.environ.get('DJANGO_CORS_ALLOWED_ORIGINS', '').split(',') if o.strip()
     ]
 
-# ------------------------------------------------------------------
+
 # Database — PostgreSQL (+ PostGIS-ready)
-# ------------------------------------------------------------------
 # SECURITY: no hardcoded password fallback. DB_PASSWORD must come from
 # the environment (.env locally, real secret storage in production).
 # The app will fail fast at startup instead of silently connecting
-# with a leaked default password.
 _db_password = os.environ.get('DB_PASSWORD')
 if not _db_password and 'test' not in sys.argv:
     raise RuntimeError(
@@ -171,7 +165,7 @@ if not _db_password and 'test' not in sys.argv:
 DATABASES = {
     'default': {
         # Switched from django.db.backends.postgresql to the PostGIS
-        # backend — this is a drop-in replacement, same connection
+        # backend this is a drop-in replacement, same connection
         # params, same Neon host. It just adds spatial query support
         # (PointField, Distance, etc.) on top of the same Postgres
         # connection. Requires `CREATE EXTENSION postgis;` to have been
@@ -189,7 +183,6 @@ DATABASES = {
     }
 }
 
-# ------------------------------------------------------------------
 # GDAL/GEOS native library paths — ONLY needed for local `runserver`
 # on Windows, where these libraries aren't on the system path the way
 # they are inside the Docker image (which installs gdal-bin/libgeos
@@ -264,7 +257,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # / vet / admin from there.
 LOGIN_URL = 'core:landing_page'
 
-# --- Email (used for password-reset OTP codes) ---
+#  Email (used for password-reset OTP codes)
 # Defaults to printing emails to the console/terminal in dev, so OTP
 # codes are visible without any real email provider configured. Set
 # EMAIL_BACKEND and the SMTP_* vars in .env once you have a real
@@ -277,9 +270,8 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').strip().lower() in ('true', '1', 'yes')
 
-# ------------------------------------------------------------------
 # Production hardening (only kicks in when DEBUG=False)
-# ------------------------------------------------------------------
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').strip().lower() in ('true', '1', 'yes')
     SESSION_COOKIE_SECURE = True
