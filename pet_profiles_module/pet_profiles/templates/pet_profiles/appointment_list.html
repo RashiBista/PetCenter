@@ -1,0 +1,42 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}{{ pet.name }}'s appointments{% endblock %}
+{% block content %}
+<section class="page-heading records-heading">
+    <div>
+        <p class="eyebrow">{{ pet.name }}</p>
+        <h1>Appointments</h1>
+        <p>Upcoming and past veterinary visits.</p>
+    </div>
+    <div class="heading-actions">
+        <a class="button button-ghost" href="{% url 'pet_profiles:detail' pet.pk %}">Back</a>
+        <a class="button button-primary" href="{% url 'pet_profiles:appointment_add' pet.pk %}">Add appointment</a>
+    </div>
+</section>
+
+<section class="card appointment-list-card">
+    {% for appointment in appointments %}
+        <article class="appointment-list-item">
+            <div class="date-tile">
+                <strong>{{ appointment.starts_at|date:"d" }}</strong>
+                <span>{{ appointment.starts_at|date:"M" }}</span>
+            </div>
+            <div class="appointment-list-copy">
+                <div class="appointment-title-row">
+                    <h2>{{ appointment.title }}</h2>
+                    <span class="status status-neutral">{{ appointment.get_status_display }}</span>
+                </div>
+                <p>{{ appointment.starts_at|date:"l, F d, Y" }} at {{ appointment.starts_at|time:"g:i A" }}</p>
+                {% if appointment.veterinarian %}<span>{{ appointment.veterinarian }}</span>{% endif %}
+                {% if appointment.location %}<span>{{ appointment.location }}</span>{% endif %}
+                {% if appointment.notes %}<small>{{ appointment.notes }}</small>{% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <div class="empty-state">
+            <h2>No appointments yet</h2>
+            <p>Add an appointment to make it appear on the profile page.</p>
+            <a class="button button-primary" href="{% url 'pet_profiles:appointment_add' pet.pk %}">Add appointment</a>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}
