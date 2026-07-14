@@ -869,7 +869,47 @@ def admin_dashboard(request):
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, "You don't have access to that page.")
         return redirect('core:landing_page')
-    return render(request, 'core/admin_dashboard.html')
+
+    stats = {
+        'total_owners': User.objects.filter(role=User.Role.USER).count(),
+        'total_vets': User.objects.filter(role=User.Role.VET).count(),
+        'total_pharmacies': User.objects.filter(role=User.Role.PHARMACY).count(),
+        'total_medicines': Medicine.objects.count(),
+        'total_accessories': Accessory.objects.count(),
+        'total_appointments': Appointment.objects.count(),
+        'pending_prescriptions': Prescription.objects.filter(status=Prescription.Status.PENDING).count(),
+        'total_pets': Pet.objects.count(),
+    }
+
+    recent_users = User.objects.exclude(is_superuser=True).order_by('-date_joined')[:15]
+
+    return render(request, 'core/admin_dashboard.html', {
+        'stats': stats,
+        'recent_users': recent_users,
+    })
+
+
+@login_required(login_url='core:admin_login')
+def toggle_user_active_view(request, user_id):
+    """
+    Real add/remove-user control — 'remove' is a soft deactivation
+    (is_active=False) rather than a hard delete, since hard-deleting a
+    User would cascade-delete their pets/appointments/prescriptions
+    (all FK on_delete=CASCADE). Full destructive delete, if ever
+    needed, stays in Django admin where that risk is explicit.
+    """
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "You don't have access to that page.")
+        return redirect('core:landing_page')
+
+    if request.method == 'POST':
+        target = User.objects.filter(id=user_id).exclude(is_superuser=True).first()
+        if target:
+            target.is_active = not target.is_active
+            target.save(update_fields=['is_active'])
+            messages.success(request, f"{target.username} was {'reactivated' if target.is_active else 'deactivated'}.")
+
+    return redirect('core:admin_dashboard')
 
 
 @login_required(login_url='core:pet_owner_login')

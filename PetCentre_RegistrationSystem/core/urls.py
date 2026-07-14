@@ -39,6 +39,7 @@ urlpatterns = [
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
     path('dashboard/pharmacy/', views.pharmacy_dashboard, name='pharmacy_dashboard'),
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/admin/users/<int:user_id>/toggle-active/', views.toggle_user_active_view, name='toggle_user_active'),
 
     path('chatbot/', views.chatbot_view, name='chatbot'),
 ]
