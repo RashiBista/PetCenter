@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pet Centre - Vet List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#f8e28a",
+                        "primary": "#5f578f",
+                        "on-secondary-container": "#616470",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#181b26",
+                        "surface-bright": "#fdf8fd",
+                        "on-tertiary-fixed": "#221b00",
+                        "secondary-container": "#e0e1f0",
+                        "surface-container-high": "#ebe7ec",
+                        "surface-variant": "#e5e1e6",
+                        "surface-tint": "#5f578f",
+                        "on-secondary-fixed-variant": "#444652",
+                        "on-background": "#1c1b1f",
+                        "on-primary-container": "#413a70",
+                        "surface-dim": "#ddd9de",
+                        "secondary-fixed-dim": "#c4c6d4",
+                        "inverse-on-surface": "#f4eff5",
+                        "background": "#fdf8fd",
+                        "tertiary-fixed-dim": "#dac671",
+                        "error-container": "#ffdad6",
+                        "secondary": "#5b5e6a",
+                        "primary-fixed": "#e5deff",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#48454f",
+                        "secondary-fixed": "#e0e1f0",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#6d5e13",
+                        "primary-container": "#afa6e4",
+                        "on-primary-fixed-variant": "#473f76",
+                        "on-tertiary-fixed-variant": "#534600",
+                        "primary-fixed-dim": "#c8bfff",
+                        "surface-container": "#f1ecf2",
+                        "on-tertiary-container": "#4c4000",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#1b1248",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#c9c4d0",
+                        "outline": "#797580",
+                        "surface-container-low": "#f7f2f8",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#c8bfff",
+                        "surface-container-highest": "#e5e1e6",
+                        "inverse-surface": "#313034",
+                        "tertiary-container": "#c0ad5b",
+                        "surface": "#fdf8fd",
+                        "on-surface": "#1c1b1f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "card-gap": "24px",
+                        "unit": "8px",
+                        "section-margin": "64px",
+                        "container-padding-mobile": "20px",
+                        "container-padding-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Manrope"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "title-lg": ["20px", { "lineHeight": "1.5", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #fdf8fd; /* surface */
+            color: #1c1b1f; /* on-surface */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface h-screen overflow-hidden flex font-body-md">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full w-[280px] bg-surface shadow-sm border-r border-outline-variant z-50">
+<div class="flex flex-col gap-2 p-4 h-full">
+<div class="mb-8 mt-4 flex items-center gap-4 px-4">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A small, elegant, circular logo for a premium pet care center. The logo features a minimalist, line-art silhouette of a dog and cat forming a subtle heart shape, set against a pristine white background. The aesthetic is modern, calming, and utilizes a soft 'Lavender Mist' primary color palette, reflecting a nurturing and sophisticated healthcare brand. Lighting is bright and even, ensuring high legibility and a clean, light-mode appearance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBWBLPjnqIJ3afVwe8vRu7O0XdOqJVQbHbf_sirRAmBJYCnNWswFCE_Rel7wdSG_EAasf03Ndr4zDDhXLnSSTjfU9wz14_p40PRS6sUOkMlfmS8pHvon9LuXD5zbOxk9f0x8DrQUBYW2q_wtG5OuUzsaIApqMTV6DaTRXyrBi6zXAeSpLnRm6EVUM_0J9SESsQsa574Y3mv4vsFydPtv-Z0iGz80LakWAGjr_Hu70gmk_tLaP3V4S-59x_Y4hAzQW9yoHw67N8qIsS"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Pet Centre</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
+</div>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_dashboard' %}">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary hover:bg-surface-container-highest transition-colors duration-200" href="{% url 'core:medicine_search' %}" style="transform: scale(0.98);">
+<span class="material-symbols-outlined" data-icon="medical_services" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+<span class="font-body-md text-body-md font-bold">Medicine</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:appointment_booking' %}">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-body-md text-body-md">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:chatbot' %}">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="font-body-md text-body-md">Chat</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_notifications' %}">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-body-md text-body-md">Notifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg mt-auto" href="{% url 'core:pet_profile' %}">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-body-md text-body-md">Profile</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<button class="mt-4 bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-full w-full shadow-sm hover:shadow-md transition-shadow">
+                Book Appointment
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-0 md:ml-[280px] flex flex-col h-full overflow-hidden bg-surface-container-lowest">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-280px)] h-20 bg-surface/80 backdrop-blur-md shadow-sm z-40 flex justify-between items-center px-6 md:px-10 border-b border-surface-variant">
+<div class="flex-1 max-w-md hidden sm:flex relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-full py-2 pl-10 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md transition-colors" placeholder="Search veterinarians..." type="text"/>
+</div>
+<div class="flex items-center gap-6 ml-auto">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+</button>
+<img class="w-10 h-10 rounded-full object-cover border-2 border-surface-container-high cursor-pointer hover:opacity-80 transition-opacity" data-alt="A portrait of a smiling pet owner, softly lit in a modern, light-filled environment. The individual appears relaxed and confident, reflecting the calming nature of the Pet Centre brand. The background is a blurred, pristine 'Lavender Mist' setting, emphasizing a clean, light-mode aesthetic suitable for a premium health and wellness platform profile picture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlDxSfzSJbGiXq16oSPFPDaBuWUa3Sc9IkgXxYh5wcG4vEN-KOSPrB-akB4BErmhFx0cGWjdNjOfSxyok4hepGbP4zK9nDscSyGV8_mV2ikZArd-RUnlM1fZNuAJyn8DMd9hBmlSOweP6qRXkiNSbLl3GZhtCB6--AVo_RUM6WORVfptGpSu0Ooq6IcD2Fwj2H0Ps0qVvFPFnxgQdHPm3ezt_GXPmJNg2zQAmNRPU9_on-hqaJJiVB30Xfw9WI-rZidi2bJSgsB_hg"/>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<div class="flex-1 overflow-y-auto pt-28 pb-32 px-6 md:px-container-padding-desktop">
+<div class="max-w-5xl mx-auto">
+<div class="mb-10 sm:hidden">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant text-on-surface rounded-full py-3 pl-10 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md" placeholder="Search veterinarians..." type="text"/>
+</div>
+</div>
+<div class="mb-8">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Our Veterinarians</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Find the perfect care specialist for your companion.</p>
+</div>
+<!-- Bento Grid Layout for Vets -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-card-gap">
+<!-- Vet Card A -->
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-[0_8px_16px_rgba(46,46,56,0.04)] hover:shadow-[0_12px_24px_rgba(46,46,56,0.08)] transition-shadow duration-300 border border-surface-variant flex flex-col sm:flex-row gap-6">
+<img class="w-24 h-24 sm:w-32 sm:h-32 rounded-[16px] object-cover flex-shrink-0" data-alt="A professional headshot of a friendly female veterinarian in a pristine, bright clinic setting. She is wearing a crisp white coat over a soft lavender scrub top, smiling warmly. The background is slightly blurred, showing clean, modern medical equipment, emphasizing a calm, nurturing, and sophisticated sanctuary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOTwxtxvT1F2tT_L5YggIRH0P6TC49rbEl4ci0Rh5XlzQZP9jcUbql8s3mR391pPFTYChX67TA-KOAB5UdV3Ga_peSvRMYFXyQHUjgYe_jSLOKPDD-iTSPoMj_NciQ9ggoBbtJhwfRkkIjb5xAXezkTVvuIGBf_95x4P_qqbwJ27CiCisOuHEPBPoMlg-TKeIR6gB33visiTm1JpV_aj4RKxphlGWgv5XGVjWguwW2Z9DFg52hLA68a_dYFtt1n9KEIIRrgUo_3G3l"/>
+<div class="flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Dr. Sarah Jenkins</h3>
+<p class="font-body-md text-body-md text-primary">Feline Specialist</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-tertiary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm text-on-surface">4.9</span>
+</div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2 mb-6">
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full border border-outline-variant">Next avail: Today, 2:00 PM</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full border border-outline-variant">10+ yrs exp</span>
+</div>
+<div class="mt-auto flex gap-3 items-center">
+<button class="flex-1 bg-primary hover:bg-on-primary-container text-on-primary font-label-md text-label-md py-2.5 px-4 rounded-full shadow-sm transition-colors text-center">
+                                    Book Appointment
+                                </button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-variant transition-colors border border-outline-variant">
+<span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Vet Card B -->
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-[0_8px_16px_rgba(46,46,56,0.04)] hover:shadow-[0_12px_24px_rgba(46,46,56,0.08)] transition-shadow duration-300 border border-surface-variant flex flex-col sm:flex-row gap-6">
+<img class="w-24 h-24 sm:w-32 sm:h-32 rounded-[16px] object-cover flex-shrink-0" data-alt="A professional headshot of an approachable male veterinarian in a bright, modern clinic. He wears professional attire with a subtle lavender accent, projecting a calm and trustworthy demeanor. The environment is minimalist and softly lit, aligning with a premium health and wellness brand identity that feels like a sanctuary." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7T4-f-c76y4IUIE_a3i92NjQ3_Bf4ZnymNL-pSF8A4-i0YS-sBgbRmbW0tNZQa9ZjQIcCCXlOlW6JJq_0BpPUNF7vG0F6tQjEddtmbFJ4pmucY6u0nbCp-tERANS433suREEhX2qwogzyt-Bz7FnS2692ptcf4_EPOn6vzLS6AZCmEtpqTPgyt3RzTGuzFs3Nt7A7UsPWsMlBE_c2C66X1VMRQhVghg0w3AKaJ-pP93lZn_qUSWif4WDhgyyBn50o0dkoMBo8hOlB"/>
+<div class="flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Dr. Michael Chen</h3>
+<p class="font-body-md text-body-md text-primary">Canine Orthopedics</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-tertiary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm text-on-surface">4.8</span>
+</div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2 mb-6">
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full border border-outline-variant">Next avail: Tomorrow, 9:00 AM</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full border border-outline-variant">Surgery</span>
+</div>
+<div class="mt-auto flex gap-3 items-center">
+<button class="flex-1 bg-primary hover:bg-on-primary-container text-on-primary font-label-md text-label-md py-2.5 px-4 rounded-full shadow-sm transition-colors text-center">
+                                    Book Appointment
+                                </button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-variant transition-colors border border-outline-variant">
+<span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Vet Card C -->
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-[0_8px_16px_rgba(46,46,56,0.04)] hover:shadow-[0_12px_24px_rgba(46,46,56,0.08)] transition-shadow duration-300 border border-surface-variant flex flex-col sm:flex-row gap-6 lg:col-span-2">
+<img class="w-24 h-24 sm:w-32 sm:h-32 rounded-[16px] object-cover flex-shrink-0" data-alt="A professional portrait of a caring veterinarian, softly illuminated in a high-key, modern veterinary clinic. The aesthetic is clean, minimalist, and serene, utilizing a subtle 'Lavender Mist' tone in the background to convey a sense of wellness and safety. The vet appears attentive and professional, fitting for a premium pet healthcare platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1TxkxNvt_JFmlC6ZPt6Y4GBsNFyAhL98ZdHzSPwuIRvUgrmjbucEGiIPl0fcLEVb2QKQJGoXxfgHxG9no37bFcOGx8-us91FdqJ5gHLgCfeitkk6JHgq5UQfVPp9n4P-ISpfbHObIWb4B0RE9OdzGahLjBJgotOK2mGQpO87W95rWr3z-cjDhr8bbbhO_fLtfE8NbgU7k5-4ElK38THsHD56W-QU75sRnpthxvdViiHPTKoknxvuQMN7zZ3v1-jjk9V4BwDfxwOKJ"/>
+<div class="flex-1 flex flex-col sm:flex-row gap-6">
+<div class="flex-1">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">Dr. Emily Rivera</h3>
+<p class="font-body-md text-body-md text-primary">Exotic Pets &amp; Birds</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full">
+<span class="material-symbols-outlined text-tertiary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm text-on-surface">5.0</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 mb-4 line-clamp-2">Dr. Rivera specializes in avian and exotic animal care, bringing over 15 years of dedicated experience to our sanctuary.</p>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-3 py-1 rounded-full border border-outline-variant">Next avail: Friday, 1:00 PM</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 justify-end sm:min-w-[180px]">
+<button class="w-full bg-primary hover:bg-on-primary-container text-on-primary font-label-md text-label-md py-2.5 px-4 rounded-full shadow-sm transition-colors text-center">
+                                    Book Appointment
+                                </button>
+<button class="w-full flex items-center justify-center gap-2 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-variant transition-colors border border-outline-variant py-2.5 px-4 font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+                                    Message
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-10 right-10 rounded-full p-4 bg-primary text-on-primary shadow-xl hover:scale-110 hover:shadow-2xl transition-all z-50 flex items-center justify-center font-label-md text-label-md active:scale-95 duration-100 group">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:ml-2">Assistant</span>
+</button>
+</body></html>
