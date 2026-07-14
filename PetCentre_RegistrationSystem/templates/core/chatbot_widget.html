@@ -1,22 +1,3 @@
-{# ------------------------------------------------------------------
-   Floating chatbot widget — include this on any page with:
-     {% include 'core/_chatbot_widget.html' %}
-
-   Replaces the old full-page /chatbot/ navigation with an
-   Intercom/Drift-style floating bubble that expands into a small
-   panel without leaving the current page. The conversation logic
-   (append message, typing indicator, backend integration point) is
-   the same as before — just repackaged into a widget instead of a
-   dedicated page. core/chatbot_assistant.html and the /chatbot/ route
-   can stay as a fallback/direct link, but this is now the primary way
-   people will actually reach it.
-
-   Real AI backend integration is intentionally still a stub — see the
-   BACKEND INTEGRATION POINT comment in the script below. Planned for
-   after the 19th; everything here works end-to-end except the actual
-   AI reply.
------------------------------------------------------------------- #}
-
 <!-- Floating button -->
 <button id="chatbot-fab" onclick="toggleChatbotWidget()"
         class="fixed bottom-6 right-6 rounded-full p-4 bg-primary text-on-primary shadow-xl z-50 flex items-center justify-center hover:scale-110 hover:shadow-2xl active:scale-95 transition-all duration-200">

@@ -219,16 +219,6 @@ class Medicine(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# NOTE: the old myapp.Notification model has been removed. Notifications
-# are now handled entirely by the separate `notifications` app (see
-# notifications/models.py), which has a more complete schema
-# (recipient_role, notification_type, email_sent tracking, etc.) and is
-# what core/views.py and chat/consumers.py actually use. Keeping both
-# would risk accidentally writing to the wrong one.
-
-
 class SignupOTP(models.Model):
     """
     OTP verification sent DURING signup, before the account exists.
@@ -274,7 +264,7 @@ class LoginAttempt(models.Model):
 class IPLoginAttempt(models.Model):
     """
     Tracks failed login attempts by IP address, independent of which
-    username/email was targeted — closes the gap where hammering many
+    username/email was targeted and  closes the gap where hammering many
     different usernames from the same machine wasn't rate-limited.
     """
     ip_address = models.GenericIPAddressField()
@@ -284,12 +274,12 @@ class IPLoginAttempt(models.Model):
         indexes = [models.Index(fields=['ip_address', 'created_at'])]
 class Accessory(models.Model):
     """
-    Mirrors Medicine's structure — same pattern, different content
+    Mirrors Medicine's structure :same pattern, different content
     category (leashes, bowls, toys, grooming, etc. instead of drugs).
     Kept as a separate model rather than a shared "Product" base since
     medicines have prescription-relevant fields (dosage_info) that
     accessories never need, and vice versa (accessories may want size/
-    color later) — cleaner to let them diverge independently.
+    color later)  cleaner to let them diverge independently. -->will be completed after mid defence
     """
     name = models.CharField(max_length=150)
     category = models.CharField(max_length=100, blank=True)  # e.g. "Leashes", "Grooming"
