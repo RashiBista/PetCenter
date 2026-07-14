@@ -865,6 +865,52 @@ def pharmacy_dashboard(request):
 
 
 @login_required(login_url='core:admin_login')
+def admin_create_user_view(request):
+    """
+    Real, embedded user-creation form — replaces sending admins out to
+    Django admin's generic (and previously unstyled, due to the Daphne
+    static-file gap) add-user page. Creates the User + matching role
+    profile in one step, same pattern as the public signup views, just
+    without the OTP step since an admin is creating this account
+    directly and doesn't need to verify their own identity.
+    """
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "You don't have access to that page.")
+        return redirect('core:landing_page')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        password = request.POST.get('password', '')
+        role = request.POST.get('role', '')
+        pharmacy_name = request.POST.get('pharmacy_name', '').strip()
+
+        errors = _validate_signup_fields(username, email, password, password)  # password==password2 since there's no confirm field here
+        if role not in (User.Role.USER, User.Role.VET, User.Role.PHARMACY):
+            errors.setdefault('role', []).append('Choose a valid role.')
+
+        if not errors:
+            user = User.objects.create_user(
+                username=username, email=email, password=password,
+                phone_number=phone_number, role=role,
+            )
+            if role == User.Role.USER:
+                UserProfile.objects.create(user=user)
+            elif role == User.Role.VET:
+                VetProfile.objects.create(user=user)
+            elif role == User.Role.PHARMACY:
+                PharmacyProfile.objects.create(user=user, pharmacy_name=pharmacy_name)
+
+            messages.success(request, f"{username} was created as a {user.get_role_display()}.")
+            return redirect('core:admin_dashboard')
+
+        messages.error(request, " ".join(msg for msgs in errors.values() for msg in msgs))
+
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
 def admin_dashboard(request):
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, "You don't have access to that page.")

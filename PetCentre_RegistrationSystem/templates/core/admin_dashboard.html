@@ -133,9 +133,53 @@ tailwind.config = {
 <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6">
 <div class="flex items-center justify-between mb-4">
 <h2 class="font-title-lg text-title-lg text-on-surface">Recent Users</h2>
-<a href="/admin/myapp/user/add/" class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
+<button onclick="document.getElementById('add-user-form').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
 <span class="material-symbols-outlined text-[18px]">person_add</span>Add User
-</a>
+</button>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="mb-4 px-4 py-3 rounded-xl {% if message.tags == 'success' %}bg-primary-container/40{% else %}bg-error-container text-on-error-container{% endif %} text-sm">{{ message }}</div>
+{% endfor %}
+{% endif %}
+
+<div id="add-user-form" class="hidden mb-6 p-5 rounded-xl bg-surface-container-low border border-surface-container-high">
+<form method="post" action="{% url 'core:admin_create_user' %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+{% csrf_token %}
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Username</label>
+<input name="username" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Email</label>
+<input name="email" type="email" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Phone (optional)</label>
+<input name="phone_number" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Temporary Password</label>
+<input name="password" type="password" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Role</label>
+<select name="role" required onchange="document.getElementById('pharmacy-name-field').classList.toggle('hidden', this.value !== 'pharmacy')" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<option value="">Choose a role</option>
+<option value="user">Pet Owner</option>
+<option value="vet">Veterinarian</option>
+<option value="pharmacy">Pharmacy</option>
+</select>
+</div>
+<div id="pharmacy-name-field" class="hidden">
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Pharmacy Name</label>
+<input name="pharmacy_name" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div class="md:col-span-2">
+<button type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Create Account</button>
+</div>
+</form>
 </div>
 <div class="overflow-x-auto">
 <table class="w-full text-left">
