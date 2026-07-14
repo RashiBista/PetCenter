@@ -1,48 +1,46 @@
-from django.conf import settings
-from django.conf.urls.static import static
-from django.contrib import admin
-from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from myapp.views import (
-    DashboardView,
-    LoginView,
-    UserDashboardView,
-    UserRegisterView,
-    UserSearchView,
-    VetDashboardView,
-    VetRegisterView,
-)
+from django.urls import path
+from . import views
+
+app_name = 'core'
 
 urlpatterns = [
-    path('', include('core.urls')),
-    path('admin/', admin.site.urls),
+    path('', views.landing_page, name='landing_page'),
 
-    # --- API schema / interactive docs ---
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('login/pet-owner/', views.pet_owner_login_view, name='pet_owner_login'),
+    path('signup/pet-owner/', views.pet_owner_signup_view, name='pet_owner_signup'),
+    path('signup/verify/', views.verify_signup_view, name='verify_signup'),
+    path('signup/resend-otp/', views.resend_signup_otp_view, name='resend_signup_otp'),
 
-    # --- Auth ---
-    path('api/auth/register/user/', UserRegisterView.as_view(), name='register_user'),
-    path('api/auth/register/vet/', VetRegisterView.as_view(), name='register_vet'),
-    path('api/users/search/', UserSearchView.as_view(), name='user_search'),
-    path('api/auth/login/', LoginView.as_view(), name='auth_login'),
-    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/auth/dashboard/', DashboardView.as_view(), name='dashboard'),
-    path('api/auth/dashboard/user/', UserDashboardView.as_view(), name='dashboard_user'),
-    path('api/auth/dashboard/vet/', VetDashboardView.as_view(), name='dashboard_vet'),
+    path('login/veterinary/', views.veterinary_login_view, name='veterinary_login'),
+    path('signup/veterinary/', views.veterinary_signup_view, name='veterinary_signup'),
 
-    # --- Chat (previously missing — chat/urls.py existed but was never included) ---
-    path('chat/', include('chat.urls')),
-    path('api/notifications/', include('notifications.urls')),
+    path('login/pharmacy/', views.pharmacy_login_view, name='pharmacy_login'),
+    path('signup/pharmacy/', views.pharmacy_signup_view, name='pharmacy_signup'),
+
+    path('login/admin/', views.admin_login_view, name='admin_login'),
+    path('logout/', views.logout_view, name='logout'),
+
+    path('forgot-password/', views.forgot_password_view, name='forgot_password'),
+    path('reset-password/', views.reset_password_view, name='reset_password'),
+
+    path('appointments/book/', views.book_appointment_view, name='appointment_booking'),
+    path('appointments/<int:appointment_id>/status/', views.update_appointment_status_view, name='update_appointment_status'),
+
+    path('medicine/', views.medicine_search_view, name='medicine_search'),
+    path('medicine/<int:pk>/', views.medicine_detail_view, name='medicine_detail'),
+    path('accessory/<int:pk>/', views.accessory_detail_view, name='accessory_detail'),
+    path('search/', views.search_view, name='search'),
+
+    path('notifications/', views.pet_owner_notifications_view, name='pet_owner_notifications'),
+    path('profile/', views.pet_profile_view, name='pet_profile'),
+    path('find-vets/', views.find_nearest_vets_view, name='find_nearest_vets'),
+
+    path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
+    path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
+    path('dashboard/pharmacy/', views.pharmacy_dashboard, name='pharmacy_dashboard'),
+    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/admin/users/create/', views.admin_create_user_view, name='admin_create_user'),
+    path('dashboard/admin/users/<int:user_id>/toggle-active/', views.toggle_user_active_view, name='toggle_user_active'),
+
+    path('chatbot/', views.chatbot_view, name='chatbot'),
 ]
-
-# Daphne (unlike `manage.py runserver`) does NOT auto-serve static files
-# even when DEBUG=True — that auto-serve behavior is specific to the
-# runserver management command. This is why Django admin's own CSS/JS
-# never loaded under Docker/Daphne. static() here works for any DEBUG
-# ASGI/WSGI server since it's just normal URL routing, not runserver-only.
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
