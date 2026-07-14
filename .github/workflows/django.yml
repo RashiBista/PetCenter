@@ -20,8 +20,10 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        python-version: ['3.10', '3.11']
-        project: ['PetCentre_RegistrationSystem', 'final_chat']
+        python-version: ['3.12', '3.13']
+        # final_chat removed — integrated/archived, kept for records only,
+        # not actively developed, so it doesn't need ongoing CI coverage.
+        project: ['PetCentre_RegistrationSystem']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,7 +53,7 @@ jobs:
         if: matrix.project == 'PetCentre_RegistrationSystem'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libgeos-dev libproj-dev
+          sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libgeos-dev libproj-dev libsqlite3-mod-spatialite
       - name: Install Dependencies
         working-directory: ./${{ matrix.project }}
         run: |
