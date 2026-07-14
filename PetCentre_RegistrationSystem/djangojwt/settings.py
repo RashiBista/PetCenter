@@ -222,7 +222,7 @@ CHANNEL_LAYERS = {
 # Allow tests to run without a PostgreSQL server / without DB_PASSWORD set.
 if 'test' in sys.argv:
     DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 
