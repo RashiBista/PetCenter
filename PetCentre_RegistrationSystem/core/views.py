@@ -47,7 +47,7 @@ def _send_otp(channel, destination, code, purpose="verification"):
         message=f"Your one-time code is: {code}\nIt expires in 10 minutes.",
         from_email=None,
         recipient_list=[destination],
-        fail_silently=True,
+        fail_silently=False,
     )
 
 
@@ -508,7 +508,7 @@ def forgot_password_view(request):
                     message=f"Your one-time code is: {code}\nIt expires in 10 minutes. If you didn't request this, ignore this email.",
                     from_email=None,
                     recipient_list=[user.email],
-                    fail_silently=True,
+                    fail_silently=False,
                 )
                 request.session['reset_user_id'] = user.id
                 sent = True
