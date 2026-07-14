@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Veterinary Login - Pet Centre</title>
+<title>Verify Your Account - Pet Centre</title>
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <!-- Google Fonts (from design system) -->
@@ -118,88 +119,40 @@
 </head>
 <body class="bg-surface-container-low min-h-screen flex items-center justify-center p-container-padding-mobile md:p-container-padding-desktop font-body-md text-on-surface ambient-bg relative overflow-y-auto">
 <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-container rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-<div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-tertiary-container rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-<div class="bg-surface-container-lowest w-full max-w-[480px] rounded-[24px] p-8 md:p-10 relative z-10" style="box-shadow: 0px 8px 32px rgba(46, 46, 56, 0.06), 0px 0px 1px rgba(46, 46, 56, 0.1);">
+<div class="bg-surface-container-lowest w-full max-w-[440px] rounded-[24px] p-8 md:p-10 relative z-10" style="box-shadow: 0px 8px 32px rgba(46, 46, 56, 0.06), 0px 0px 1px rgba(46, 46, 56, 0.1);">
 <div class="flex flex-col items-center text-center mb-8">
 <div class="w-14 h-14 bg-primary-container text-primary rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+<span class="material-symbols-outlined text-[32px]">mark_email_read</span>
 </div>
-<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Pet Centre</h1>
-<p class="font-title-lg text-title-lg text-primary mt-1">Veterinary Sign Up</p>
-<p class="font-body-md text-body-md text-on-surface-variant mt-2">Register as a veterinary professional.</p>
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Verify your account</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Enter the 6-digit code we just sent you to finish creating your account.</p>
 </div>
 
-{% if errors %}
-<div class="mb-6 px-4 py-3 rounded-xl bg-error-container text-on-error-container text-body-md">
-  <ul class="list-disc pl-5">
-    {% for field, msgs in errors.items %}
-      {% for msg in msgs %}<li>{{ msg }}</li>{% endfor %}
-    {% endfor %}
-  </ul>
-</div>
+{% if error %}
+<div class="mb-6 px-4 py-3 rounded-xl bg-error-container text-on-error-container text-body-md">{{ error }}</div>
+{% endif %}
+{% if messages %}
+{% for message in messages %}
+<div class="mb-6 px-4 py-3 rounded-xl bg-primary-container/40 text-on-surface text-body-md">{{ message }}</div>
+{% endfor %}
 {% endif %}
 
 <form class="flex flex-col gap-5" method="post">
 {% csrf_token %}
 <div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="username">Username</label>
-<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="username" name="username" required type="text" value="{{ form_data.username|default:'' }}"/>
-</div>
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="email">Email Address</label>
-<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="email" name="email" placeholder="dr.smith@petcentre.com" required type="email" value="{{ form_data.email|default:'' }}"/>
-</div>
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="phone_number">Phone Number (optional)</label>
-<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="phone_number" name="phone_number" type="text" value="{{ form_data.phone_number|default:'' }}"/>
-</div>
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password">Password</label>
-<div class="relative"><input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200 pr-12" id="password" name="password" required type="password"/><button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility</span></button></div>
-</div>
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password2">Confirm Password</label>
-<div class="relative"><input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200 pr-12" id="password2" name="password2" required type="password"/><button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility</span></button></div>
-</div>
-
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface-variant ml-1">Send verification code via</label>
-<div class="flex gap-4">
-<label class="flex items-center gap-2 cursor-pointer">
-<input type="radio" name="otp_channel" value="email" checked class="accent-primary"/>
-<span class="text-body-md text-on-surface">Email</span>
-</label>
-<label class="flex items-center gap-2 cursor-pointer">
-<input type="radio" name="otp_channel" value="phone" class="accent-primary"/>
-<span class="text-body-md text-on-surface">Phone (SMS)</span>
-</label>
-</div>
+<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="otp">6-Digit Code</label>
+<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md text-center tracking-[0.3em] focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="otp" name="otp" required maxlength="6" type="text" inputmode="numeric" placeholder="000000"/>
 </div>
 <button class="w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-full shadow-sm hover:shadow-md hover:bg-opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-2" type="submit">
-<span>Create Account</span>
+<span>Verify & Create Account</span>
 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
 </button>
 </form>
-<div class="mt-8 text-center">
-<p class="font-label-md text-label-md text-on-surface-variant">
-                Already have an account? <a class="text-primary font-title-lg text-[14px] hover:underline transition-all" href="{% url 'core:veterinary_login' %}">Log in</a>
-</p>
+<div class="mt-6 text-center">
+<form method="post" action="{% url 'core:resend_signup_otp' %}">
+{% csrf_token %}
+<button type="submit" class="font-label-sm text-label-sm text-primary hover:underline">Didn't get a code? Send again</button>
+</form>
 </div>
 </div>
-<script>
-  function togglePasswordVisibility(btn) {
-    const input = btn.closest("div").querySelector("input[type=password], input.pw-revealed");
-    if (!input) return;
-    const icon = btn.querySelector(".material-symbols-outlined");
-    if (input.type === "password") {
-      input.type = "text";
-      input.classList.add("pw-revealed");
-      icon.textContent = "visibility_off";
-    } else {
-      input.type = "password";
-      input.classList.remove("pw-revealed");
-      icon.textContent = "visibility";
-    }
-  }
-</script>
 </body></html>

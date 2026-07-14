@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgdal-dev \
     libgeos-dev \
     libproj-dev \
+    libsqlite3-mod-spatialite \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps first (separate layer so `docker build` caches this

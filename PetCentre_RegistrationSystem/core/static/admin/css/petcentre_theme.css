@@ -1,0 +1,58 @@
+
+:root {
+  --primary: #5f578f;
+  --secondary: #4a4470;
+  --accent: #ede7f6;
+  --primary-fg: #fff;
+ 
+  --header-color: #fff;
+  --header-branding-color: #fff;
+  --header-bg: #5f578f;
+  --header-link-color: #fff;
+ 
+  --breadcrumbs-fg: #fff;
+  --breadcrumbs-link-fg: #ede7f6;
+  --breadcrumbs-bg: #4a4470;
+ 
+  --link-fg: #5f578f;
+  --link-hover-color: #4a4470;
+  --link-selected-fg: #5f578f;
+ 
+  --button-bg: #5f578f;
+  --button-hover-bg: #4a4470;
+  --default-button-bg: #5f578f;
+  --default-button-hover-bg: #4a4470;
+ 
+  --object-tools-bg: #5f578f;
+  --object-tools-hover-bg: #4a4470;
+ 
+  --selected-bg: #ede7f6;
+  --selected-row: #f5f2fa;
+}
+ 
+html[data-theme="dark"] {
+  --primary: #8b7fc2;
+  --secondary: #6a5fa8;
+  --header-bg: #4a4470;
+  --breadcrumbs-bg: #3a3560;
+  --link-fg: #b3a8e0;
+  --button-bg: #6a5fa8;
+  --button-hover-bg: #8b7fc2;
+  --default-button-bg: #6a5fa8;
+  --default-button-hover-bg: #8b7fc2;
+  --object-tools-bg: #6a5fa8;
+  --object-tools-hover-bg: #8b7fc2;
+}
+ 
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+ 
+.module h2, .module caption, .inline-group h2 {
+  border-radius: 4px 4px 0 0;
+}
+ 
+#header {
+  box-shadow: 0 2px 8px rgba(95, 87, 143, 0.15);
+}

@@ -16,12 +16,12 @@ urlpatterns = [
     path('', include('core.urls')),
     path('admin/', admin.site.urls),
 
-    # --- API schema / interactive docs ---
+    # API schema / interactive docs 
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    # --- Auth ---
+    #  Auth 
     path('api/auth/register/user/', UserRegisterView.as_view(), name='register_user'),
     path('api/auth/register/vet/', VetRegisterView.as_view(), name='register_vet'),
     path('api/users/search/', UserSearchView.as_view(), name='user_search'),
@@ -32,8 +32,7 @@ urlpatterns = [
     path('api/auth/dashboard/user/', UserDashboardView.as_view(), name='dashboard_user'),
     path('api/auth/dashboard/vet/', VetDashboardView.as_view(), name='dashboard_vet'),
 
-    #chat and notifications
+    # Chat (previously missing — chat/urls.py existed but was never included) 
     path('chat/', include('chat.urls')),
     path('api/notifications/', include('notifications.urls')),
-    
 ]

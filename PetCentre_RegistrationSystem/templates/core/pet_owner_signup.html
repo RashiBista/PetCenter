@@ -154,11 +154,11 @@
 </div>
 <div class="space-y-2">
 <label class="font-label-md text-label-md text-on-surface block" for="password">Password</label>
-<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password" name="password" required type="password"/>
+<div class="relative"><input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors pr-12" id="password" name="password" required type="password"/><button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility</span></button></div>
 </div>
 <div class="space-y-2">
 <label class="font-label-md text-label-md text-on-surface block" for="password2">Confirm Password</label>
-<input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" id="password2" name="password2" required type="password"/>
+<div class="relative"><input class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors pr-12" id="password2" name="password2" required type="password"/><button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility</span></button></div>
 </div>
 
 <div class="space-y-2">
@@ -174,6 +174,7 @@
 </label>
 </div>
 <p class="text-label-sm font-label-sm text-on-surface-variant">Phone requires a phone number entered above.</p>
+</div>
 
 <div class="pt-2 border-t border-outline-variant">
 <p class="font-label-md text-label-md text-on-surface-variant mb-3 pt-4">Add your pet (optional)</p>
@@ -210,4 +211,20 @@
 </div>
 </div>
 </main>
+<script>
+  function togglePasswordVisibility(btn) {
+    const input = btn.closest("div").querySelector("input[type=password], input.pw-revealed");
+    if (!input) return;
+    const icon = btn.querySelector(".material-symbols-outlined");
+    if (input.type === "password") {
+      input.type = "text";
+      input.classList.add("pw-revealed");
+      icon.textContent = "visibility_off";
+    } else {
+      input.type = "password";
+      input.classList.remove("pw-revealed");
+      icon.textContent = "visibility";
+    }
+  }
+</script>
 </body></html>
