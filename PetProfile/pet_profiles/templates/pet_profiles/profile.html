@@ -1,0 +1,181 @@
+{% extends "pet_profiles/base.html" %}
+{% load static %}
+
+{% block title %}{{ pet.name }}'s Profile{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <a class="outline-button compact" href="{% url 'pet_profiles:edit' pet.pk %}">Edit profile</a>
+        <h1>{{ pet.name }}'s Profile</h1>
+        <p>Manage details, medical history, and appointments.</p>
+    </div>
+    <div class="heading-actions">
+        {% if pets|length > 1 %}
+            <label class="pet-switcher">
+                <span>Switch pet</span>
+                <select onchange="window.location.href=this.value">
+                    {% for item in pets %}
+                        <option value="{% url 'pet_profiles:detail' item.pk %}" {% if item.pk == pet.pk %}selected{% endif %}>{{ item.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        {% endif %}
+        <a class="outline-button" href="{% url 'pet_profiles:create' %}">+ Add Another Pet</a>
+    </div>
+</section>
+
+<section class="profile-grid">
+    <article class="card identity-card">
+        <a class="photo-wrap" href="{% url 'pet_profiles:photo' pet.pk %}" title="Change photo">
+            {% if pet.photo %}
+                <img class="pet-photo" src="{{ pet.photo.url }}" alt="Photo of {{ pet.name }}">
+            {% else %}
+                <img class="pet-photo" src="{% static 'pet_profiles/images/default_pet.svg' %}" alt="Default pet avatar">
+            {% endif %}
+            <span class="photo-edit" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 7h3l1.3-2h7.4L17 7h3v12H4V7Zm8 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-2.2a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6Z"/></svg>
+            </span>
+        </a>
+
+        <h2>{{ pet.name }}</h2>
+        <div class="chips">
+            <span class="chip primary">{{ pet.breed|default:pet.get_species_display }}</span>
+            <span class="chip">{{ pet.age_display }}</span>
+        </div>
+
+        <div class="identity-stats">
+            <div class="stat-box">
+                <span class="stat-icon">⚥</span>
+                <span class="stat-label">Gender</span>
+                <strong>{{ pet.get_gender_display }}</strong>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">⚖</span>
+                <span class="stat-label">Weight</span>
+                <strong>{% if pet.weight_kg %}{{ pet.weight_kg|floatformat:"-2" }} kg{% else %}Not set{% endif %}</strong>
+            </div>
+        </div>
+    </article>
+
+    <div class="profile-main">
+        <article class="card medical-card">
+            <div class="card-title-row">
+                <div class="title-with-icon">
+                    <span class="section-icon lavender">
+                        <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3V6Zm2 2v8h14V8H5Zm1 3h3l1.2-2 2.1 5 1.4-3H18v2h-3l-2.3 5-2.8-6.5L10 13H6v-2Z"/></svg>
+                    </span>
+                    <h2>Medical Summary</h2>
+                </div>
+                <a class="icon-button" href="{% url 'pet_profiles:medical_summary_edit' pet.pk %}" title="Edit medical summary" aria-label="Edit medical summary">
+                    <svg viewBox="0 0 24 24"><path d="m4 16.5-.5 4 4-.5L18.8 8.7l-3.5-3.5L4 16.5Zm13.4-13a1.5 1.5 0 0 1 2.1 0l1 1a1.5 1.5 0 0 1 0 2.1l-.7.7-3.5-3.5.7-.7.4-.1Z"/></svg>
+                </a>
+            </div>
+
+            <div class="summary-section">
+                <div class="summary-label">
+                    <span class="circle-info">i</span>
+                    <span>Current Conditions</span>
+                </div>
+                <p>{{ medical_summary.current_conditions|default:"No current conditions have been added." }}</p>
+                {% if medical_summary.allergies %}
+                    <p class="muted-line"><strong>Allergies:</strong> {{ medical_summary.allergies }}</p>
+                {% endif %}
+            </div>
+
+            <div class="summary-section border-top">
+                <div class="summary-label">
+                    <span class="prescription-icon">✚</span>
+                    <span>Active Prescriptions</span>
+                </div>
+                <div class="prescription-list">
+                    {% for prescription in active_prescriptions %}
+                        <span class="medicine-chip">
+                            <strong>{{ prescription.medicine_name }}{% if prescription.dosage %} {{ prescription.dosage }}{% endif %}</strong>
+                            {% if prescription.frequency %}<span>{{ prescription.frequency }}</span>{% endif %}
+                        </span>
+                    {% empty %}
+                        <p class="empty-copy">No active prescriptions.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+
+        <div class="lower-grid">
+            <article class="card vaccinations-card">
+                <div class="card-title-row">
+                    <div class="title-with-icon">
+                        <span class="section-icon cream">💉</span>
+                        <h2>Vaccinations</h2>
+                    </div>
+                </div>
+
+                <div class="vaccination-list">
+                    {% for vaccination in vaccinations %}
+                        <div class="vaccination-row">
+                            <div>
+                                <strong>{{ vaccination.name }}</strong>
+                                {% if vaccination.administered_date %}
+                                    <span>Administered: {{ vaccination.administered_date|date:"M d, Y" }}</span>
+                                {% elif vaccination.due_date %}
+                                    <span>Due: {{ vaccination.due_date|date:"M d, Y" }}</span>
+                                {% else %}
+                                    <span>No date recorded</span>
+                                {% endif %}
+                            </div>
+                            <span class="status-badge status-{{ vaccination.status }}">{{ vaccination.status_label }}</span>
+                        </div>
+                    {% empty %}
+                        <p class="empty-copy">No vaccination records yet. Add them from Django admin.</p>
+                    {% endfor %}
+                </div>
+
+                <a class="wide-button" href="{% url 'pet_profiles:records' pet.pk %}">View All Records</a>
+            </article>
+
+            <article class="card upcoming-card">
+                <div class="card-title-row">
+                    <div class="title-with-icon">
+                        <span class="section-icon lavender">
+                            <svg viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10ZM6 6v2h12V6H6Z"/></svg>
+                        </span>
+                        <h2>Upcoming</h2>
+                    </div>
+                </div>
+
+                <a class="appointment-preview" href="{% url 'pet_profiles:open_list' pet.pk %}">
+                    {% if upcoming_appointment %}
+                        <div class="appointment-title-row">
+                            <strong>{{ upcoming_appointment.title }}</strong>
+                            <span>›</span>
+                        </div>
+                        <div class="appointment-meta">
+                            <span>▣ {{ upcoming_appointment.start_datetime|date:"M d, Y" }}</span>
+                            <span>◷ {{ upcoming_appointment.start_datetime|time:"g:i A" }}</span>
+                        </div>
+                        {% if upcoming_appointment.veterinarian %}
+                            <div class="doctor-line">Dr. {{ upcoming_appointment.veterinarian }}</div>
+                        {% endif %}
+                        {% if upcoming_appointment.clinic %}
+                            <div class="clinic-line">{{ upcoming_appointment.clinic }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div class="appointment-title-row">
+                            <strong>No upcoming appointments</strong>
+                            <span>›</span>
+                        </div>
+                        <p class="empty-copy">Open the appointment list to review or add one.</p>
+                    {% endif %}
+                </a>
+            </article>
+        </div>
+    </div>
+</section>
+
+<a class="assistant-button" href="{% url 'pet_profiles:assistant' pet.pk %}" title="Open assistant">
+    <span class="assistant-circle">
+        <svg viewBox="0 0 24 24"><path d="M9 2h6v2h2a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-1v3l-4-3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h2V2Zm-1 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-7 6h6v-2H9v2Z"/></svg>
+    </span>
+    <span>Assistant</span>
+</a>
+{% endblock %}

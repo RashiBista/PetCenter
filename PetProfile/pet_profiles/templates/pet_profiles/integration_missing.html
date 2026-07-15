@@ -1,0 +1,14 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}{{ integration_name }} not connected{% endblock %}
+{% block content %}
+<section class="form-page">
+    <div class="card integration-card">
+        <div class="empty-state-icon">🔌</div>
+        <h1>{{ integration_name }} is not connected yet</h1>
+        <p>Add the route for the teammate's module to <code>{{ setting_name }}</code> inside <code>PetProfile/.env</code>.</p>
+        <pre>{{ setting_name }}={{ example }}</pre>
+        <p>The selected pet ID is {{ pet.pk }}, and its name is {{ pet.name }}.</p>
+        <a class="primary-button" href="{% url 'pet_profiles:detail' pet.pk %}">Return to profile</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}{{ pet.name }}'s Medical Records{% endblock %}
+{% block content %}
+<section class="list-page">
+    <div class="list-heading">
+        <div>
+            <a class="back-link" href="{% url 'pet_profiles:detail' pet.pk %}">‹ Back to profile</a>
+            <h1>{{ pet.name }}'s Medical History</h1>
+            <p>Complete medical records, vaccinations, and prescriptions.</p>
+        </div>
+        <a class="outline-button" href="/admin/pet_profiles/medicalrecord/add/?pet={{ pet.pk }}">Add record in admin</a>
+    </div>
+
+    <article class="card list-card">
+        <h2>Medical Records</h2>
+        <div class="timeline">
+            {% for record in records %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <div class="record-heading">
+                            <strong>{{ record.title }}</strong>
+                            <span>{{ record.record_date|date:"M d, Y" }}</span>
+                        </div>
+                        <span class="record-type">{{ record.get_record_type_display }}</span>
+                        {% if record.description %}<p>{{ record.description }}</p>{% endif %}
+                        {% if record.veterinarian %}<small>Veterinarian: {{ record.veterinarian }}</small>{% endif %}
+                        {% if record.attachment %}<a class="attachment-link" href="{{ record.attachment.url }}">Open attachment</a>{% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <p class="empty-copy">No medical records have been added.</p>
+            {% endfor %}
+        </div>
+    </article>
+
+    <div class="two-column-list">
+        <article class="card list-card">
+            <h2>Vaccinations</h2>
+            {% for item in vaccinations %}
+                <div class="simple-row">
+                    <div>
+                        <strong>{{ item.name }}</strong>
+                        <span>{% if item.due_date %}Due {{ item.due_date|date:"M d, Y" }}{% else %}No due date{% endif %}</span>
+                    </div>
+                    <span class="status-badge status-{{ item.status }}">{{ item.status_label }}</span>
+                </div>
+            {% empty %}<p class="empty-copy">No vaccination records.</p>{% endfor %}
+        </article>
+
+        <article class="card list-card">
+            <h2>Prescriptions</h2>
+            {% for item in prescriptions %}
+                <div class="simple-row">
+                    <div>
+                        <strong>{{ item.medicine_name }} {{ item.dosage }}</strong>
+                        <span>{{ item.frequency|default:"Frequency not set" }}</span>
+                    </div>
+                    <span class="status-badge {% if item.active %}status-valid{% else %}status-unknown{% endif %}">{% if item.active %}Active{% else %}Inactive{% endif %}</span>
+                </div>
+            {% empty %}<p class="empty-copy">No prescriptions.</p>{% endfor %}
+        </article>
+    </div>
+</section>
+{% endblock %}

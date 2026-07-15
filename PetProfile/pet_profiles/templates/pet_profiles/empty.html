@@ -1,0 +1,10 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}Pet Profiles{% endblock %}
+{% block content %}
+<section class="empty-state card">
+    <div class="empty-state-icon">🐾</div>
+    <h1>No pet profiles yet</h1>
+    <p>Create the first pet profile to start tracking details, medical records, vaccinations, and appointments.</p>
+    <a class="primary-button" href="{% url 'pet_profiles:create' %}">Create pet profile</a>
+</section>
+{% endblock %}

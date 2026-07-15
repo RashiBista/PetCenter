@@ -1,0 +1,44 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PetProfile{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'pet_profiles/css/profile.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{% url 'pet_profiles:dashboard' %}">
+            <span class="brand-mark">P</span>
+            <span>PetProfile</span>
+        </a>
+        <nav class="top-actions" aria-label="Main navigation">
+            <a class="icon-link" href="{% url 'pet_profiles:dashboard' %}" title="Pet profile" aria-label="Pet profile">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 5.65-7 10-7 10Z"/></svg>
+            </a>
+            {% if user.is_authenticated %}
+                <span class="signed-in">{{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="text-button" type="submit">Log out</button>
+                </form>
+            {% else %}
+                <a class="text-button" href="{% url 'login' %}">Log in</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% if messages %}
+        <div class="messages" aria-live="polite">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="page-shell">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

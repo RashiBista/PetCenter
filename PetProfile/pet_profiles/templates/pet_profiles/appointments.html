@@ -1,0 +1,31 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}{{ pet.name }}'s Appointments{% endblock %}
+{% block content %}
+<section class="list-page">
+    <div class="list-heading">
+        <div>
+            <a class="back-link" href="{% url 'pet_profiles:detail' pet.pk %}">‹ Back to profile</a>
+            <h1>{{ pet.name }}'s Appointments</h1>
+            <p>This is the local fallback list. OPEN_LIST_URL can redirect this button to the team's open-list module.</p>
+        </div>
+        <a class="outline-button" href="/admin/pet_profiles/appointment/add/?pet={{ pet.pk }}">Add appointment in admin</a>
+    </div>
+
+    <div class="appointment-list">
+        {% for appointment in appointments %}
+            <article class="card appointment-card">
+                <div>
+                    <span class="status-badge status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+                    <h2>{{ appointment.title }}</h2>
+                    <p>{{ appointment.start_datetime|date:"l, M d, Y" }} at {{ appointment.start_datetime|time:"g:i A" }}</p>
+                    {% if appointment.veterinarian %}<p>Dr. {{ appointment.veterinarian }}</p>{% endif %}
+                    {% if appointment.clinic %}<p>{{ appointment.clinic }}</p>{% endif %}
+                </div>
+                {% if appointment.notes %}<p class="appointment-notes">{{ appointment.notes }}</p>{% endif %}
+            </article>
+        {% empty %}
+            <article class="card empty-inline"><h2>No appointments</h2><p>Add an appointment from Django admin or connect the open-list module.</p></article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "pet_profiles/base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<section class="form-page">
+    <div class="form-card card">
+        <div class="form-heading">
+            <h1>{{ page_title }}</h1>
+            <p>Update the information below, then save your changes.</p>
+        </div>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="form-grid">
+                {% for field in form %}
+                    <div class="form-field {% if field.name == 'notes' or field.name == 'current_conditions' or field.name == 'allergies' or field.name == 'medical_notes' %}full-width{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-actions">
+                {% if cancel_pk %}
+                    <a class="outline-button" href="{% url cancel_url cancel_pk %}">Cancel</a>
+                {% else %}
+                    <a class="outline-button" href="{% url cancel_url %}">Cancel</a>
+                {% endif %}
+                <button class="primary-button" type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
