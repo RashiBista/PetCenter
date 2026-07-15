@@ -89,7 +89,10 @@ class Command(BaseCommand):
         if created:
             user.set_password('DemoPass123!')
             user.save()
-        PharmacyProfile.objects.get_or_create(user=user, defaults={'pharmacy_name': 'Main Clinic Pharmacy'})
+        PharmacyProfile.objects.get_or_create(
+            user=user,
+            defaults={'pharmacy_name': 'Main Clinic Pharmacy', 'location': Point(85.3300, 27.7000, srid=4326)},
+        )
         return user
 
     def _create_medicines(self):

@@ -36,7 +36,7 @@ class VetProfileAdmin(GISModelAdmin):
 
 
 @admin.register(PharmacyProfile)
-class PharmacyProfileAdmin(admin.ModelAdmin):
+class PharmacyProfileAdmin(GISModelAdmin):
     list_display = ('user', 'pharmacy_name', 'created_at')
     search_fields = ('user__username', 'user__email', 'pharmacy_name')
 
