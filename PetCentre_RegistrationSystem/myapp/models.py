@@ -79,6 +79,7 @@ class VetProfile(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    specialization = models.CharField(max_length=150, blank=True, default="General Practice")
     # geography=True makes distance queries return real-world meters
     # (accounting for the Earth's curvature) rather than flat-plane units.
     location = PointField(geography=True, null=True, blank=True)
@@ -221,6 +222,25 @@ class Medicine(models.Model):
 # (recipient_role, notification_type, email_sent tracking, etc.) and is
 # what core/views.py and chat/consumers.py actually use. Keeping both
 # would risk accidentally writing to the wrong one.
+
+
+class Accessory(models.Model):
+    """
+    Mirrors Medicine's structure — same pattern, different content
+    category (leashes, bowls, toys, grooming, etc. instead of drugs).
+    """
+    name = models.CharField(max_length=150)
+    category = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    in_stock = models.BooleanField(default=True)
+    photo = models.ImageField(upload_to='accessories/', blank=True, null=True)
+    pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
+    pharmacy_contact = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 
 
 class SignupOTP(models.Model):

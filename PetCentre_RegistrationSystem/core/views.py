@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from myapp.decorators import role_required
 from myapp.models import (
-    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, MedicineReminder, PasswordResetOTP, Prescription,
+    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
     SignupOTP, User, UserProfile, VetProfile, PharmacyProfile,
 )
 from pet_profiles.models import Pet
@@ -736,51 +736,6 @@ def search_view(request):
 # ------------------------------------------------------------------
 # Notifications
 # ------------------------------------------------------------------
-
-@login_required(login_url='core:pet_owner_login')
-def create_medicine_reminder_view(request, pet_id):
-    """
-    Available to vets and pharmacies only — creates a MedicineReminder
-    for a specific pet, sends the owner an immediate confirmation that
-    it was set, and the actual day-before reminder gets sent later by
-    the send_medicine_reminders management command.
-    """
-    if request.user.role not in (User.Role.VET, User.Role.PHARMACY):
-        messages.error(request, "You don't have access to that page.")
-        return redirect('core:landing_page')
-
-    pet = Pet.objects.filter(id=pet_id).select_related('owner').first()
-    if not pet:
-        messages.error(request, "Pet not found.")
-        return redirect(request.META.get('HTTP_REFERER', 'core:landing_page'))
-
-    if request.method == 'POST':
-        medicine_name = request.POST.get('medicine_name', '').strip()
-        instructions = request.POST.get('instructions', '').strip()
-        remind_date_str = request.POST.get('remind_date', '')
-
-        if medicine_name and remind_date_str:
-            remind_date = datetime.strptime(remind_date_str, "%Y-%m-%d").date()
-            MedicineReminder.objects.create(
-                pet=pet, created_by=request.user, medicine_name=medicine_name,
-                instructions=instructions, remind_date=remind_date,
-            )
-            create_notification(
-                recipient=pet.owner,
-                recipient_role=_recipient_role_for(pet.owner),
-                notification_type='medicine',
-                title="Medicine reminder set",
-                message=(
-                    f"{request.user.get_full_name() or request.user.username} set a reminder for "
-                    f"{pet.name} to take {medicine_name} on {remind_date:%b %d, %Y}."
-                ),
-                action_url="/dashboard/pet-owner/",
-            )
-            messages.success(request, f"Reminder set for {pet.name}.")
-        else:
-            messages.error(request, "Medicine name and date are required.")
-
-    return redirect(request.META.get('HTTP_REFERER', 'core:landing_page'))
 
 
 @login_required(login_url='core:pet_owner_login')

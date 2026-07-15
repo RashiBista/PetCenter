@@ -30,7 +30,6 @@ urlpatterns = [
     path('medicine/<int:pk>/', views.medicine_detail_view, name='medicine_detail'),
     path('accessory/<int:pk>/', views.accessory_detail_view, name='accessory_detail'),
     path('search/', views.search_view, name='search'),
-    path('pets/<int:pet_id>/medicine-reminder/', views.create_medicine_reminder_view, name='create_medicine_reminder'),
 
     path('notifications/', views.pet_owner_notifications_view, name='pet_owner_notifications'),
     path('profile/', views.pet_profile_view, name='pet_profile'),
