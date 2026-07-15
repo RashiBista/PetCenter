@@ -317,3 +317,9 @@ if not DEBUG:
 # ------------------------------------------------------------------
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 14 days, in seconds — used only when "Remember Me" is checked
 SESSION_SAVE_EVERY_REQUEST = True
+
+# IPs listed here (comma-separated in .env) are exempt from IP-level
+# login lockout only. Useful for a presentation/dev machine, so
+# deliberately demonstrating account-level lockout can't also
+# accidentally IP-lock a different account's login right after.
+EXEMPT_LOGIN_IPS = [ip.strip() for ip in os.environ.get('EXEMPT_LOGIN_IPS', '').split(',') if ip.strip()]

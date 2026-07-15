@@ -2,6 +2,7 @@ import random
 from datetime import datetime, timedelta
 
 import cloudinary.uploader
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -82,12 +83,21 @@ def _get_client_ip(request):
 
 
 def _is_ip_locked_out(ip_address):
+    # Presentation/dev machines listed here never get IP-locked, so
+    # demonstrating account lockout (failing one account 5x) can't
+    # accidentally block a DIFFERENT account's successful login from
+    # the same machine right after. Account-level lockout is
+    # completely unaffected by this — that's still fully live.
+    if ip_address in settings.EXEMPT_LOGIN_IPS:
+        return False
     cutoff = timezone.now() - timedelta(hours=24)
     recent_failures = IPLoginAttempt.objects.filter(ip_address=ip_address, created_at__gte=cutoff).count()
     return recent_failures >= MAX_ATTEMPTS_PER_24H
 
 
 def _record_failed_ip_attempt(ip_address):
+    if ip_address in settings.EXEMPT_LOGIN_IPS:
+        return
     IPLoginAttempt.objects.create(ip_address=ip_address)
 
 
@@ -369,6 +379,19 @@ def resend_signup_otp_view(request):
 # actually holds the matching role before starting the session.
 # ------------------------------------------------------------------
 
+def _apply_remember_me(request):
+    """
+    Call right after login(). Checked → session rolls for
+    SESSION_COOKIE_AGE (3 days), reset on every request. Unchecked →
+    session ends when the browser closes, regardless of the global
+    SESSION_COOKIE_AGE setting.
+    """
+    if request.POST.get('remember_me'):
+        request.session.set_expiry(settings.SESSION_COOKIE_AGE)
+    else:
+        request.session.set_expiry(0)
+
+
 def pet_owner_login_view(request):
     error = None
     if request.method == 'POST':
@@ -392,6 +415,7 @@ def pet_owner_login_view(request):
                 error = 'This account is not a pet-owner account. Use the correct login page.'
             else:
                 login(request, user)
+                _apply_remember_me(request)
                 return redirect('core:pet_owner_dashboard')
     return render(request, 'core/pet_owner_login.html', {'error': error})
 
@@ -419,6 +443,7 @@ def veterinary_login_view(request):
                 error = 'This account is not a veterinarian account.'
             else:
                 login(request, user)
+                _apply_remember_me(request)
                 return redirect('core:veterinary_dashboard')
     return render(request, 'core/veterinary_login.html', {'error': error})
 
@@ -446,6 +471,7 @@ def pharmacy_login_view(request):
                 error = 'This account is not a pharmacy account.'
             else:
                 login(request, user)
+                _apply_remember_me(request)
                 return redirect('core:pharmacy_dashboard')
     return render(request, 'core/pharmacy_login.html', {'error': error})
 
@@ -473,6 +499,7 @@ def admin_login_view(request):
                 error = 'This account does not have administrator access.'
             else:
                 login(request, user)
+                _apply_remember_me(request)
                 return redirect('core:admin_dashboard')
     return render(request, 'core/admin_login.html', {'error': error})
 
@@ -780,13 +807,17 @@ def pet_profile_view(request):
 @login_required(login_url='core:pet_owner_login')
 def find_nearest_vets_view(request):
     """
+    Combined "Find Nearby Care" locator — covers both veterinary
+    clinics AND pharmacies, the two location-relevant registered
+    entity types in the system. Filterable via ?type=vet|pharmacy|all.
+
     If the browser supplies ?lat=&lng= (via navigator.geolocation on
-    the frontend), vets with a saved location are sorted by real
-    distance using PostGIS. Vets without a saved location, or when no
-    lat/lng is supplied at all, are just listed with no distance shown
-    — no fake numbers are ever displayed.
+    the frontend), results with a saved location are sorted by real
+    distance using PostGIS. Results without a saved location, or when
+    no lat/lng is supplied at all, are just listed with no distance
+    shown — no fake numbers are ever displayed.
     """
-    vets = User.objects.filter(role=User.Role.VET).select_related('vet_profile')
+    type_filter = request.GET.get('type', 'all')
 
     user_point = None
     lat = request.GET.get('lat')
@@ -797,13 +828,27 @@ def find_nearest_vets_view(request):
         except (TypeError, ValueError):
             user_point = None
 
-    if user_point:
-        vets = vets.filter(vet_profile__location__isnull=False).annotate(
-            distance=Distance('vet_profile__location', user_point)
-        ).order_by('distance')
+    vets = []
+    pharmacies = []
+
+    if type_filter in ('all', 'vet'):
+        vets = User.objects.filter(role=User.Role.VET).select_related('vet_profile')
+        if user_point:
+            vets = vets.filter(vet_profile__location__isnull=False).annotate(
+                distance=Distance('vet_profile__location', user_point)
+            ).order_by('distance')
+
+    if type_filter in ('all', 'pharmacy'):
+        pharmacies = User.objects.filter(role=User.Role.PHARMACY).select_related('pharmacy_profile')
+        if user_point:
+            pharmacies = pharmacies.filter(pharmacy_profile__location__isnull=False).annotate(
+                distance=Distance('pharmacy_profile__location', user_point)
+            ).order_by('distance')
 
     return render(request, 'core/find_nearest_vets.html', {
         'vets': vets,
+        'pharmacies': pharmacies,
+        'type_filter': type_filter,
         'has_location': bool(user_point),
     })
 
