@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Appointments — PetCentre</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed-variant": "#444652","on-error": "#ffffff","tertiary-container": "#c0ad5b",
+        "on-primary-fixed-variant": "#473f76","surface-container-low": "#f7f2f8","inverse-primary": "#c8bfff",
+        "surface-container-highest": "#e5e1e6","on-tertiary-container": "#4c4000","on-error-container": "#93000a",
+        "on-background": "#1c1b1f","error": "#ba1a1a","on-primary-fixed": "#1b1248","on-secondary": "#ffffff",
+        "on-secondary-container": "#616470","surface-container-high": "#ebe7ec","inverse-surface": "#313034",
+        "secondary-container": "#e0e1f0","on-surface": "#1c1b1f","primary-fixed": "#e5deff","on-tertiary": "#ffffff",
+        "outline": "#797580","on-surface-variant": "#48454f","surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#e0e1f0","on-tertiary-fixed": "#221b00","inverse-on-surface": "#f4eff5",
+        "surface-bright": "#fdf8fd","surface-tint": "#5f578f","on-primary-container": "#413a70",
+        "primary-container": "#afa6e4","surface-variant": "#e5e1e6","on-secondary-fixed": "#181b26",
+        "secondary": "#5b5e6a","surface-dim": "#ddd9de","primary": "#5f578f","background": "#fdf8fd",
+        "secondary-fixed-dim": "#c4c6d4","surface-container": "#f1ecf2","tertiary": "#6d5e13",
+        "on-tertiary-fixed-variant": "#534600","surface": "#fdf8fd","error-container": "#ffdad6",
+        "on-primary": "#ffffff","tertiary-fixed-dim": "#dac671","tertiary-fixed": "#f8e28a",
+        "primary-fixed-dim": "#c8bfff","outline-variant": "#c9c4d0"
+      },
+      "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+      "fontFamily": {
+        "body-lg": ["Plus Jakarta Sans"],"title-lg": ["Plus Jakarta Sans"],"headline-lg-mobile": ["Manrope"],
+        "label-md": ["Plus Jakarta Sans"],"label-sm": ["Plus Jakarta Sans"],"body-md": ["Plus Jakarta Sans"],
+        "display-lg": ["Manrope"],"headline-md": ["Manrope"],"headline-lg": ["Manrope"]
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen">
+<div class="max-w-4xl mx-auto py-10 px-4">
+
+  <div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'core:veterinary_dashboard' %}" class="text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h1 class="font-headline-md text-headline-md text-on-surface">My Appointments</h1>
+  </div>
+
+  <div class="flex gap-2 mb-6 border-b border-surface-container-high">
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}" class="px-4 py-2 font-label-md text-label-md {% if status_filter == value %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
+    {% for appt in appointments %}
+    <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-surface-container last:border-b-0">
+      <div>
+        <p class="font-label-md text-label-md text-on-surface font-semibold">{{ appt.pet.name }} ({{ appt.pet.breed|default:appt.pet.get_species_display }})</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant">Owner: {{ appt.pet.owner.get_full_name|default:appt.pet.owner.username }} · {{ appt.scheduled_time|date:"M d, Y" }} at {{ appt.scheduled_time|date:"g:i A" }}</p>
+        {% if appt.reason %}<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ appt.reason }}</p>{% endif %}
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="px-3 py-1 rounded-full bg-primary-container/30 text-on-primary-container font-label-sm text-label-sm">{{ appt.get_status_display }}</span>
+        {% if appt.status == 'requested' %}
+        <form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="confirmed">
+        <button type="submit" class="px-3 py-1 rounded-full bg-primary text-on-primary text-xs font-medium hover:bg-primary/90 transition-colors">Confirm</button>
+        </form>
+        <form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="cancelled">
+        <button type="submit" class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-xs font-medium hover:bg-error-container/80 transition-colors">Cancel</button>
+        </form>
+        {% elif appt.status == 'confirmed' %}
+        <form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="completed">
+        <button type="submit" class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-medium hover:bg-secondary-container/80 transition-colors">Mark Completed</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-on-surface-variant font-body-md text-body-md text-center py-10">No appointments{% if status_filter != 'all' %} with this status{% endif %}.</p>
+    {% endfor %}
+  </div>
+</div>
+</body></html>

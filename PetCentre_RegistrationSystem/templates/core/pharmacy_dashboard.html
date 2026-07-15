@@ -58,8 +58,7 @@ tailwind.config = {
     <h2 class="font-title-lg text-title-lg text-on-surface mb-4">Pending Prescriptions</h2>
 
     {% for rx in pending_prescriptions %}
-    <form method="post" class="flex items-center justify-between gap-4 py-3 border-b border-surface-container last:border-b-0">
-      {% csrf_token %}
+    <div class="flex items-center justify-between gap-4 py-3 border-b border-surface-container last:border-b-0">
       <div>
         <p class="font-label-md text-label-md text-on-surface font-semibold">{{ rx.medicine_name }}{% if rx.dosage %} — {{ rx.dosage }}{% endif %}</p>
         <p class="font-body-md text-body-md text-on-surface-variant">
@@ -68,12 +67,27 @@ tailwind.config = {
           {{ rx.created_at|date:"M d, Y" }}
         </p>
         {% if rx.instructions %}<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ rx.instructions }}</p>{% endif %}
+        {% if rx.reminder_date %}<p class="font-label-sm text-label-sm text-primary mt-1">🔔 Reminder set for {{ rx.reminder_date|date:"M d, Y" }}</p>{% endif %}
       </div>
-      <input type="hidden" name="prescription_id" value="{{ rx.id }}">
-      <button type="submit" class="flex-shrink-0 bg-primary hover:bg-primary/90 text-on-primary text-sm font-medium rounded-lg px-4 py-2 transition-colors">
-        Mark Fulfilled
-      </button>
-    </form>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <form method="post" class="flex items-center gap-1">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="set_reminder">
+          <input type="hidden" name="prescription_id" value="{{ rx.id }}">
+          <input type="date" name="reminder_date" value="{{ rx.reminder_date|date:'Y-m-d' }}" class="h-9 px-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-xs"/>
+          <button type="submit" class="bg-secondary-container hover:bg-secondary-container/80 text-on-secondary-container text-xs font-medium rounded-lg px-3 py-2 transition-colors">
+            Set Reminder
+          </button>
+        </form>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="prescription_id" value="{{ rx.id }}">
+          <button type="submit" class="bg-primary hover:bg-primary/90 text-on-primary text-sm font-medium rounded-lg px-4 py-2 transition-colors">
+            Mark Fulfilled
+          </button>
+        </form>
+      </div>
+    </div>
     {% empty %}
     <p class="font-body-md text-body-md text-on-surface-variant py-4">No pending prescriptions right now.</p>
     {% endfor %}
@@ -100,5 +114,5 @@ tailwind.config = {
   </a>
 </div>
 
-{% include "core/chatbot_widget.html" %}
+{% include "core/_chatbot_widget.html" %}
 </body></html>
