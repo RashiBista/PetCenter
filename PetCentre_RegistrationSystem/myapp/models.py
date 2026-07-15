@@ -169,6 +169,10 @@ class Prescription(models.Model):
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     fulfilled_at = models.DateTimeField(null=True, blank=True)
+    # Set by the vet or pharmacy — a date to remind the owner to give/
+    # refill this medicine. Reminder fires the day before.
+    reminder_date = models.DateField(null=True, blank=True)
+    reminder_sent = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']

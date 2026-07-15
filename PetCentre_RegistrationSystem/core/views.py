@@ -17,9 +17,10 @@ from django.utils import timezone
 
 from myapp.decorators import role_required
 from myapp.models import (
-    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Pet, Prescription,
+    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, MedicineReminder, PasswordResetOTP, Prescription,
     SignupOTP, User, UserProfile, VetProfile, PharmacyProfile,
 )
+from pet_profiles.models import Pet
 from notifications.models import Notification
 from notifications.services import create_notification
 
@@ -79,10 +80,12 @@ def _get_client_ip(request):
         return forwarded.split(',')[0].strip()
     return request.META.get('REMOTE_ADDR', '0.0.0.0')
 
+
 def _is_ip_locked_out(ip_address):
     cutoff = timezone.now() - timedelta(hours=24)
     recent_failures = IPLoginAttempt.objects.filter(ip_address=ip_address, created_at__gte=cutoff).count()
     return recent_failures >= MAX_ATTEMPTS_PER_24H
+
 
 def _record_failed_ip_attempt(ip_address):
     IPLoginAttempt.objects.create(ip_address=ip_address)
@@ -593,6 +596,20 @@ def update_appointment_status_view(request, appointment_id):
             ),
             action_url="/dashboard/pet-owner/",
         )
+        # Also send the vet their own confirmation receipt of the action
+        # they just took, so both sides have a paper trail in email.
+        create_notification(
+            recipient=request.user,
+            recipient_role=_recipient_role_for(request.user),
+            notification_type='appointment',
+            title=f"You {appointment.get_status_display().lower()} an appointment",
+            message=(
+                f"You {appointment.get_status_display().lower()} the appointment for "
+                f"{appointment.pet.name} (owner: {owner.get_full_name() or owner.username}) "
+                f"on {appointment.scheduled_time:%b %d, %Y at %I:%M %p}."
+            ),
+            action_url="/dashboard/veterinary/appointments/",
+        )
 
     return redirect('core:veterinary_dashboard')
 
@@ -721,6 +738,52 @@ def search_view(request):
 # ------------------------------------------------------------------
 
 @login_required(login_url='core:pet_owner_login')
+def create_medicine_reminder_view(request, pet_id):
+    """
+    Available to vets and pharmacies only — creates a MedicineReminder
+    for a specific pet, sends the owner an immediate confirmation that
+    it was set, and the actual day-before reminder gets sent later by
+    the send_medicine_reminders management command.
+    """
+    if request.user.role not in (User.Role.VET, User.Role.PHARMACY):
+        messages.error(request, "You don't have access to that page.")
+        return redirect('core:landing_page')
+
+    pet = Pet.objects.filter(id=pet_id).select_related('owner').first()
+    if not pet:
+        messages.error(request, "Pet not found.")
+        return redirect(request.META.get('HTTP_REFERER', 'core:landing_page'))
+
+    if request.method == 'POST':
+        medicine_name = request.POST.get('medicine_name', '').strip()
+        instructions = request.POST.get('instructions', '').strip()
+        remind_date_str = request.POST.get('remind_date', '')
+
+        if medicine_name and remind_date_str:
+            remind_date = datetime.strptime(remind_date_str, "%Y-%m-%d").date()
+            MedicineReminder.objects.create(
+                pet=pet, created_by=request.user, medicine_name=medicine_name,
+                instructions=instructions, remind_date=remind_date,
+            )
+            create_notification(
+                recipient=pet.owner,
+                recipient_role=_recipient_role_for(pet.owner),
+                notification_type='medicine',
+                title="Medicine reminder set",
+                message=(
+                    f"{request.user.get_full_name() or request.user.username} set a reminder for "
+                    f"{pet.name} to take {medicine_name} on {remind_date:%b %d, %Y}."
+                ),
+                action_url="/dashboard/pet-owner/",
+            )
+            messages.success(request, f"Reminder set for {pet.name}.")
+        else:
+            messages.error(request, "Medicine name and date are required.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'core:landing_page'))
+
+
+@login_required(login_url='core:pet_owner_login')
 def pet_owner_notifications_view(request):
     if request.method == 'POST' and request.POST.get('action') == 'mark_all_read':
         Notification.objects.filter(recipient=request.user, is_read=False).update(
@@ -742,18 +805,13 @@ def pet_owner_notifications_view(request):
 
 @login_required(login_url='core:pet_owner_login')
 def pet_profile_view(request):
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        species = request.POST.get('species', '').strip()
-        breed = request.POST.get('breed', '').strip()
-        photo = request.FILES.get('photo')
-        if name and species:
-            Pet.objects.create(owner=request.user, name=name, species=species, breed=breed, photo=photo)
-            messages.success(request, f"{name} was added.")
-        return redirect('core:pet_profile')
-
-    pets = Pet.objects.filter(owner=request.user)
-    return render(request, 'core/pet_profile.html', {'pets': pets})
+    """
+    Superseded by the richer pet_profiles app (medical records,
+    vaccinations, medications, per-pet care notes) — this URL name is
+    kept alive (in case anything still links to it by name) but just
+    hands off to the new module instead of rendering its own page.
+    """
+    return redirect('pet_profiles:home')
 
 
 # ------------------------------------------------------------------
@@ -816,6 +874,25 @@ def pet_owner_dashboard(request):
 
 
 @role_required(User.Role.VET)
+def veterinary_appointments_view(request):
+    """
+    The full appointments list — the dashboard itself only ever showed
+    TODAY's appointments; the sidebar 'Appointments' link had nowhere
+    real to go until now.
+    """
+    status_filter = request.GET.get('status', 'all')
+    appointments = Appointment.objects.filter(vet=request.user).select_related('pet', 'pet__owner').order_by('scheduled_time')
+    if status_filter in (Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED, Appointment.Status.COMPLETED, Appointment.Status.CANCELLED):
+        appointments = appointments.filter(status=status_filter)
+
+    return render(request, 'core/veterinary_appointments.html', {
+        'appointments': appointments,
+        'status_filter': status_filter,
+        'status_choices': [('all', 'All')] + list(Appointment.Status.choices),
+    })
+
+
+@role_required(User.Role.VET)
 def veterinary_dashboard(request):
     today = timezone.localdate()
     todays_appointments = Appointment.objects.filter(
@@ -827,17 +904,46 @@ def veterinary_dashboard(request):
         appointments__vet=request.user
     ).distinct().count()
 
+    pending_prescriptions_count = Prescription.objects.filter(
+        vet=request.user, status=Prescription.Status.PENDING
+    ).count()
+
     return render(request, 'core/veterinary_dashboard.html', {
         'todays_appointments': todays_appointments,
         'total_patients': total_patients,
+        'pending_prescriptions_count': pending_prescriptions_count,
     })
 
 
 @role_required(User.Role.PHARMACY)
 def pharmacy_dashboard(request):
     if request.method == 'POST':
-        # Fulfill action: mark a pending prescription as fulfilled by this pharmacy.
+        action = request.POST.get('action', 'fulfill')
         prescription_id = request.POST.get('prescription_id')
+
+        if action == 'set_reminder':
+            reminder_date = request.POST.get('reminder_date')
+            prescription = Prescription.objects.filter(id=prescription_id).select_related('pet', 'pet__owner').first()
+            if prescription and reminder_date:
+                prescription.reminder_date = reminder_date
+                prescription.reminder_sent = False  # allow re-triggering if the date was changed
+                prescription.save(update_fields=['reminder_date', 'reminder_sent'])
+                # Confirmation that the reminder was set — sent immediately,
+                # separate from the actual reminder which fires the day before.
+                create_notification(
+                    recipient=prescription.pet.owner,
+                    recipient_role=_recipient_role_for(prescription.pet.owner),
+                    notification_type='medicine',
+                    title="Medicine reminder set",
+                    message=(
+                        f"A reminder has been set for {prescription.pet.name}'s "
+                        f"{prescription.medicine_name} on {prescription.reminder_date:%b %d, %Y}."
+                    ),
+                    action_url="/dashboard/pet-owner/",
+                )
+            return redirect('core:pharmacy_dashboard')
+
+        # Fulfill action: mark a pending prescription as fulfilled by this pharmacy.
         Prescription.objects.filter(
             id=prescription_id, status=Prescription.Status.PENDING
         ).update(
@@ -909,6 +1015,86 @@ def admin_create_user_view(request):
 
 
 @login_required(login_url='core:admin_login')
+def admin_add_medicine_view(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('core:landing_page')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if name:
+            Medicine.objects.create(
+                name=name,
+                category=request.POST.get('category', '').strip(),
+                price=request.POST.get('price') or None,
+                description=request.POST.get('description', '').strip(),
+                in_stock=True,
+            )
+            messages.success(request, f"{name} added to Medicine catalog.")
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
+def admin_toggle_medicine_stock_view(request, item_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('core:landing_page')
+    if request.method == 'POST':
+        item = Medicine.objects.filter(id=item_id).first()
+        if item:
+            item.in_stock = not item.in_stock
+            item.save(update_fields=['in_stock'])
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
+def admin_delete_medicine_view(request, item_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('core:landing_page')
+    if request.method == 'POST':
+        Medicine.objects.filter(id=item_id).delete()
+        messages.success(request, "Medicine removed.")
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
+def admin_add_accessory_view(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('core:landing_page')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if name:
+            Accessory.objects.create(
+                name=name,
+                category=request.POST.get('category', '').strip(),
+                price=request.POST.get('price') or None,
+                description=request.POST.get('description', '').strip(),
+                in_stock=True,
+            )
+            messages.success(request, f"{name} added to Accessory catalog.")
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
+def admin_toggle_accessory_stock_view(request, item_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('core:landing_page')
+    if request.method == 'POST':
+        item = Accessory.objects.filter(id=item_id).first()
+        if item:
+            item.in_stock = not item.in_stock
+            item.save(update_fields=['in_stock'])
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
+def admin_delete_accessory_view(request, item_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('core:landing_page')
+    if request.method == 'POST':
+        Accessory.objects.filter(id=item_id).delete()
+        messages.success(request, "Accessory removed.")
+    return redirect('core:admin_dashboard')
+
+
+@login_required(login_url='core:admin_login')
 def admin_dashboard(request):
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, "You don't have access to that page.")
@@ -926,10 +1112,18 @@ def admin_dashboard(request):
     }
 
     recent_users = User.objects.exclude(is_superuser=True).order_by('-date_joined')[:15]
+    all_medicines = Medicine.objects.order_by('-created_at')
+    all_accessories = Accessory.objects.order_by('-created_at')
+    all_appointments = Appointment.objects.select_related('pet', 'pet__owner', 'vet').order_by('-scheduled_time')[:20]
+    all_prescriptions = Prescription.objects.select_related('pet', 'vet', 'pharmacy').order_by('-created_at')[:20]
 
     return render(request, 'core/admin_dashboard.html', {
         'stats': stats,
         'recent_users': recent_users,
+        'all_medicines': all_medicines,
+        'all_accessories': all_accessories,
+        'all_appointments': all_appointments,
+        'all_prescriptions': all_prescriptions,
     })
 
 
