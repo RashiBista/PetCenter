@@ -109,20 +109,10 @@ class PharmacyProfile(models.Model):
         return f'PharmacyProfile<{self.user.username}>'
 
 
-class Pet(models.Model):
-    owner = models.ForeignKey(
-        'myapp.User',
-        on_delete=models.CASCADE,
-        related_name='pets',
-        limit_choices_to={'role': User.Role.USER},
-    )
-    name = models.CharField(max_length=100)
-    species = models.CharField(max_length=50)
-    breed = models.CharField(max_length=100, blank=True)
-    photo = models.ImageField(upload_to='pets/', blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.name} → {self.owner.username}"
+# NOTE: myapp.Pet has been removed entirely — superseded by
+# pet_profiles.Pet (richer: DOB, gender, weight, care notes, medical
+# summary/records/vaccinations/medications). Appointment/Prescription
+# below now reference 'pet_profiles.Pet' instead.
 
 
 class Appointment(models.Model):
@@ -133,7 +123,7 @@ class Appointment(models.Model):
         CANCELLED = 'cancelled', 'Cancelled'
 
     pet = models.ForeignKey(
-        'myapp.Pet', on_delete=models.CASCADE, related_name='appointments',
+        'pet_profiles.Pet', on_delete=models.CASCADE, related_name='appointments',
     )
     vet = models.ForeignKey(
         'myapp.User', on_delete=models.CASCADE, related_name='vet_appointments',
@@ -142,6 +132,7 @@ class Appointment(models.Model):
     scheduled_time = models.DateTimeField()
     reason = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.REQUESTED)
+    reminder_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -162,7 +153,7 @@ class Prescription(models.Model):
         CANCELLED = 'cancelled', 'Cancelled'
 
     pet = models.ForeignKey(
-        'myapp.Pet', on_delete=models.CASCADE, related_name='prescriptions',
+        'pet_profiles.Pet', on_delete=models.CASCADE, related_name='prescriptions',
     )
     vet = models.ForeignKey(
         'myapp.User', on_delete=models.CASCADE, related_name='issued_prescriptions',
@@ -179,6 +170,10 @@ class Prescription(models.Model):
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     fulfilled_at = models.DateTimeField(null=True, blank=True)
+    # Set by the vet or pharmacy — a date to remind the owner to give/
+    # refill this medicine. Reminder fires the day before.
+    reminder_date = models.DateField(null=True, blank=True)
+    reminder_sent = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']
@@ -219,6 +214,35 @@ class Medicine(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# NOTE: the old myapp.Notification model has been removed. Notifications
+# are now handled entirely by the separate `notifications` app (see
+# notifications/models.py), which has a more complete schema
+# (recipient_role, notification_type, email_sent tracking, etc.) and is
+# what core/views.py and chat/consumers.py actually use. Keeping both
+# would risk accidentally writing to the wrong one.
+
+
+class Accessory(models.Model):
+    """
+    Mirrors Medicine's structure — same pattern, different content
+    category (leashes, bowls, toys, grooming, etc. instead of drugs).
+    """
+    name = models.CharField(max_length=150)
+    category = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    in_stock = models.BooleanField(default=True)
+    photo = models.ImageField(upload_to='accessories/', blank=True, null=True)
+    pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
+    pharmacy_contact = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
 class SignupOTP(models.Model):
     """
     OTP verification sent DURING signup, before the account exists.
@@ -264,7 +288,7 @@ class LoginAttempt(models.Model):
 class IPLoginAttempt(models.Model):
     """
     Tracks failed login attempts by IP address, independent of which
-    username/email was targeted and  closes the gap where hammering many
+    username/email was targeted — closes the gap where hammering many
     different usernames from the same machine wasn't rate-limited.
     """
     ip_address = models.GenericIPAddressField()
@@ -272,24 +296,3 @@ class IPLoginAttempt(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['ip_address', 'created_at'])]
-class Accessory(models.Model):
-    """
-    Mirrors Medicine's structure :same pattern, different content
-    category (leashes, bowls, toys, grooming, etc. instead of drugs).
-    Kept as a separate model rather than a shared "Product" base since
-    medicines have prescription-relevant fields (dosage_info) that
-    accessories never need, and vice versa (accessories may want size/
-    color later)  cleaner to let them diverge independently. -->will be completed after mid defence
-    """
-    name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100, blank=True)  # e.g. "Leashes", "Grooming"
-    description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    in_stock = models.BooleanField(default=True)
-    photo = models.ImageField(upload_to='accessories/', blank=True, null=True)
-    pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
-    pharmacy_contact = models.CharField(max_length=50, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
- 
-    def __str__(self):
-        return self.name        

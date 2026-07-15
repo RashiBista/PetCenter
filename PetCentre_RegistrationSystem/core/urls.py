@@ -37,10 +37,18 @@ urlpatterns = [
 
     path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
+    path('dashboard/veterinary/appointments/', views.veterinary_appointments_view, name='veterinary_appointments'),
+    path('dashboard/veterinary/appointments/', views.veterinary_appointments_view, name='veterinary_appointments'),
     path('dashboard/pharmacy/', views.pharmacy_dashboard, name='pharmacy_dashboard'),
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('dashboard/admin/users/create/', views.admin_create_user_view, name='admin_create_user'),
     path('dashboard/admin/users/<int:user_id>/toggle-active/', views.toggle_user_active_view, name='toggle_user_active'),
+    path('dashboard/admin/medicine/add/', views.admin_add_medicine_view, name='admin_add_medicine'),
+    path('dashboard/admin/medicine/<int:item_id>/toggle-stock/', views.admin_toggle_medicine_stock_view, name='admin_toggle_medicine_stock'),
+    path('dashboard/admin/medicine/<int:item_id>/delete/', views.admin_delete_medicine_view, name='admin_delete_medicine'),
+    path('dashboard/admin/accessory/add/', views.admin_add_accessory_view, name='admin_add_accessory'),
+    path('dashboard/admin/accessory/<int:item_id>/toggle-stock/', views.admin_toggle_accessory_stock_view, name='admin_toggle_accessory_stock'),
+    path('dashboard/admin/accessory/<int:item_id>/delete/', views.admin_delete_accessory_view, name='admin_delete_accessory'),
 
     path('chatbot/', views.chatbot_view, name='chatbot'),
 ]

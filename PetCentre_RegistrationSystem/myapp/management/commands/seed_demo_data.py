@@ -5,14 +5,16 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from myapp.models import (
-    Accessory, Appointment, Medicine, Pet, Prescription,
+    Accessory, Appointment, Medicine, Prescription,
     User, UserProfile, VetProfile, PharmacyProfile,
 )
+from pet_profiles.models import Pet
 
 
 class Command(BaseCommand):
     """
-    Populates the database with demo data for test/demo purpose. Safe to run multiple times —
+    Populates the database with demo data so a live defense/demo
+    doesn't start from an empty app. Safe to run multiple times —
     uses get_or_create throughout, so re-running just confirms
     everything's still there instead of creating duplicates.
 
@@ -61,8 +63,8 @@ class Command(BaseCommand):
 
     def _create_owners_and_pets(self):
         owners_data = [
-            ('demo_owner_lisa', 'Lisa', 'Adams', [('Buddy', 'Dog', 'Golden Retriever'), ('Milo', 'Cat', 'Tabby')]),
-            ('demo_owner_sam', 'Sam', 'Patel', [('Rex', 'Dog', 'German Shepherd')]),
+            ('demo_owner_lisa', 'Lisa', 'Adams', [('Buddy', 'dog', 'Golden Retriever'), ('Milo', 'cat', 'Tabby')]),
+            ('demo_owner_sam', 'Sam', 'Patel', [('Rex', 'dog', 'German Shepherd')]),
         ]
         owners = []
         for username, first, last, pets in owners_data:

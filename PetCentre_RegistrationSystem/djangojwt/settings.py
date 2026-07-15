@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'chat',
     'core',
     'notifications',
+    'pet_profiles',
     'corsheaders',
     'drf_spectacular',
 ]
@@ -220,6 +221,11 @@ CHANNEL_LAYERS = {
 }
 
 # Allow tests to run without a PostgreSQL server / without DB_PASSWORD set.
+# Uses SpatiaLite (SQLite's spatial extension) rather than plain SQLite,
+# since VetProfile.location is a PostGIS PointField — plain SQLite has
+# no spatial column types at all and fails with
+# "AttributeError: 'DatabaseOperations' object has no attribute
+# 'geo_db_type'" the moment migrations try to create that column.
 if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.contrib.gis.db.backends.spatialite',
@@ -245,6 +251,7 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -276,6 +283,18 @@ EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').strip().lower() in ('true', '1', 'yes')
+
+# --- pet_profiles app config ---
+# Demo mode intentionally OFF — this project has a complete, real auth
+# system already; the module's own fallback (auto-creating/reusing a
+# shared fake account for anonymous visitors) would be a real security
+# hole if left on here.
+PET_PROFILES_DEMO_MODE = False
+PET_PROFILE_CHATBOT_URL_NAME = 'core:chatbot'
+# Points the "Upcoming" card at the real appointment system instead of
+# a disconnected local one (pet_profiles' own Appointment model was
+# removed entirely during integration).
+PET_PROFILE_APPOINTMENT_URL_NAME = 'core:pet_owner_dashboard'
 
 # ------------------------------------------------------------------
 # Production hardening (only kicks in when DEBUG=False)
