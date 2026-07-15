@@ -306,3 +306,14 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# ------------------------------------------------------------------
+# Session lifetime — controlled per-login by the "Remember Me"
+# checkbox (see core/views.py login views), not a single fixed value:
+#   - Checked   → session.set_expiry(SESSION_COOKIE_AGE) → rolls for 14 days
+#   - Unchecked → session.set_expiry(0) → ends when the browser closes
+# SESSION_SAVE_EVERY_REQUEST makes the "remembered" case a genuine
+# rolling window (resets on activity) rather than fixed from login.
+# ------------------------------------------------------------------
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 14 days, in seconds — used only when "Remember Me" is checked
+SESSION_SAVE_EVERY_REQUEST = True

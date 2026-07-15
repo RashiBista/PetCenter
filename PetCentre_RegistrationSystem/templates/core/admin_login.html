@@ -160,6 +160,10 @@
 <a class="font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors" href="{% url 'core:forgot_password' %}">Forgot password?</a>
 </div>
 <!-- Login Button -->
+<label class="flex items-center gap-2 cursor-pointer mb-4">
+<input type="checkbox" name="remember_me" class="accent-primary w-4 h-4"/>
+<span class="font-label-sm text-label-sm text-on-surface">Remember me for 14 days</span>
+</label>
 <button class="w-full h-14 rounded-full bg-primary text-on-primary font-title-lg text-title-lg hover:bg-surface-tint shadow-md hover:shadow-lg hover:-translate-y-[1px] active:translate-y-[1px] active:shadow-sm transition-all duration-200 flex items-center justify-center gap-2 mt-8" type="submit">
                 Sign In Securely
                 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>

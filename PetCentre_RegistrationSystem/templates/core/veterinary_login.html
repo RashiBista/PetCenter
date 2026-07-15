@@ -165,6 +165,10 @@
 <a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors" href="{% url 'core:forgot_password' %}">Forgot password?</a>
 </div>
 <!-- Submit Action -->
+<label class="flex items-center gap-2 cursor-pointer mb-2">
+<input type="checkbox" name="remember_me" class="accent-primary w-4 h-4"/>
+<span class="font-label-sm text-label-sm text-on-surface">Remember me for 14 days</span>
+</label>
 <button class="w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-full shadow-sm hover:shadow-md hover:bg-opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-2" type="submit">
 <span>Sign In</span>
 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
