@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Find Nearby Care — PetCentre</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed-variant": "#444652","on-error": "#ffffff","tertiary-container": "#c0ad5b",
+        "on-primary-fixed-variant": "#473f76","surface-container-low": "#f7f2f8","inverse-primary": "#c8bfff",
+        "surface-container-highest": "#e5e1e6","on-tertiary-container": "#4c4000","on-error-container": "#93000a",
+        "on-background": "#1c1b1f","error": "#ba1a1a","on-primary-fixed": "#1b1248","on-secondary": "#ffffff",
+        "on-secondary-container": "#616470","surface-container-high": "#ebe7ec","inverse-surface": "#313034",
+        "secondary-container": "#e0e1f0","on-surface": "#1c1b1f","primary-fixed": "#e5deff","on-tertiary": "#ffffff",
+        "outline": "#797580","on-surface-variant": "#48454f","surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#e0e1f0","on-tertiary-fixed": "#221b00","inverse-on-surface": "#f4eff5",
+        "surface-bright": "#fdf8fd","surface-tint": "#5f578f","on-primary-container": "#413a70",
+        "primary-container": "#afa6e4","surface-variant": "#e5e1e6","on-secondary-fixed": "#181b26",
+        "secondary": "#5b5e6a","surface-dim": "#ddd9de","primary": "#5f578f","background": "#fdf8fd",
+        "secondary-fixed-dim": "#c4c6d4","surface-container": "#f1ecf2","tertiary": "#6d5e13",
+        "on-tertiary-fixed-variant": "#534600","surface": "#fdf8fd","error-container": "#ffdad6",
+        "on-primary": "#ffffff","tertiary-fixed-dim": "#dac671","tertiary-fixed": "#f8e28a",
+        "primary-fixed-dim": "#c8bfff","outline-variant": "#c9c4d0"
+      },
+      "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+      "fontFamily": {
+        "body-lg": ["Plus Jakarta Sans"],"title-lg": ["Plus Jakarta Sans"],"headline-lg-mobile": ["Manrope"],
+        "label-md": ["Plus Jakarta Sans"],"label-sm": ["Plus Jakarta Sans"],"body-md": ["Plus Jakarta Sans"],
+        "display-lg": ["Manrope"],"headline-md": ["Manrope"],"headline-lg": ["Manrope"]
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen">
+<div class="max-w-4xl mx-auto py-8 px-4">
+
+  <div class="flex items-center gap-3 mb-2">
+    <a href="{% url 'core:pet_owner_dashboard' %}" class="text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h1 class="font-headline-md text-headline-md text-on-surface">Find Nearby Care</h1>
+  </div>
+  <p class="font-body-md text-body-md text-on-surface-variant mb-6 ml-9">Locate registered veterinary clinics and pharmacies near you.</p>
+
+  <button id="use-location-btn" onclick="useMyLocation()" class="mb-6 flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors">
+    <span class="material-symbols-outlined text-[18px]">my_location</span>
+    Use my location to sort by distance
+  </button>
+  {% if has_location %}<p class="-mt-4 mb-6 font-label-sm text-label-sm text-primary">Sorted by distance from your location.</p>{% endif %}
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-6 border-b border-surface-container-high">
+    <a href="?type=all{% if request.GET.lat %}&lat={{ request.GET.lat }}&lng={{ request.GET.lng }}{% endif %}"
+       class="px-4 py-2 font-label-md text-label-md {% if type_filter == 'all' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">All</a>
+    <a href="?type=vet{% if request.GET.lat %}&lat={{ request.GET.lat }}&lng={{ request.GET.lng }}{% endif %}"
+       class="px-4 py-2 font-label-md text-label-md {% if type_filter == 'vet' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">Veterinary Clinics</a>
+    <a href="?type=pharmacy{% if request.GET.lat %}&lat={{ request.GET.lat }}&lng={{ request.GET.lng }}{% endif %}"
+       class="px-4 py-2 font-label-md text-label-md {% if type_filter == 'pharmacy' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">Pharmacies</a>
+  </div>
+
+  {% if type_filter == 'all' or type_filter == 'vet' %}
+  <h2 class="font-title-lg text-title-lg text-on-surface mb-3">Veterinary Clinics</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    {% for vet in vets %}
+    <div class="bg-surface-container-lowest rounded-xl p-5 border border-surface-container-high shadow-sm">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="font-label-md text-label-md text-on-surface font-semibold">Dr. {{ vet.get_full_name|default:vet.username }}</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">{{ vet.vet_profile.specialization|default:"General Practice" }}</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ vet.email }}{% if vet.phone_number %} · {{ vet.phone_number }}{% endif %}</p>
+        </div>
+        {% if vet.distance %}<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-medium flex-shrink-0">{{ vet.distance.km|floatformat:1 }} km</span>{% endif %}
+      </div>
+      <div class="flex gap-2 mt-4">
+        <a href="{% url 'core:appointment_booking' %}" class="flex-1 text-center px-3 py-2 rounded-lg bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Book Appointment</a>
+        <a href="{% url 'chat:start_chat' vet.id %}" class="flex-1 text-center px-3 py-2 rounded-lg border border-outline-variant text-on-surface text-sm font-medium hover:bg-surface-container transition-colors">Message</a>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-on-surface-variant font-body-md text-body-md col-span-2">No veterinary clinics registered yet.</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if type_filter == 'all' or type_filter == 'pharmacy' %}
+  <h2 class="font-title-lg text-title-lg text-on-surface mb-3">Pharmacies</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {% for pharmacy in pharmacies %}
+    <div class="bg-surface-container-lowest rounded-xl p-5 border border-surface-container-high shadow-sm">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="font-label-md text-label-md text-on-surface font-semibold">{{ pharmacy.pharmacy_profile.pharmacy_name|default:pharmacy.username }}</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ pharmacy.email }}{% if pharmacy.phone_number %} · {{ pharmacy.phone_number }}{% endif %}</p>
+        </div>
+        {% if pharmacy.distance %}<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-medium flex-shrink-0">{{ pharmacy.distance.km|floatformat:1 }} km</span>{% endif %}
+      </div>
+      <div class="flex gap-2 mt-4">
+        <a href="{% url 'core:search' %}?category=pet_things" class="flex-1 text-center px-3 py-2 rounded-lg bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Browse Medicine</a>
+        <a href="{% url 'chat:start_chat' pharmacy.id %}" class="flex-1 text-center px-3 py-2 rounded-lg border border-outline-variant text-on-surface text-sm font-medium hover:bg-surface-container transition-colors">Message</a>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-on-surface-variant font-body-md text-body-md col-span-2">No pharmacies registered yet.</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  function useMyLocation() {
+    const btn = document.getElementById("use-location-btn");
+    if (!navigator.geolocation) {
+      alert("Your browser doesn't support location access.");
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "Getting your location...";
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const url = new URL(window.location.href);
+        url.searchParams.set("lat", pos.coords.latitude);
+        url.searchParams.set("lng", pos.coords.longitude);
+        window.location.href = url.toString();
+      },
+      (err) => {
+        alert("Couldn't get your location: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">my_location</span> Use my location to sort by distance';
+      }
+    );
+  }
+</script>
+</body></html>

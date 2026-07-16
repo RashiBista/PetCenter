@@ -194,6 +194,10 @@
 <span class="material-symbols-outlined">person</span>
 <span class="font-label-md text-label-md">Profile</span>
 </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:find_nearest_vets' %}">
+<span class="material-symbols-outlined">near_me</span>
+<span class="font-label-md text-label-md">Find Nearest Vets</span>
+</a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200 mt-auto" href="#">
 <span class="material-symbols-outlined">settings</span>
 <span class="font-label-md text-label-md">Settings</span>
@@ -395,5 +399,5 @@
 </div>
 </main>
 <!-- Floating Action Button (Contextual Assistant) -->
-{% include "core/chatbot_widget.html" %}
+{% include "core/_chatbot_widget.html" %}
 </body></html>
