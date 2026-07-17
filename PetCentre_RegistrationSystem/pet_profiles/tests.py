@@ -14,10 +14,10 @@ class PetProfileTests(TestCase):
         # role defaults to User.Role.USER on the model, matching what
         # @role_required(User.Role.USER) on every pet_profiles view expects.
         self.owner = user_model.objects.create_user(
-            username="owner", password="test-pass-123",
+            username="owner", email="owner@example.com", password="test-pass-123",
         )
         self.other_owner = user_model.objects.create_user(
-            username="other", password="test-pass-123",
+            username="other", email="other@example.com", password="test-pass-123",
         )
         self.pet = Pet.objects.create(
             owner=self.owner,

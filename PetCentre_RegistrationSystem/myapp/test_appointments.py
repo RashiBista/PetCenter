@@ -27,7 +27,8 @@ class AppointmentFlowTests(TestCase):
             scheduled_time=timezone.now() + timedelta(days=1),
         )
         self.client.force_login(self.vet)
-        self.client.post(f"/appointments/{appt.id}/status/", {"status": "confirmed"})
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(f"/appointments/{appt.id}/status/", {"status": "confirmed"})
 
         appt.refresh_from_db()
         self.assertEqual(appt.status, Appointment.Status.CONFIRMED)
@@ -73,7 +74,8 @@ class VaccinationAutoRenewalTests(TestCase):
             pet=self.pet, vaccine_name="Rabies", next_due_on=due_date,
         )
 
-        call_command("send_vaccination_reminders")
+        with self.captureOnCommitCallbacks(execute=True):
+            call_command("send_vaccination_reminders")
 
         vaccine.refresh_from_db()
         self.assertTrue(vaccine.reminder_sent)
@@ -91,6 +93,8 @@ class VaccinationAutoRenewalTests(TestCase):
         VaccinationRecord.objects.create(
             pet=self.pet, vaccine_name="DHPP", next_due_on=due_date,
         )
-        call_command("send_vaccination_reminders")
-        call_command("send_vaccination_reminders")  # run twice
+        with self.captureOnCommitCallbacks(execute=True):
+            call_command("send_vaccination_reminders")
+        with self.captureOnCommitCallbacks(execute=True):
+            call_command("send_vaccination_reminders")  # run twice
         self.assertEqual(len(mail.outbox), 1)  # only sent once, not duplicated

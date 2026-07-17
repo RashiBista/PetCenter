@@ -30,16 +30,19 @@ class LoginLockoutTests(TestCase):
         self.assertContains(response, "Too many failed attempts")
 
     def test_lockout_is_per_account_not_global(self):
+        from django.test import override_settings
+
         other_user = User.objects.create_user(
             username="other_account", email="other@example.com",
             password="OtherPass123!", role=User.Role.USER,
         )
-        for _ in range(5):
-            self._attempt_login("wrong-password")  # locks lockout_test only
+        with override_settings(EXEMPT_LOGIN_IPS=["127.0.0.1"]):
+            for _ in range(5):
+                self._attempt_login("wrong-password")  # locks lockout_test only (IP exempted, so IP itself stays clear)
 
-        response = self.client.post(reverse("core:pet_owner_login"), {
-            "email": "other_account", "password": "OtherPass123!",
-        })
+            response = self.client.post(reverse("core:pet_owner_login"), {
+                "email": "other_account", "password": "OtherPass123!",
+            })
         self.assertEqual(response.status_code, 302)  # other_account is unaffected
 
     def test_ip_lockout_blocks_different_accounts_from_same_ip(self):
