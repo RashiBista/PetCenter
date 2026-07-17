@@ -259,7 +259,16 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        # Plain (non-compressing) WhiteNoise storage — the Compressed
+        # variant's post-processing step crashes on a known fragile
+        # interaction with django-cloudinary-storage's own collectstatic
+        # override (they disagree about which vendor files, like
+        # admin's select2 i18n files, actually exist on disk at
+        # compression time). This still gets WhiteNoise's core purpose
+        # — serving static files at all under Daphne — just without
+        # gzip/brotli compression, which isn't worth the fragility for
+        # a project this size.
+        "BACKEND": "whitenoise.storage.StaticFilesStorage",
     },
 }
 
