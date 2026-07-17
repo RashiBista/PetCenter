@@ -233,13 +233,6 @@ if 'test' in sys.argv:
         'ENGINE': 'django.contrib.gis.db.backends.spatialite',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-    # Without this, any test that saves a photo/attachment (pet photos,
-    # medical record attachments, signup photos) would make a REAL
-    # network call to Cloudinary every time tests run — slow, flaky
-    # without internet, and pollutes your real Cloudinary account with
-    # test data. In-memory storage keeps file-touching tests fast and
-    # fully offline.
-    STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -270,11 +263,39 @@ STORAGES = {
     },
 }
 
+# django-cloudinary-storage's own collectstatic override still reads
+# this legacy setting name directly (settings.STATICFILES_STORAGE),
+# even though Django 5+ only requires STORAGES. Without this mirror,
+# collectstatic crashes with AttributeError the moment that package's
+# code runs, since Django doesn't auto-alias STORAGES['staticfiles']
+# back onto the old attribute name.
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
+
+# django-cloudinary-storage's OWN collectstatic override still checks
+# this legacy setting name directly (hasn't been updated for Django's
+# newer STORAGES dict) — without it, collectstatic crashes with
+# "AttributeError: 'Settings' object has no attribute
+# 'STATICFILES_STORAGE'". Modern Django itself ignores this legacy
+# setting once STORAGES is defined — this exists purely so that one
+# third-party package's check doesn't blow up.
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
+
+# Test-only storage override — placed AFTER the real STORAGES dict
+# above, since this line needs that dict to already exist (referencing
+# STORAGES before its own definition would raise NameError the moment
+# `manage.py test` actually ran). Without this, any test that saves a
+# photo/attachment would make a REAL network call to Cloudinary every
+# time tests run — slow, flaky without internet, and pollutes your
+# real Cloudinary account with test data. In-memory storage keeps
+# file-touching tests fast and fully offline.
+if 'test' in sys.argv:
+    STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
