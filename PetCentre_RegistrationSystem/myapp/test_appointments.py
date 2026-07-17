@@ -35,7 +35,15 @@ class AppointmentFlowTests(TestCase):
         self.assertTrue(
             Notification.objects.filter(recipient=self.owner, notification_type="appointment").exists()
         )
-        self.assertEqual(len(mail.outbox), 1)  # real email actually sent (console backend in tests)
+        self.assertTrue(
+            Notification.objects.filter(recipient=self.vet, notification_type="appointment").exists()
+        )
+        # Confirming sends 2 emails by design: one to the owner (the
+        # confirmation itself) and one to the vet (their own receipt).
+        self.assertEqual(len(mail.outbox), 2)
+        recipients = {email.to[0] for email in mail.outbox}
+        self.assertIn(self.owner.email, recipients)
+        self.assertIn(self.vet.email, recipients)
 
     def test_vet_cannot_confirm_someone_elses_appointment(self):
         other_vet = User.objects.create_user(
