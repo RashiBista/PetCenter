@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'django.contrib.gis',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -231,6 +233,13 @@ if 'test' in sys.argv:
         'ENGINE': 'django.contrib.gis.db.backends.spatialite',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+    # Without this, any test that saves a photo/attachment (pet photos,
+    # medical record attachments, signup photos) would make a REAL
+    # network call to Cloudinary every time tests run — slow, flaky
+    # without internet, and pollutes your real Cloudinary account with
+    # test data. In-memory storage keeps file-touching tests fast and
+    # fully offline.
+    STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -254,11 +263,17 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
+}
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
