@@ -216,15 +216,6 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name
 
-
-# NOTE: the old myapp.Notification model has been removed. Notifications
-# are now handled entirely by the separate `notifications` app (see
-# notifications/models.py), which has a more complete schema
-# (recipient_role, notification_type, email_sent tracking, etc.) and is
-# what core/views.py and chat/consumers.py actually use. Keeping both
-# would risk accidentally writing to the wrong one.
-
-
 class Accessory(models.Model):
     """
     Mirrors Medicine's structure — same pattern, different content
