@@ -188,7 +188,7 @@ def pet_owner_signup_view(request):
                 errors.setdefault('pet_name', []).append('Pet name and species are required if uploading a photo.')
             else:
                 # Upload to Cloudinary right now, before the account even
-                # exists — sessions can't hold file objects, but they can
+                # exists sessions can't hold file objects, but they can
                 # hold this short string reference. Tagged so an orphan
                 # cleanup job can find and remove it later if the signup
                 # is abandoned before OTP verification completes.
@@ -692,10 +692,8 @@ def book_appointment_view(request):
         'upcoming_dates': upcoming_dates, 'time_slots': time_slots,
     })
 
-
-# ------------------------------------------------------------------
 # Medicine search + detail
-# ------------------------------------------------------------------
+
 
 @login_required(login_url='core:pet_owner_login')
 def medicine_search_view(request):
@@ -797,10 +795,10 @@ def pet_profile_view(request):
 
 
 # ------------------------------------------------------------------
-# Find nearest vets — lists real vet accounts. NOTE: there is no real
+# Find nearest vets "lists real vet accounts. NOTE: there is no real
 # geolocation, distance, or ratings data anywhere in this system yet,
 # so "distance" and star ratings from the original design are NOT
-# rendered here (no data to back them) — only real fields: name,
+# rendered here (no data to back them) :only real fields: name,
 # specialization, email/phone for contact, and a link to book/chat.
 # ------------------------------------------------------------------
 
