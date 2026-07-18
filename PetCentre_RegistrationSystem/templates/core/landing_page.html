@@ -187,6 +187,16 @@
 </header>
 <!-- Main Content Canvas -->
 <main class="flex-grow pt-20">
+{% if messages %}
+<div class="max-w-[1360px] mx-auto w-full px-container-padding-mobile md:px-container-padding-desktop pt-6 space-y-3">
+{% for message in messages %}
+<div class="flex items-center gap-3 rounded-xl px-4 py-3 {% if message.tags == 'success' %}bg-primary-container text-on-primary-container{% elif message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-surface-container-high text-on-surface{% endif %}">
+<span class="material-symbols-outlined">{% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' %}error{% else %}info{% endif %}</span>
+<p class="font-body-md text-body-md">{{ message }}</p>
+</div>
+{% endfor %}
+</div>
+{% endif %}
 <!-- Hero Section -->
 <section class="relative min-h-[calc(100vh-80px)] flex items-center overflow-y-auto">
 <!-- Background Decorative Elements -->

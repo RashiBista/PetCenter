@@ -16,24 +16,41 @@ def inbox(request):
     Shows all chat rooms the current user participates in,
     ordered by most recent activity. Includes unread count per room.
     """
-    rooms = ChatRoom.objects.filter(
-        Q(participant_1=request.user) | Q(participant_2=request.user)
-    ).select_related("participant_1", "participant_2").order_by("-updated_at")
+    rooms = list(
+        ChatRoom.objects.filter(
+            Q(participant_1=request.user) | Q(participant_2=request.user)
+        ).select_related("participant_1", "participant_2").order_by("-updated_at")
+    )
+    room_ids = [room.pk for room in rooms]
 
-    rooms_data = []
-    for room in rooms:
-        other = room.get_other_participant(request.user)
-        last_msg = room.last_message
-        unread = Message.objects.filter(
-            room=room, is_read=False
-        ).exclude(sender=request.user).count()
+    # Previously each room.last_message + unread count was its own query
+    # (2N+1 total for N rooms) — every extra round trip to a remote DB
+    # adds real, noticeable latency, so these are batched into one query
+    # each regardless of how many rooms there are.
+    last_messages = {
+        message.room_id: message
+        for message in Message.objects.filter(room_id__in=room_ids)
+            .select_related("sender")
+            .order_by("room_id", "-timestamp")
+            .distinct("room_id")
+    }
+    unread_counts = dict(
+        Message.objects.filter(room_id__in=room_ids, is_read=False)
+        .exclude(sender=request.user)
+        .values("room_id")
+        .annotate(count=Count("id"))
+        .values_list("room_id", "count")
+    )
 
-        rooms_data.append({
+    rooms_data = [
+        {
             "room": room,
-            "other_user": other,
-            "last_message": last_msg,
-            "unread_count": unread,
-        })
+            "other_user": room.get_other_participant(request.user),
+            "last_message": last_messages.get(room.pk),
+            "unread_count": unread_counts.get(room.pk, 0),
+        }
+        for room in rooms
+    ]
 
     return render(request, "chat/inbox.html", {
         "rooms_data": rooms_data,

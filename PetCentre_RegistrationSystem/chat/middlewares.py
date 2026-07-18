@@ -22,12 +22,9 @@ class JWTAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        print("MIDDLEWARE STEP 1: __call__ invoked", flush=True)
         query_string = scope.get('query_string', b'').decode()
         params = parse_qs(query_string)
         token_list = params.get('token', [None])
         token = token_list[0] if token_list else None
-        print(f"MIDDLEWARE STEP 2: token extracted = {token[:20] if token else None}...", flush=True)
         scope['user'] = await get_user_from_token(token) if token else AnonymousUser()
-        print(f"MIDDLEWARE STEP 3: user resolved = {scope['user']}", flush=True)
         return await self.app(scope, receive, send)
