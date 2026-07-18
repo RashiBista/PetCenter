@@ -8,12 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      # NOTE: this group key includes matrix.python-version and
-      # matrix.project so each matrix combination gets its own
-      # independent concurrency slot. Without those, all 4 combinations
-      # (2 python-versions x 2 projects) collide into the same group and
-      # cancel-in-progress kills whichever one started earlier every
-      # time another one starts.
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.python-version }}-${{ matrix.project }}
       cancel-in-progress: true
     strategy:
@@ -21,8 +15,6 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ['3.12', '3.13']
-        # final_chat removed — integrated/archived, kept for records only,
-        # not actively developed, so it doesn't need ongoing CI coverage.
         project: ['PetCentre_RegistrationSystem']
     steps:
       - name: Checkout
@@ -47,29 +39,28 @@ jobs:
           test -f ${{ matrix.project }}/manage.py || { echo "manage.py not found in ${{ matrix.project }}" >&2; exit 1; }
           test -f ${{ matrix.project }}/requirements.txt || { echo "requirements.txt not found in ${{ matrix.project }}" >&2; exit 1; }
       - name: Install GDAL/GEOS/PROJ (required by django.contrib.gis / PostGIS)
-        # Only PetCentre_RegistrationSystem uses django.contrib.gis —
-        # final_chat doesn't need these packages, so this step is
-        # skipped for that matrix entry to save CI time.
         if: matrix.project == 'PetCentre_RegistrationSystem'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gdal-bin libgdal-dev libgeos-dev libproj-dev libsqlite3-mod-spatialite
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            gdal-bin \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev \
+            libsqlite3-mod-spatialite
+          echo "GDAL_CONFIG=/usr/bin/gdal-config" >> $GITHUB_ENV
       - name: Install Dependencies
         working-directory: ./${{ matrix.project }}
+        env:
+          CPLUS_INCLUDE_PATH: /usr/include/gdal
+          C_INCLUDE_PATH: /usr/include/gdal
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Run Tests
         working-directory: ./${{ matrix.project }}
-        # DJANGO_SECRET_KEY / DJANGO_DEBUG: settings.py raises RuntimeError
-        # and refuses to start if these aren't set and DEBUG=False (see
-        # settings.py's fail-fast SECRET_KEY guard). manage.py test puts
-        # 'test' into sys.argv, so the DB_PASSWORD/Postgres checks and
-        # the real Neon connection are already bypassed by settings.py's
-        # own `if 'test' in sys.argv` branches — only the secret key is
-        # still required here. This value is a CI-only dummy, never used
-        # outside this ephemeral container, so it's fine hardcoded rather
-        # than routed through GitHub Secrets.
         env:
           DJANGO_DEBUG: "True"
           DJANGO_SECRET_KEY: "ci-test-secret-key-not-for-production-use"
