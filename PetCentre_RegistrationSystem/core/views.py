@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timedelta
+from decimal import Decimal, InvalidOperation
 
 import cloudinary.uploader
 from django.conf import settings
@@ -14,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils import timezone
 
 from myapp.decorators import role_required
@@ -293,6 +295,13 @@ def verify_signup_view(request):
     if not pending:
         return redirect('core:landing_page')
 
+    # So the confirmation screen can show "code sent to X" — without
+    # this a typo'd email/phone during signup is invisible until the
+    # user realizes the code never arrives, since there's nothing on
+    # screen to double-check it against.
+    last_otp = SignupOTP.objects.filter(session_key=request.session.session_key).order_by('-created_at').first()
+    destination = last_otp.destination if last_otp else None
+
     error = None
     if request.method == 'POST':
         code = request.POST.get('otp', '').strip()
@@ -351,7 +360,7 @@ def verify_signup_view(request):
                 }
                 return redirect(dashboard_map[role])
 
-    return render(request, 'core/verify_signup.html', {'error': error, 'destination': None})
+    return render(request, 'core/verify_signup.html', {'error': error, 'destination': destination})
 
 
 def resend_signup_otp_view(request):
@@ -831,6 +840,13 @@ def find_nearest_vets_view(request):
             user_point = Point(float(lng), float(lat), srid=4326)
         except (TypeError, ValueError):
             user_point = None
+    elif request.user.is_pet_owner:
+        # No lat/lng in this request — fall back to whatever was saved
+        # via "Use my location" on a previous visit, so distance sorting
+        # doesn't require asking every single time.
+        profile = getattr(request.user, 'user_profile', None)
+        if profile and profile.location:
+            user_point = profile.location
 
     vets = []
     pharmacies = []
@@ -855,6 +871,47 @@ def find_nearest_vets_view(request):
         'type_filter': type_filter,
         'has_location': bool(user_point),
     })
+
+
+@login_required(login_url='core:pet_owner_login')
+def update_my_location_view(request):
+    """
+    Shared "Use my location" save endpoint for any role with a
+    location-bearing profile (pet owner, vet, pharmacy) — persists
+    coordinates the browser's geolocation API supplied, so distance
+    features (find-nearby-care sorting, appointment booking proximity)
+    work on future visits without asking again every time.
+    """
+    next_url = request.POST.get('next') or reverse('core:landing_page')
+
+    if request.method != 'POST':
+        return redirect(next_url)
+
+    lat = request.POST.get('lat')
+    lng = request.POST.get('lng')
+    try:
+        point = Point(float(lng), float(lat), srid=4326)
+    except (TypeError, ValueError):
+        messages.error(request, "Couldn't read that location — please try again.")
+        return redirect(next_url)
+
+    if request.user.is_vet:
+        profile = getattr(request.user, 'vet_profile', None)
+    elif request.user.is_pharmacy:
+        profile = getattr(request.user, 'pharmacy_profile', None)
+    else:
+        profile = getattr(request.user, 'user_profile', None)
+
+    if profile is None:
+        messages.error(request, "No profile found to save a location to.")
+        return redirect(next_url)
+
+    profile.location = point
+    profile.save(update_fields=['location'])
+    messages.success(request, "Your location has been saved.")
+
+    separator = '&' if '?' in next_url else '?'
+    return redirect(f"{next_url}{separator}lat={lat}&lng={lng}")
 
 
 # ------------------------------------------------------------------
@@ -917,6 +974,38 @@ def veterinary_dashboard(request):
         'total_patients': total_patients,
         'pending_prescriptions_count': pending_prescriptions_count,
     })
+
+
+@role_required(User.Role.VET)
+def vet_settings_view(request):
+    """
+    Self-service profile settings for vets — specialization and the
+    NRS consultation fee shown to pet owners at booking time. Both
+    previously only editable by an admin via Django admin; this is the
+    vet's own equivalent of the pharmacy/admin catalog forms.
+    Location (for find-nearby-care distance sorting) is set separately
+    via the shared "Use my location" button, same flow as pet owners.
+    """
+    profile = request.user.vet_profile
+
+    if request.method == 'POST':
+        specialization = request.POST.get('specialization', '').strip()
+        fee_raw = request.POST.get('consultation_fee', '').strip()
+
+        profile.specialization = specialization or 'General Practice'
+        if fee_raw:
+            try:
+                profile.consultation_fee = Decimal(fee_raw)
+            except InvalidOperation:
+                messages.error(request, "Consultation fee must be a number.")
+                return redirect('core:vet_settings')
+        else:
+            profile.consultation_fee = None
+        profile.save(update_fields=['specialization', 'consultation_fee'])
+        messages.success(request, "Your settings have been updated.")
+        return redirect('core:vet_settings')
+
+    return render(request, 'core/vet_settings.html', {'profile': profile})
 
 
 @role_required(User.Role.PHARMACY)

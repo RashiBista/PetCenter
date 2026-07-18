@@ -62,6 +62,11 @@ class UserProfile(models.Model):
     address = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Set via the browser's geolocation API ("Use my location") on the
+    # Find Nearby Care page — same geography=True pattern as
+    # VetProfile/PharmacyProfile.location, so distance queries return
+    # real-world meters.
+    location = PointField(geography=True, null=True, blank=True)
 
     def __str__(self):
         return f'UserProfile<{self.user.username}>'

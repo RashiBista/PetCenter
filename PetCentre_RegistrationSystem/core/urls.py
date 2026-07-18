@@ -34,10 +34,12 @@ urlpatterns = [
     path('notifications/', views.pet_owner_notifications_view, name='pet_owner_notifications'),
     path('profile/', views.pet_profile_view, name='pet_profile'),
     path('find-vets/', views.find_nearest_vets_view, name='find_nearest_vets'),
+    path('profile/update-location/', views.update_my_location_view, name='update_my_location'),
+
+    path('dashboard/veterinary/settings/', views.vet_settings_view, name='vet_settings'),
 
     path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
-    path('dashboard/veterinary/appointments/', views.veterinary_appointments_view, name='veterinary_appointments'),
     path('dashboard/veterinary/appointments/', views.veterinary_appointments_view, name='veterinary_appointments'),
     path('dashboard/pharmacy/', views.pharmacy_dashboard, name='pharmacy_dashboard'),
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),

@@ -51,11 +51,17 @@ tailwind.config = {
   </div>
   <p class="font-body-md text-body-md text-on-surface-variant mb-6 ml-9">Locate registered veterinary clinics and pharmacies near you.</p>
 
-  <button id="use-location-btn" onclick="useMyLocation()" class="mb-6 flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors">
-    <span class="material-symbols-outlined text-[18px]">my_location</span>
-    Use my location to sort by distance
-  </button>
-  {% if has_location %}<p class="-mt-4 mb-6 font-label-sm text-label-sm text-primary">Sorted by distance from your location.</p>{% endif %}
+  <form id="location-form" method="post" action="{% url 'core:update_my_location' %}" class="mb-2">
+    {% csrf_token %}
+    <input type="hidden" name="lat" id="loc-lat"/>
+    <input type="hidden" name="lng" id="loc-lng"/>
+    <input type="hidden" name="next" value="{% url 'core:find_nearest_vets' %}?type={{ type_filter }}"/>
+    <button type="button" id="use-location-btn" onclick="useMyLocation()" class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors">
+      <span class="material-symbols-outlined text-[18px]">my_location</span>
+      Use my location to sort by distance
+    </button>
+  </form>
+  {% if has_location %}<p class="mb-6 font-label-sm text-label-sm text-primary">Sorted by distance from your saved location.</p>{% else %}<p class="mb-6"></p>{% endif %}
 
   <!-- Tabs -->
   <div class="flex gap-2 mb-6 border-b border-surface-container-high">
@@ -127,10 +133,9 @@ tailwind.config = {
     btn.textContent = "Getting your location...";
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const url = new URL(window.location.href);
-        url.searchParams.set("lat", pos.coords.latitude);
-        url.searchParams.set("lng", pos.coords.longitude);
-        window.location.href = url.toString();
+        document.getElementById("loc-lat").value = pos.coords.latitude;
+        document.getElementById("loc-lng").value = pos.coords.longitude;
+        document.getElementById("location-form").submit();
       },
       (err) => {
         alert("Couldn't get your location: " + err.message);

@@ -125,7 +125,12 @@
 <span class="material-symbols-outlined text-[32px]">mark_email_read</span>
 </div>
 <h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Verify your account</h1>
-<p class="font-body-md text-body-md text-on-surface-variant mt-2">Enter the 6-digit code we just sent you to finish creating your account.</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+{% if destination %}Enter the 6-digit code we just sent to <span class="font-semibold text-on-surface">{{ destination }}</span>.{% else %}Enter the 6-digit code we just sent you to finish creating your account.{% endif %}
+</p>
+{% if destination %}
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Not the right address? <a href="{% url 'core:landing_page' %}" class="text-primary hover:underline">Start over</a>.</p>
+{% endif %}
 </div>
 
 {% if error %}
