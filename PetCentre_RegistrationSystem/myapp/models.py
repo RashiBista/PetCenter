@@ -83,6 +83,10 @@ class VetProfile(models.Model):
     # geography=True makes distance queries return real-world meters
     # (accounting for the Earth's curvature) rather than flat-plane units.
     location = PointField(geography=True, null=True, blank=True)
+    # Displayed in NRS on the appointment booking page. Set per-vet via
+    # Django admin — nullable so an unset fee just renders as "—" instead
+    # of a misleading 0.
+    consultation_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f'VetProfile<{self.user.username}>'
@@ -110,7 +114,7 @@ class PharmacyProfile(models.Model):
         return f'PharmacyProfile<{self.user.username}>'
 
 
-# NOTE: myapp.Pet has been removed entirely — superseded by
+#  myapp.Pet has been removed entirely — superseded by
 # pet_profiles.Pet (richer: DOB, gender, weight, care notes, medical
 # summary/records/vaccinations/medications). Appointment/Prescription
 # below now reference 'pet_profiles.Pet' instead.
@@ -140,7 +144,12 @@ class Appointment(models.Model):
         ordering = ['scheduled_time']
 
     def __str__(self):
-        return f"{self.pet.name} with Dr. {self.vet.username} @ {self.scheduled_time:%b %d, %I:%M %p}"
+        # scheduled_time is stored UTC-aware — strftime formats it in
+        # whatever tzinfo is attached to the object itself (UTC, as
+        # fetched from the DB), not settings.TIME_ZONE, so it needs an
+        # explicit localtime() conversion first.
+        local_time = timezone.localtime(self.scheduled_time)
+        return f"{self.pet.name} with Dr. {self.vet.username} @ {local_time:%b %d, %I:%M %p}"
 
     @property
     def owner(self):
@@ -171,7 +180,7 @@ class Prescription(models.Model):
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     fulfilled_at = models.DateTimeField(null=True, blank=True)
-    # Set by the vet or pharmacy — a date to remind the owner to give/
+    # Set by the vet or pharmacy  a date to remind the owner to give/
     # refill this medicine. Reminder fires the day before.
     reminder_date = models.DateField(null=True, blank=True)
     reminder_sent = models.BooleanField(default=False)

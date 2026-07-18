@@ -326,7 +326,7 @@
 <div class="space-y-4">
 {% for vet in vets %}
 <label class="cursor-pointer group block">
-<input class="peer sr-only" name="vet" type="radio" value="{{ vet.id }}" {% if forloop.first %}checked{% endif %}/>
+<input class="peer sr-only vet-radio" name="vet" type="radio" value="{{ vet.id }}" data-fee="{{ vet.vet_profile.consultation_fee|default_if_none:'' }}" {% if forloop.first %}checked{% endif %}/>
 <div class="flex items-center p-4 border-2 border-surface-variant rounded-xl peer-checked:border-primary peer-checked:bg-primary-fixed/10 transition-all hover:bg-surface-container">
 <div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg mr-4">
 {{ vet.get_full_name|default:vet.username|first|upper }}
@@ -335,6 +335,9 @@
 <h4 class="font-label-md text-label-md font-semibold text-on-background">Dr. {{ vet.get_full_name|default:vet.username }}</h4>
 <p class="text-label-sm font-label-sm text-on-surface-variant">{{ vet.vet_profile.specialization|default:"General Practice" }}</p>
 </div>
+<p class="font-label-md text-label-md font-semibold text-primary flex-shrink-0">
+{% if vet.vet_profile.consultation_fee %}NRS {{ vet.vet_profile.consultation_fee }}{% else %}—{% endif %}
+</p>
 </div>
 </label>
 {% empty %}
@@ -416,6 +419,10 @@
 <p class="font-label-md text-label-md text-on-background">Select your pet, vet, and a date/time on the left, then confirm below.</p>
 </div>
 </div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-4">
+<p class="font-label-md text-label-md text-on-surface-variant">Consultation Fee</p>
+<p id="booking-fee" class="font-title-lg text-title-lg text-primary font-bold">—</p>
+</div>
 </div>
 <!-- CTA -->
 <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-on-primary font-title-lg text-title-lg py-4 rounded-full shadow-[0px_4px_12px_rgba(95,87,143,0.3)] transition-all transform hover:-translate-y-1">
@@ -433,4 +440,14 @@
 <button onclick="window.location.href='{% url 'core:chatbot' %}'" aria-label="Assistant" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed font-label-md text-label-md shadow-xl hover:scale-110 hover:shadow-2xl transition-all Active: scale-95 duration-100 z-50 flex items-center justify-center">
 <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
 </button>
+<script>
+  function updateBookingFee() {
+    const checked = document.querySelector('.vet-radio:checked');
+    const feeEl = document.getElementById('booking-fee');
+    const fee = checked ? checked.dataset.fee : '';
+    feeEl.textContent = fee ? ('NRS ' + fee) : '—';
+  }
+  document.querySelectorAll('.vet-radio').forEach((el) => el.addEventListener('change', updateBookingFee));
+  updateBookingFee();
+</script>
 </body></html>

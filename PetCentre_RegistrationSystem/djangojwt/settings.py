@@ -189,6 +189,14 @@ DATABASES = {
         'OPTIONS': {
             'sslmode': os.environ.get('DB_SSLMODE', 'require'),
         },
+        # Default CONN_MAX_AGE=0 closes and reopens a fresh connection to
+        # Neon (a remote, TLS-only host) on every single query — channels'
+        # database_sync_to_async even calls close_old_connections() before
+        # AND after each call, so every chat DB query was separately
+        # paying the ~2-3s TCP/TLS handshake to Neon. Keeping connections
+        # alive for a minute lets them actually get reused.
+        'CONN_MAX_AGE': 60,
+        'CONN_HEALTH_CHECKS': True,
     }
 }
 
@@ -222,6 +230,25 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Sessions default to Django's `db` backend, which means every single
+# authenticated request — every page load, everywhere in the app — did a
+# session-table SELECT against the remote Neon DB, plus (because
+# SESSION_SAVE_EVERY_REQUEST=True below) a full UPDATE transaction on
+# every request too. That's 3-4 extra WAN round trips per page, on top
+# of whatever the view itself queries — a major, universal contributor
+# to "everything feels slow". Redis is already a hard dependency (chat
+# requires it), lives on the same Docker network as this container, and
+# is dramatically faster to reach than Neon — so sessions go there
+# instead of the database. DB 1 keeps this logically separate from the
+# channel layer's use of Redis DB 0 above.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1')}:{os.environ.get('REDIS_PORT', '6379')}/1",
+    }
+}
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
 # Allow tests to run without a PostgreSQL server / without DB_PASSWORD set.
 # Uses SpatiaLite (SQLite's spatial extension) rather than plain SQLite,
 # since VetProfile.location is a PostGIS PointField — plain SQLite has
@@ -246,7 +273,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+# The clinic (and its users, per observed data) operates out of Nepal.
+# With TIME_ZONE='UTC', every appointment booking treated the wall-clock
+# time slot the user picked (e.g. "09:00") as if it were 09:00 UTC
+# instead of 09:00 Nepal time — silently storing appointments ~5h45m off
+# from what was actually booked, which also skewed "is this in the
+# past?" validation and "today's appointments" filtering. Django still
+# stores everything internally in UTC (USE_TZ=True) — this only changes
+# which zone naive input/output is interpreted in.
+TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'Asia/Kathmandu')
 USE_I18N = True
 USE_TZ = True
 

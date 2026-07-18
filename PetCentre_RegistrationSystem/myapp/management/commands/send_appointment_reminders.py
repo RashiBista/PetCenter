@@ -43,6 +43,10 @@ class Command(BaseCommand):
         for appt in due:
             owner = appt.pet.owner
             vet = appt.vet
+            # scheduled_time comes back from the DB UTC-aware — strftime
+            # formats in whatever tzinfo is attached (UTC), not
+            # settings.TIME_ZONE, so it needs an explicit conversion.
+            local_scheduled = timezone.localtime(appt.scheduled_time)
 
             create_notification(
                 recipient=owner,
@@ -52,7 +56,7 @@ class Command(BaseCommand):
                 message=(
                     f"Reminder: {appt.pet.name}'s appointment with "
                     f"Dr. {vet.get_full_name() or vet.username} is tomorrow, "
-                    f"{appt.scheduled_time:%b %d, %Y at %I:%M %p}."
+                    f"{local_scheduled:%b %d, %Y at %I:%M %p}."
                 ),
                 action_url="/dashboard/pet-owner/",
             )
@@ -64,7 +68,7 @@ class Command(BaseCommand):
                 message=(
                     f"Reminder: you have an appointment with {appt.pet.name} "
                     f"(owner: {owner.get_full_name() or owner.username}) tomorrow, "
-                    f"{appt.scheduled_time:%b %d, %Y at %I:%M %p}."
+                    f"{local_scheduled:%b %d, %Y at %I:%M %p}."
                 ),
                 action_url="/dashboard/veterinary/appointments/",
             )

@@ -188,7 +188,7 @@ def pet_owner_signup_view(request):
                 errors.setdefault('pet_name', []).append('Pet name and species are required if uploading a photo.')
             else:
                 # Upload to Cloudinary right now, before the account even
-                # exists — sessions can't hold file objects, but they can
+                # exists sessions can't hold file objects, but they can
                 # hold this short string reference. Tagged so an orphan
                 # cleanup job can find and remove it later if the signup
                 # is abandoned before OTP verification completes.
@@ -610,6 +610,12 @@ def update_appointment_status_view(request, appointment_id):
         appointment.status = new_status
         appointment.save()
 
+        # scheduled_time is stored as a UTC-aware datetime — formatting it
+        # directly with %-directives ignores settings.TIME_ZONE entirely
+        # (unlike the |date: template filter, raw strftime doesn't convert
+        # to the active timezone), so it must go through localtime() first.
+        local_scheduled = timezone.localtime(appointment.scheduled_time)
+
         owner = appointment.pet.owner
         create_notification(
             recipient=owner,
@@ -619,7 +625,7 @@ def update_appointment_status_view(request, appointment_id):
             message=(
                 f"Dr. {request.user.get_full_name() or request.user.username} has "
                 f"{appointment.get_status_display().lower()} your appointment for "
-                f"{appointment.pet.name} on {appointment.scheduled_time:%b %d, %Y at %I:%M %p}."
+                f"{appointment.pet.name} on {local_scheduled:%b %d, %Y at %I:%M %p}."
             ),
             action_url="/dashboard/pet-owner/",
         )
@@ -633,7 +639,7 @@ def update_appointment_status_view(request, appointment_id):
             message=(
                 f"You {appointment.get_status_display().lower()} the appointment for "
                 f"{appointment.pet.name} (owner: {owner.get_full_name() or owner.username}) "
-                f"on {appointment.scheduled_time:%b %d, %Y at %I:%M %p}."
+                f"on {local_scheduled:%b %d, %Y at %I:%M %p}."
             ),
             action_url="/dashboard/veterinary/appointments/",
         )
@@ -692,10 +698,8 @@ def book_appointment_view(request):
         'upcoming_dates': upcoming_dates, 'time_slots': time_slots,
     })
 
-
-# ------------------------------------------------------------------
 # Medicine search + detail
-# ------------------------------------------------------------------
+
 
 @login_required(login_url='core:pet_owner_login')
 def medicine_search_view(request):
@@ -717,7 +721,7 @@ def medicine_detail_view(request, pk):
 def accessory_detail_view(request, pk):
     from django.shortcuts import get_object_or_404
     accessory = get_object_or_404(Accessory, pk=pk)
-    return render(request, 'core/accessory_detail.html', {'accessory': accessory})
+    return render(request, 'core/accessory_details.html', {'accessory': accessory})
 
 
 # ------------------------------------------------------------------
@@ -797,10 +801,10 @@ def pet_profile_view(request):
 
 
 # ------------------------------------------------------------------
-# Find nearest vets — lists real vet accounts. NOTE: there is no real
+# Find nearest vets "lists real vet accounts. NOTE: there is no real
 # geolocation, distance, or ratings data anywhere in this system yet,
 # so "distance" and star ratings from the original design are NOT
-# rendered here (no data to back them) — only real fields: name,
+# rendered here (no data to back them) :only real fields: name,
 # specialization, email/phone for contact, and a link to book/chat.
 # ------------------------------------------------------------------
 
@@ -922,8 +926,19 @@ def pharmacy_dashboard(request):
         prescription_id = request.POST.get('prescription_id')
 
         if action == 'set_reminder':
-            reminder_date = request.POST.get('reminder_date')
+            reminder_date_str = request.POST.get('reminder_date')
             prescription = Prescription.objects.filter(id=prescription_id).select_related('pet', 'pet__owner').first()
+            # Parse to an actual date before assigning — leaving it as the
+            # raw POST string "works" for the DB write (Django's DateField
+            # converts on save), but the in-memory attribute stays a str,
+            # and formatting a str with a datetime spec below raises
+            # ValueError: every "set reminder" submission 500'd.
+            reminder_date = None
+            if reminder_date_str:
+                try:
+                    reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d').date()
+                except ValueError:
+                    reminder_date = None
             if prescription and reminder_date:
                 prescription.reminder_date = reminder_date
                 prescription.reminder_sent = False  # allow re-triggering if the date was changed

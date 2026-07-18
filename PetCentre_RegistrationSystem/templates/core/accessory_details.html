@@ -113,16 +113,16 @@
 <header class="w-full h-20 bg-surface/80 backdrop-blur-md sticky top-0 z-40 flex items-center px-10 border-b border-surface-variant">
 <a href="{% url 'core:search' %}?category=pet_things" aria-label="Go Back" class="flex items-center gap-2 text-primary hover:bg-surface-variant p-2 rounded-full transition-colors">
 <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
-</button>
+</a>
 <h1 class="ml-4 font-headline-md text-headline-md font-bold text-primary">Accessory Details</h1>
 </header>
 <main class="flex-1 flex flex-col items-center p-container-padding-desktop">
 <div class="w-full max-w-[1360px] mx-auto">
 <!-- Breadcrumbs -->
 <nav aria-label="Breadcrumb" class="flex items-center gap-2 mb-section-margin text-on-surface-variant font-label-md text-label-md">
-<a class="hover:text-primary transition-colors" href="#">Medicine</a>
+<a class="hover:text-primary transition-colors" href="{% url 'core:search' %}?category=pet_things">Accessories</a>
 <span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
-<span aria-current="page" class="text-on-surface">Medicine A</span>
+<span aria-current="page" class="text-on-surface">{{ accessory.name }}</span>
 </nav>
 <!-- Main Detail Area -->
 <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-section-margin">
@@ -134,20 +134,17 @@
 <div class="md:col-span-7 flex flex-col justify-between">
 <div>
 <div class="flex justify-between items-start mb-4">
-<h2 class="font-display-lg text-display-lg text-on-surface">Medicine A</h2>
-<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm">
-<span class="w-2 h-2 rounded-full bg-primary mr-2"></span>In Stock
-                            </span>
+<h2 class="font-display-lg text-display-lg text-on-surface">{{ accessory.name }}</h2>
 </div>
 <p class="font-body-lg text-body-lg text-on-surface-variant mb-6">{{ accessory.description|default:"No description available." }}</p>
 <div class="grid grid-cols-2 gap-4 mb-6">
 <div class="bg-surface-container-low p-4 rounded-lg">
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Category</p>
-<p class="font-title-lg text-title-lg text-on-surface">Antibiotics</p>
+<p class="font-title-lg text-title-lg text-on-surface">{{ accessory.category|default:"—" }}</p>
 </div>
 <div class="bg-surface-container-low p-4 rounded-lg">
-<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Usage</p>
-<p class="font-title-lg text-title-lg text-on-surface">Oral Suspension</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Price</p>
+<p class="font-title-lg text-title-lg text-on-surface">{% if accessory.price %}NRS {{ accessory.price }}{% else %}—{% endif %}</p>
 </div>
 </div>
 </div>
@@ -172,8 +169,8 @@
 <span class="material-symbols-outlined" data-icon="storefront">storefront</span>
 </div>
 <div>
-<p class="font-label-md text-label-md text-on-surface font-semibold">Main Clinic Pharmacy</p>
-<p class="text-on-surface-variant text-sm mt-1">Available for immediate pickup.</p>
+<p class="font-label-md text-label-md text-on-surface font-semibold">{{ accessory.pharmacy_name|default:"Main Clinic Pharmacy" }}</p>
+<p class="text-on-surface-variant text-sm mt-1">Available for pickup.</p>
 </div>
 </div>
 <div class="flex items-start gap-4">
@@ -182,7 +179,7 @@
 </div>
 <div>
 <p class="font-label-md text-label-md text-on-surface font-semibold">Contact</p>
-<p class="text-on-surface-variant text-sm mt-1">+1 (555) 019-2837</p>
+<p class="text-on-surface-variant text-sm mt-1">{{ accessory.pharmacy_contact|default:"Contact clinic for details" }}</p>
 </div>
 </div>
 <div class="flex items-start gap-4">

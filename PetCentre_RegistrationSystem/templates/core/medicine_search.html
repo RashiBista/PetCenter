@@ -3,7 +3,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Messages — PetCentre</title>
+<title>Medicine — PetCentre</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -41,63 +41,45 @@ tailwind.config = {
 </script>
 </head>
 <body class="bg-surface font-body-md text-on-surface min-h-screen">
-<div class="max-w-3xl mx-auto py-8 px-4">
+<div class="max-w-4xl mx-auto py-8 px-4">
 
   <div class="flex items-center gap-3 mb-6">
-    <a href="javascript:history.back()" class="text-on-surface-variant hover:text-primary transition-colors">
+    <a href="{% url 'core:pet_owner_dashboard' %}" class="text-on-surface-variant hover:text-primary transition-colors">
       <span class="material-symbols-outlined">arrow_back</span>
     </a>
-    <h1 class="font-headline-md text-headline-md text-on-surface">Messages</h1>
+    <h1 class="font-headline-md text-headline-md text-on-surface">Search Medicine</h1>
   </div>
 
-  <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
-    {% for entry in rooms_data %}
-    <a href="{% url 'chat:room' entry.room.pk %}"
-       class="flex items-center gap-4 px-5 py-4 border-b border-surface-container last:border-b-0 hover:bg-surface-container-low transition-colors">
+  <form method="get" class="relative mb-8">
+    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+    <input name="q" value="{{ query }}" placeholder="Search by name or category..."
+           class="w-full pl-12 pr-4 py-3 rounded-full border border-outline-variant bg-surface-container-low text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"/>
+  </form>
 
-      <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg flex-shrink-0">
-        {{ entry.other_user.get_full_name|default:entry.other_user.username|first|upper }}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {% for medicine in medicines %}
+    <a href="{% url 'core:medicine_detail' medicine.id %}"
+       class="bg-surface-container-lowest rounded-xl p-5 border border-surface-container-high shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+      <div class="w-14 h-14 rounded-lg bg-surface-container-low flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {% if medicine.photo %}
+          <img src="{{ medicine.photo.url }}" alt="{{ medicine.name }}" class="w-full h-full object-cover"/>
+        {% else %}
+          <span class="material-symbols-outlined text-outline text-2xl">medication</span>
+        {% endif %}
       </div>
-
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center justify-between gap-2">
-          <p class="font-label-md text-label-md text-on-surface font-semibold truncate">
-            {{ entry.other_user.get_full_name|default:entry.other_user.username }}
-          </p>
-          {% if entry.last_message %}
-          <p class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0 msg-time" data-iso="{{ entry.last_message.timestamp.isoformat }}"></p>
-          {% endif %}
-        </div>
-        <p class="font-body-md text-body-md text-on-surface-variant truncate mt-0.5">
-          {% if entry.last_message %}{{ entry.last_message.content }}{% else %}<span class="italic">No messages yet</span>{% endif %}
+      <div class="flex-1">
+        <p class="font-label-md text-label-md text-on-surface font-semibold">{{ medicine.name }}</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant">
+          {{ medicine.category|default:"—" }}
         </p>
       </div>
-
-      {% if entry.unread_count %}
-      <span class="flex-shrink-0 bg-primary text-on-primary text-xs font-bold rounded-full min-w-[22px] h-[22px] flex items-center justify-center px-1.5">
-        {{ entry.unread_count }}
-      </span>
-      {% endif %}
+      {% if medicine.price %}<span class="font-label-md text-label-md text-primary flex-shrink-0">NRS {{ medicine.price }}</span>{% endif %}
     </a>
     {% empty %}
-    <div class="flex flex-col items-center justify-center text-center py-16 gap-3">
-      <span class="material-symbols-outlined text-5xl text-on-surface-variant">chat_bubble</span>
-      <p class="font-body-md text-body-md text-on-surface-variant">No conversations yet.</p>
-      <p class="font-label-sm text-label-sm text-on-surface-variant">Start a chat from a user's profile to see it here.</p>
-    </div>
+    <p class="text-on-surface-variant font-body-md text-body-md text-center py-10 col-span-2">
+      {% if query %}No medicine found matching "{{ query }}".{% else %}No medicine available right now.{% endif %}
+    </p>
     {% endfor %}
   </div>
 </div>
-<script>
-  // Server sends raw UTC ISO timestamps (data-iso) since Django doesn't
-  // know the viewer's timezone — render each in the browser's local time.
-  document.querySelectorAll(".msg-time[data-iso]").forEach((el) => {
-    const d = new Date(el.dataset.iso);
-    let hours = d.getHours();
-    const minutes = d.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12 || 12;
-    el.textContent = `${hours}:${minutes} ${ampm}`;
-  });
-</script>
 </body></html>
