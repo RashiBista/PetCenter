@@ -21,22 +21,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
     """
 
     async def connect(self):
+        print("STEP 1: connect() called", flush=True)
         self.user = self.scope['user']
+        print(f"STEP 2: user = {self.user}, authenticated = {self.user.is_authenticated}", flush=True)
 
         if not self.user.is_authenticated:
+            print("STEP 2b: closing - not authenticated", flush=True)
             await self.close(code=4001)
             return
 
         self.room_id = self.scope['url_route']['kwargs']['room_id']
+        print(f"STEP 3: room_id = {self.room_id}", flush=True)
 
         is_member = await self.is_participant()
+        print(f"STEP 4: is_member = {is_member}", flush=True)
         if not is_member:
+            print("STEP 4b: closing - not a member", flush=True)
             await self.close(code=4003)
             return
 
         self.room_group_name = f'chat_{self.room_id}'
+        print(f"STEP 5: about to group_add, group_name = {self.room_group_name}", flush=True)
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        print("STEP 6: group_add succeeded, about to accept()", flush=True)
         await self.accept()
+        print("STEP 7: accept() succeeded - CONNECTION SHOULD BE OPEN NOW", flush=True)
 
     async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
