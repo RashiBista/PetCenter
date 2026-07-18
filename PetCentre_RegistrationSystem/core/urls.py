@@ -35,6 +35,7 @@ urlpatterns = [
     path('profile/', views.pet_profile_view, name='pet_profile'),
     path('find-vets/', views.find_nearest_vets_view, name='find_nearest_vets'),
     path('profile/update-location/', views.update_my_location_view, name='update_my_location'),
+    path('profile/settings/', views.account_settings_view, name='account_settings'),
 
     path('dashboard/veterinary/settings/', views.vet_settings_view, name='vet_settings'),
 

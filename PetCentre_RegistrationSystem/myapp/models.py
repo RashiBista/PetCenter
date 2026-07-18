@@ -29,6 +29,11 @@ class User(AbstractUser):
     )
     phone_number = models.CharField(max_length=20, blank=True)
     email = models.EmailField(unique=True)
+    # Uploads through the default storage backend (Cloudinary — see
+    # STORAGES in settings.py), same as Pet/Medicine/Accessory photos.
+    # Lives on User rather than the per-role profile models since every
+    # role needs one and there's nothing role-specific about it.
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
     REQUIRED_FIELDS = ['email']
 
