@@ -13,6 +13,41 @@ services:
       timeout: 3s
       retries: 5
 
+  # Local connection pooler in front of the real (remote) Neon database.
+  # Django's ASGI request handling gives every HTTP request its own fresh
+  # thread (see djangojwt/settings.py's CONN_MAX_AGE comment), so a
+  # connection to Neon almost never actually gets reused across requests
+  # — every page load was paying a full new TLS handshake + auth round
+  # trip across the real network distance to Neon's AWS region. pgbouncer
+  # keeps a small pool of already-open connections to Neon warm at all
+  # times; Django/Daphne's per-request "new connection" now only has to
+  # do a fast local handshake to this container instead.
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: petcare-pgbouncer
+    volumes:
+      # Custom entrypoint (see that file for why) — the image's own
+      # DATABASE_URL-driven config generator can't express the Neon SNI
+      # workaround this needs, so this replaces it entirely.
+      - ./pgbouncer-entrypoint.sh:/pgbouncer-entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/pgbouncer-entrypoint.sh"]
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    restart: unless-stopped
+    healthcheck:
+      # -d/-U must be passed explicitly: auth_type=any still requires a
+      # named user on each probe (it just doesn't check it against
+      # anything), so a bare pg_isready with no user logs a harmless but
+      # noisy "requires forced user" error every interval.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "6432", "-d", "${DB_NAME}", "-U", "${DB_USER}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   web:
     build: .
     container_name: petcare-web
@@ -31,8 +66,22 @@ services:
       # NOT 127.0.0.1 — containers reach each other by service name.
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      # Route DB traffic through the local pgbouncer pooler above instead
+      # of connecting to Neon directly on every request — .env's DB_HOST
+      # still points at the real Neon host, which is exactly what
+      # pgbouncer itself uses (see its DATABASE_URL above).
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
+      # This hop never leaves the Docker bridge network, so it doesn't
+      # need TLS — pgbouncer's client listener isn't TLS-configured, and
+      # psycopg2's sslmode=require would just fail to connect to it.
+      # The real (encrypted) hop to Neon is handled by pgbouncer itself
+      # via SERVER_TLS_SSLMODE=require above.
+      - DB_SSLMODE=disable
     depends_on:
       redis:
+        condition: service_healthy
+      pgbouncer:
         condition: service_healthy
     restart: unless-stopped
 

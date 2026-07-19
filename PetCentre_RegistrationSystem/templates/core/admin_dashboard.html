@@ -228,6 +228,200 @@ tailwind.config = {
 <a href="/admin/myapp/user/" class="inline-block mt-4 text-sm text-primary hover:underline">View and manage all users in Django Admin →</a>
 </div>
 
+<!-- Medicine catalog management -->
+<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6 mt-8">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-title-lg text-title-lg text-on-surface">Medicine Catalog</h2>
+<button onclick="document.getElementById('add-medicine-form').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>Add Medicine
+</button>
+</div>
+<div id="add-medicine-form" class="hidden mb-6 p-5 rounded-xl bg-surface-container-low border border-surface-container-high">
+<form method="post" action="{% url 'core:admin_add_medicine' %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+{% csrf_token %}
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Name</label>
+<input name="name" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Category</label>
+<input name="category" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Price</label>
+<input name="price" type="number" step="0.01" min="0" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div class="md:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Description</label>
+<input name="description" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div class="md:col-span-2">
+<button type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Add Medicine</button>
+</div>
+</form>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<th class="py-2 pr-4">Name</th>
+<th class="py-2 pr-4">Category</th>
+<th class="py-2 pr-4">Price</th>
+<th class="py-2 pr-4"></th>
+</tr>
+</thead>
+<tbody>
+{% for m in all_medicines %}
+<tr class="border-b border-surface-container last:border-b-0">
+<td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ m.name }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ m.category|default:"—" }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{% if m.price %}NRS {{ m.price }}{% else %}—{% endif %}</td>
+<td class="py-3 pr-4">
+<form method="post" action="{% url 'core:admin_delete_medicine' m.id %}">
+{% csrf_token %}
+<button type="submit" class="text-sm font-medium text-error hover:underline">Delete</button>
+</form>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="4" class="py-6 text-center text-on-surface-variant">No medicine in the catalog yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- Accessory catalog management -->
+<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6 mt-8">
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-title-lg text-title-lg text-on-surface">Accessory Catalog</h2>
+<button onclick="document.getElementById('add-accessory-form').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>Add Accessory
+</button>
+</div>
+<div id="add-accessory-form" class="hidden mb-6 p-5 rounded-xl bg-surface-container-low border border-surface-container-high">
+<form method="post" action="{% url 'core:admin_add_accessory' %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+{% csrf_token %}
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Name</label>
+<input name="name" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Category</label>
+<input name="category" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Price</label>
+<input name="price" type="number" step="0.01" min="0" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div class="md:col-span-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Description</label>
+<input name="description" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
+</div>
+<div class="md:col-span-2">
+<button type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Add Accessory</button>
+</div>
+</form>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<th class="py-2 pr-4">Name</th>
+<th class="py-2 pr-4">Category</th>
+<th class="py-2 pr-4">Price</th>
+<th class="py-2 pr-4"></th>
+</tr>
+</thead>
+<tbody>
+{% for a in all_accessories %}
+<tr class="border-b border-surface-container last:border-b-0">
+<td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ a.name }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ a.category|default:"—" }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{% if a.price %}NRS {{ a.price }}{% else %}—{% endif %}</td>
+<td class="py-3 pr-4">
+<form method="post" action="{% url 'core:admin_delete_accessory' a.id %}">
+{% csrf_token %}
+<button type="submit" class="text-sm font-medium text-error hover:underline">Delete</button>
+</form>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="4" class="py-6 text-center text-on-surface-variant">No accessories in the catalog yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- Recent appointments (read-only overview) -->
+<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6 mt-8">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Recent Appointments</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<th class="py-2 pr-4">Pet</th>
+<th class="py-2 pr-4">Owner</th>
+<th class="py-2 pr-4">Veterinarian</th>
+<th class="py-2 pr-4">When</th>
+<th class="py-2 pr-4">Status</th>
+</tr>
+</thead>
+<tbody>
+{% for appt in all_appointments %}
+<tr class="border-b border-surface-container last:border-b-0">
+<td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ appt.pet.name }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ appt.pet.owner.get_full_name|default:appt.pet.owner.username }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">Dr. {{ appt.vet.get_full_name|default:appt.vet.username }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ appt.scheduled_time|date:"M d, Y g:i A" }}</td>
+<td class="py-3 pr-4">
+<span class="px-2 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs">{{ appt.get_status_display }}</span>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="5" class="py-6 text-center text-on-surface-variant">No appointments yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- Recent prescriptions (read-only overview) -->
+<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6 mt-8">
+<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Recent Prescriptions</h2>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<th class="py-2 pr-4">Medicine</th>
+<th class="py-2 pr-4">Pet</th>
+<th class="py-2 pr-4">Veterinarian</th>
+<th class="py-2 pr-4">Pharmacy</th>
+<th class="py-2 pr-4">Status</th>
+</tr>
+</thead>
+<tbody>
+{% for rx in all_prescriptions %}
+<tr class="border-b border-surface-container last:border-b-0">
+<td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ rx.medicine_name }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ rx.pet.name }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">Dr. {{ rx.vet.get_full_name|default:rx.vet.username }}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{% if rx.pharmacy %}{{ rx.pharmacy.get_full_name|default:rx.pharmacy.username }}{% else %}—{% endif %}</td>
+<td class="py-3 pr-4">
+{% if rx.status == 'pending' %}<span class="px-2 py-1 rounded-full bg-error-container text-on-error-container text-xs">Pending</span>
+{% elif rx.status == 'fulfilled' %}<span class="px-2 py-1 rounded-full bg-primary-container text-on-primary-container text-xs">Fulfilled</span>
+{% else %}<span class="px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant text-xs">{{ rx.get_status_display }}</span>{% endif %}
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="5" class="py-6 text-center text-on-surface-variant">No prescriptions yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
 </main>
 
 {% include "core/_chatbot_widget.html" %}

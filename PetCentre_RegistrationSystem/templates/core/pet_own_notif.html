@@ -214,7 +214,7 @@
 <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
 <span class="font-title-lg text-title-lg">Appointments</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:chatbot' %}">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'chat:inbox' %}">
 <span class="material-symbols-outlined" data-icon="chat">chat</span>
 <span class="font-title-lg text-title-lg">Chat</span>
 </a>
@@ -258,7 +258,11 @@
 <span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
 </button>
 <div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant ml-2">
-<img alt="User A" class="w-full h-full object-cover" data-alt="A close-up, soft-focus portrait of a relaxed golden retriever looking gently into the camera. The lighting is bright and warm, creating a comforting, calm atmosphere consistent with a modern pet care sanctuary. The background is a highly blurred, airy lavender mist studio setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMtb4ILximV6LzWEahbcxGFoCVi-0kP5W0g0Iqp1H7jizmDGZNFZ08ucVHMWSAkzEVGNbtqlVawe4eiXIeVMRycZA8o-3HBxAUZ_f7klVax_qbXa7oCIUgxpR54sKdxCieOV8KoCJNniAyVVpIeOS7Y59AdliwRedjzmdaZV-yd6BrPVfY6uMOM-V9-_Fx-m5GkZ-vh7IwXiMf2Z_TSw7_ZKX8_fpCEz9fQ_OdYISqTTo2Nhos3XsbMqYDnVG_KzpObYJx-PUvjcZD"/>
+{% if request.user.profile_picture %}
+<img alt="Profile picture" class="w-full h-full object-cover" src="{{ request.user.profile_picture.url }}"/>
+{% else %}
+<div class="w-full h-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+{% endif %}
 </div>
 </div>
 </header>

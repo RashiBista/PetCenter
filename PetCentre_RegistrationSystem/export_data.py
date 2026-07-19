@@ -78,7 +78,7 @@ def export_data():
         output.append("")
     
     # Summary Statistics
-    output.append("\n📊 SUMMARY")
+    output.append("\n SUMMARY")
     output.append("-" * 80)
     output.append(f"Total Users: {users.count()}")
     output.append(f"Total Pet Owners: {user_profiles.count()}")
@@ -92,7 +92,7 @@ def export_data():
     with open('DATABASE_DATA.txt', 'w') as f:
         f.write(content)
     
-    print("✅ Data exported to DATABASE_DATA.txt")
+    print("Data exported to DATABASE_DATA.txt")
     print(content)
 
 if __name__ == '__main__':

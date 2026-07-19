@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'django.contrib.gis',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -187,6 +189,14 @@ DATABASES = {
         'OPTIONS': {
             'sslmode': os.environ.get('DB_SSLMODE', 'require'),
         },
+        # Default CONN_MAX_AGE=0 closes and reopens a fresh connection to
+        # Neon (a remote, TLS-only host) on every single query — channels'
+        # database_sync_to_async even calls close_old_connections() before
+        # AND after each call, so every chat DB query was separately
+        # paying the ~2-3s TCP/TLS handshake to Neon. Keeping connections
+        # alive for a minute lets them actually get reused.
+        'CONN_MAX_AGE': 60,
+        'CONN_HEALTH_CHECKS': True,
     }
 }
 
@@ -220,6 +230,25 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Sessions default to Django's `db` backend, which means every single
+# authenticated request — every page load, everywhere in the app — did a
+# session-table SELECT against the remote Neon DB, plus (because
+# SESSION_SAVE_EVERY_REQUEST=True below) a full UPDATE transaction on
+# every request too. That's 3-4 extra WAN round trips per page, on top
+# of whatever the view itself queries — a major, universal contributor
+# to "everything feels slow". Redis is already a hard dependency (chat
+# requires it), lives on the same Docker network as this container, and
+# is dramatically faster to reach than Neon — so sessions go there
+# instead of the database. DB 1 keeps this logically separate from the
+# channel layer's use of Redis DB 0 above.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1')}:{os.environ.get('REDIS_PORT', '6379')}/1",
+    }
+}
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
 # Allow tests to run without a PostgreSQL server / without DB_PASSWORD set.
 # Uses SpatiaLite (SQLite's spatial extension) rather than plain SQLite,
 # since VetProfile.location is a PostGIS PointField — plain SQLite has
@@ -244,7 +273,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+# The clinic (and its users, per observed data) operates out of Nepal.
+# With TIME_ZONE='UTC', every appointment booking treated the wall-clock
+# time slot the user picked (e.g. "09:00") as if it were 09:00 UTC
+# instead of 09:00 Nepal time — silently storing appointments ~5h45m off
+# from what was actually booked, which also skewed "is this in the
+# past?" validation and "today's appointments" filtering. Django still
+# stores everything internally in UTC (USE_TZ=True) — this only changes
+# which zone naive input/output is interpreted in.
+TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'Asia/Kathmandu')
 USE_I18N = True
 USE_TZ = True
 
@@ -254,12 +291,68 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        # Plain (non-compressing) WhiteNoise storage — the Compressed
+        # variant's post-processing step crashes on a known fragile
+        # interaction with django-cloudinary-storage's own collectstatic
+        # override (they disagree about which vendor files, like
+        # admin's select2 i18n files, actually exist on disk at
+        # compression time). This still gets WhiteNoise's core purpose
+        # — serving static files at all under Daphne — just without
+        # gzip/brotli compression, which isn't worth the fragility for
+        # a project this size.
+        "BACKEND": "whitenoise.storage.StaticFilesStorage",
     },
 }
+
+# django-cloudinary-storage's own collectstatic override still reads
+# this legacy setting name directly (settings.STATICFILES_STORAGE),
+# even though Django 5+ only requires STORAGES. Without this mirror,
+# collectstatic crashes with AttributeError the moment that package's
+# code runs, since Django doesn't auto-alias STORAGES['staticfiles']
+# back onto the old attribute name.
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
+
+# django-cloudinary-storage's OWN collectstatic override still checks
+# this legacy setting name directly (hasn't been updated for Django's
+# newer STORAGES dict) — without it, collectstatic crashes with
+# "AttributeError: 'Settings' object has no attribute
+# 'STATICFILES_STORAGE'". Modern Django itself ignores this legacy
+# setting once STORAGES is defined — this exists purely so that one
+# third-party package's check doesn't blow up.
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# Test-only storage override — placed AFTER the real STORAGES dict
+# above, since this line needs that dict to already exist (referencing
+# STORAGES before its own definition would raise NameError the moment
+# `manage.py test` actually ran). Without this, any test that saves a
+# photo/attachment would make a REAL network call to Cloudinary every
+# time tests run — slow, flaky without internet, and pollutes your
+# real Cloudinary account with test data. In-memory storage keeps
+# file-touching tests fast and fully offline.
+if 'test' in sys.argv:
+    STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
+
+# Same reasoning as the STORAGES override above, for the same reason:
+# SESSION_ENGINE/CACHES point at Redis (see CACHES below) so real
+# requests don't round-trip to the DB for every session read — but the
+# test suite calls client.login()/force_login() throughout, and each
+# of those touches a session. Without this override, `manage.py test`
+# would need a real Redis reachable at REDIS_HOST/REDIS_PORT or every
+# login-touching test fails with redis.exceptions.ConnectionError —
+# including in CI, where no Redis is running unless a workflow
+# explicitly adds one. locmem keeps tests fast, offline, and immune to
+# whatever machine happens to run them.
+if 'test' in sys.argv:
+    CACHES['default'] = {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

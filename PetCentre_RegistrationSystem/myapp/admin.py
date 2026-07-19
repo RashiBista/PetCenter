@@ -31,7 +31,7 @@ class VetProfileAdmin(GISModelAdmin):
     # GISModelAdmin (instead of plain ModelAdmin) renders `location` as
     # a clickable map widget in the admin form, so a vet's coordinates
     # can be set visually instead of typing raw lat/lng.
-    list_display = ('user', 'created_at')
+    list_display = ('user', 'specialization', 'consultation_fee', 'created_at')
     search_fields = ('user__username', 'user__email')
 
 

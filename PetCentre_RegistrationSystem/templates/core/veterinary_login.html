@@ -159,16 +159,12 @@
 <!-- Options -->
 <div class="flex items-center justify-between mt-1 mb-2">
 <label class="flex items-center gap-2 cursor-pointer group">
-<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-surface-container-lowest bg-surface-container-lowest cursor-pointer transition-colors" type="checkbox"/>
+<input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-surface-container-lowest bg-surface-container-lowest cursor-pointer transition-colors" type="checkbox" name="remember_me"/>
 <span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">Remember me</span>
 </label>
 <a class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors" href="{% url 'core:forgot_password' %}">Forgot password?</a>
 </div>
 <!-- Submit Action -->
-<label class="flex items-center gap-2 cursor-pointer mb-2">
-<input type="checkbox" name="remember_me" class="accent-primary w-4 h-4"/>
-<span class="font-label-sm text-label-sm text-on-surface">Remember me for 14 days</span>
-</label>
 <button class="w-full h-14 bg-primary text-on-primary font-title-lg text-title-lg rounded-full shadow-sm hover:shadow-md hover:bg-opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 mt-2" type="submit">
 <span>Sign In</span>
 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>

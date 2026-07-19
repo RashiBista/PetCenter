@@ -138,21 +138,21 @@
 <body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
 <!-- Mobile Nav Shell (Bottom Bar Pivot) -->
 <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface shadow-[0_-4px_16px_rgba(46,46,56,0.04)] z-50 flex justify-around items-center h-20 px-4">
-<a class="flex flex-col items-center gap-1 text-primary" href="{% url 'core:pet_owner_dashboard' %}">
+<a class="flex flex-col items-center gap-1 text-primary" href="{% url 'core:pharmacy_dashboard' %}">
 <span class="material-symbols-outlined" data-weight="fill">dashboard</span>
 <span class="font-label-sm text-label-sm">Dashboard</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'core:appointment_booking' %}">
-<span class="material-symbols-outlined">calendar_today</span>
-<span class="font-label-sm text-label-sm">Appointments</span>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'core:medicine_search' %}">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-label-sm text-label-sm">Medicine</span>
 </a>
 <a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'chat:inbox' %}">
 <span class="material-symbols-outlined">chat</span>
 <span class="font-label-sm text-label-sm">Chat</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'core:pet_profile' %}">
-<span class="material-symbols-outlined">person</span>
-<span class="font-label-sm text-label-sm">Profile</span>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="{% url 'core:pet_owner_notifications' %}">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
 </a>
 </nav>
 <!-- SideNavBar (Desktop Shell) -->
@@ -170,17 +170,13 @@
 <!-- Navigation Links -->
 <nav class="flex-1 flex flex-col gap-2">
 <!-- Active Tab -->
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary hover:bg-surface-container-highest transition-colors duration-200 group" href="{% url 'core:pet_owner_dashboard' %}">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary hover:bg-surface-container-highest transition-colors duration-200 group" href="{% url 'core:pharmacy_dashboard' %}">
 <span class="material-symbols-outlined" data-weight="fill">dashboard</span>
 <span class="font-label-md text-label-md font-semibold">Dashboard</span>
 </a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
 <span class="font-label-md text-label-md">Medicine</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:appointment_booking' %}">
-<span class="material-symbols-outlined">calendar_today</span>
-<span class="font-label-md text-label-md">Appointments</span>
 </a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'chat:inbox' %}">
 <span class="material-symbols-outlined">chat</span>
@@ -190,24 +186,11 @@
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:pet_profile' %}">
-<span class="material-symbols-outlined">person</span>
-<span class="font-label-md text-label-md">Profile</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:find_nearest_vets' %}">
-<span class="material-symbols-outlined">near_me</span>
-<span class="font-label-md text-label-md">Find Nearby Care</span>
-</a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200 mt-auto" href="#">
 <span class="material-symbols-outlined">settings</span>
 <span class="font-label-md text-label-md">Settings</span>
 </a>
 </nav>
-<!-- CTA -->
-<button onclick="window.location.href='{% url 'core:appointment_booking' %}'" class="mt-4 w-full bg-primary text-on-primary py-3 rounded-xl font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-soft flex justify-center items-center gap-2">
-<span class="material-symbols-outlined" data-weight="fill">add_circle</span>
-            Book Appointment
-        </button>
 </aside>
 <!-- Main Content Canvas -->
 <main class="flex-1 md:ml-[280px] w-full min-h-screen relative pb-24 md:pb-0">
@@ -241,7 +224,11 @@
 <div class="hidden sm:block text-right">
 <p class="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">{{ request.user.get_full_name|default:request.user.username }}</p>
 </div>
-<img alt="User A" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container shadow-sm" data-alt="A small, soft-lit portrait photograph of a smiling person, serving as a user profile avatar. Clean white background, modern soft corporate style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz4Ryy9ciiT_c5XsAEKp1RAeSwc1IEsMuT074frMfJOGsN12hmcwh86gGc4YMXzvasgiokfLzQsFQeSlK9ZHGzcvz54DZM-45htrred-W1fMs8I45xRhe0pBy8TJSFUFdchkjeE-JhAB2ZDgQnMZ4BwSA2FNTP0A1A1jWJnKxzh-Klscfxj78071GG9L41AeUVO8lhgd0-cu0yv-WKvx1rKwoTwduJxwOOOMHwKRb8HUMJWXrsSWaLeoLfrJV8fsIy4k3JlitG5y2Q"/>
+{% if request.user.profile_picture %}
+<img alt="Profile picture" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container shadow-sm" src="{{ request.user.profile_picture.url }}"/>
+{% else %}
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold border-2 border-primary-container shadow-sm">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+{% endif %}
 </div>
 </div>
 </header>
@@ -250,150 +237,115 @@
 <!-- Greeting Section -->
 <section>
 <h2 class="font-display-lg text-display-lg text-on-surface">Hello, {{ request.user.get_full_name|default:request.user.username }}</h2>
-<p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">Welcome back to your pet's wellness sanctuary. Here is an overview of your upcoming care activities.</p>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">Welcome back. Here's an overview of prescriptions waiting on you today.</p>
 </section>
-<!-- Quick Action Cards (4-column grid) -->
-<section class="grid grid-cols-2 lg:grid-cols-4 gap-card-gap">
+<!-- Quick Action Cards -->
+<section class="grid grid-cols-2 lg:grid-cols-3 gap-card-gap">
 <!-- Action 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft flex flex-col gap-4">
+<div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<div>
+<h3 class="font-title-lg text-title-lg text-on-surface">{{ pending_count }}</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Pending prescription{{ pending_count|pluralize }}</p>
+</div>
+</div>
+<!-- Action 2 -->
 <button onclick="window.location.href='{% url 'core:medicine_search' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined">medical_services</span>
 </div>
 <div>
 <h3 class="font-title-lg text-title-lg text-on-surface">Search Medicine</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">Find prescriptions and refills.</p>
-</div>
-</button>
-<!-- Action 2 -->
-<button onclick="window.location.href='{% url 'core:appointment_booking' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
-<div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined">calendar_add_on</span>
-</div>
-<div>
-<h3 class="font-title-lg text-title-lg text-on-surface">Book Vet Appointment</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">Schedule a wellness check.</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Browse the medicine catalog.</p>
 </div>
 </button>
 <!-- Action 3 -->
-<button onclick="window.location.href='{% url 'core:pet_profile' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
+<button onclick="window.location.href='{% url 'chat:inbox' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined">pets</span>
+<span class="material-symbols-outlined">chat</span>
 </div>
 <div>
-<h3 class="font-title-lg text-title-lg text-on-surface">Pet Profile</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">
-{% if pet_count %}{{ pet_count }} pet{{ pet_count|pluralize }} registered.{% else %}No pets added yet.{% endif %}
-</p>
-</div>
-</button>
-<!-- Action 4 -->
-<button class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
-<div class="w-12 h-12 rounded-xl bg-surface-variant flex items-center justify-center text-on-surface-variant group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined">location_on</span>
-</div>
-<div>
-<h3 class="font-title-lg text-title-lg text-on-surface">Lost / Found Report</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">Community alert network.</p>
+<h3 class="font-title-lg text-title-lg text-on-surface">Messages</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Chat with vets and pet owners.</p>
 </div>
 </button>
 </section>
-<!-- Main Layout Grid (Upcoming + Notifications) -->
+<!-- Main Layout Grid (Pending Prescriptions + Recently Fulfilled) -->
 <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-<!-- Upcoming Appointment (Spans 8 cols on desktop) -->
+<!-- Pending Prescriptions (Spans 8 cols on desktop) -->
 <div class="lg:col-span-8 bg-surface-container-lowest rounded-3xl p-8 shadow-soft relative overflow-hidden">
-<!-- Subtle background decoration -->
-<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary-fixed opacity-40 rounded-full blur-3xl pointer-events-none"></div>
 <div class="flex justify-between items-center mb-6 relative z-10">
 <h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">event</span>
-                            Upcoming Appointment
+<span class="material-symbols-outlined text-primary">pending_actions</span>
+                            Pending Prescriptions
                         </h3>
-<button class="text-primary font-label-md text-label-md hover:underline">View All</button>
 </div>
-<div class="flex flex-col md:flex-row gap-6 bg-surface-container-low p-6 rounded-2xl relative z-10 border border-surface-container">
-{% if next_appointment %}
-<!-- Pet Info -->
+<div class="space-y-4 relative z-10">
+{% for rx in pending_prescriptions %}
+<div class="bg-surface-container-low p-6 rounded-2xl border border-surface-container">
+<div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
 <div class="flex items-center gap-4 flex-1">
-<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xl shadow-sm">
-{{ next_appointment.pet.name|first|upper }}
+<div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg shadow-sm flex-shrink-0">
+{{ rx.pet.name|first|upper }}
 </div>
 <div>
-<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Patient</p>
-<h4 class="font-title-lg text-title-lg text-on-surface">{{ next_appointment.pet.name }}</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">{{ next_appointment.pet.species }}{% if next_appointment.pet.breed %} — {{ next_appointment.pet.breed }}{% endif %}</p>
+<h4 class="font-title-lg text-title-lg text-on-surface">{{ rx.medicine_name }}{% if rx.dosage %} — {{ rx.dosage }}{% endif %}</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">{{ rx.pet.name }} · Dr. {{ rx.vet.get_full_name|default:rx.vet.username }} · {{ rx.pet.owner.get_full_name|default:rx.pet.owner.username }}</p>
+{% if rx.instructions %}<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ rx.instructions }}</p>{% endif %}
 </div>
 </div>
-<div class="hidden md:block w-px bg-outline-variant self-stretch"></div>
-<!-- Vet Info -->
-<div class="flex items-center gap-4 flex-1">
-<div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-xl shadow-sm">
-{{ next_appointment.vet.get_full_name|default:next_appointment.vet.username|first|upper }}
-</div>
-<div>
-<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Veterinarian</p>
-<h4 class="font-title-lg text-title-lg text-on-surface">Dr. {{ next_appointment.vet.get_full_name|default:next_appointment.vet.username }}</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">{{ next_appointment.reason|default:"General Wellness" }}</p>
-</div>
-</div>
-<div class="hidden md:block w-px bg-outline-variant self-stretch"></div>
-<!-- Time Info -->
-<div class="flex-1 flex flex-col justify-center">
-<div class="bg-primary text-on-primary rounded-xl p-3 inline-flex items-center gap-2 shadow-soft w-fit">
-<span class="material-symbols-outlined" data-weight="fill">schedule</span>
-<div>
-<p class="font-label-md text-label-md font-bold">{{ next_appointment.scheduled_time|date:"M d, Y" }}</p>
-<p class="font-label-sm text-label-sm opacity-90">{{ next_appointment.scheduled_time|date:"g:i A" }}</p>
-</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<form method="post" class="flex items-center gap-2">
+{% csrf_token %}
+<input type="hidden" name="action" value="set_reminder"/>
+<input type="hidden" name="prescription_id" value="{{ rx.id }}"/>
+<input type="date" name="reminder_date" value="{{ rx.reminder_date|date:'Y-m-d' }}"
+       class="px-3 py-2 rounded-lg border border-outline-variant bg-surface text-on-surface font-label-sm text-label-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"/>
+<button type="submit" class="px-3 py-2 rounded-lg border border-outline-variant text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
+Set Reminder
+</button>
+</form>
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="action" value="fulfill"/>
+<input type="hidden" name="prescription_id" value="{{ rx.id }}"/>
+<button type="submit" class="px-4 py-2 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm hover:bg-on-primary-fixed-variant transition-colors">
+Fulfill
+</button>
+</form>
 </div>
 </div>
-{% else %}
-<div class="flex-1 flex flex-col items-center justify-center text-center py-6 gap-2">
-<span class="material-symbols-outlined text-4xl text-on-surface-variant">event_available</span>
-<p class="font-body-md text-body-md text-on-surface-variant">No upcoming appointments booked.</p>
 </div>
-{% endif %}
+{% empty %}
+<div class="flex-1 flex flex-col items-center justify-center text-center py-10 gap-2">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">task_alt</span>
+<p class="font-body-md text-body-md text-on-surface-variant">No pending prescriptions right now.</p>
+</div>
+{% endfor %}
 </div>
 </div>
-<!-- Recent Notifications (Spans 4 cols on desktop) -->
+<!-- Recently Fulfilled (Spans 4 cols on desktop) -->
 <div class="lg:col-span-4 bg-surface-container-lowest rounded-3xl p-8 shadow-soft flex flex-col">
 <div class="flex justify-between items-center mb-6">
-<h3 class="font-headline-md text-headline-md text-on-surface">Recent Notifications</h3>
+<h3 class="font-headline-md text-headline-md text-on-surface">Recently Fulfilled</h3>
 </div>
 <div class="flex-1 overflow-y-auto pr-2 space-y-4">
-<!-- Notification Item -->
-<div class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
-<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-[20px]">vaccines</span>
-</div>
-<div>
-<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Annual vaccination reminder for Pet A.</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">2 hours ago</p>
-</div>
-</div>
-<!-- Notification Item -->
-<div class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
-<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-[20px]">mark_email_unread</span>
-</div>
-<div>
-<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">New message from Dr. Vet A regarding test results.</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Yesterday</p>
-</div>
-</div>
-<!-- Notification Item -->
-<div class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
+{% for rx in recently_fulfilled %}
+<div class="flex gap-4 p-2 -mx-2 rounded-xl">
 <div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center flex-shrink-0">
 <span class="material-symbols-outlined text-[20px]">inventory_2</span>
 </div>
 <div>
-<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Your prescription refill is ready for pickup.</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Oct 20</p>
+<p class="font-body-md text-body-md text-on-surface">{{ rx.medicine_name }} for {{ rx.pet.name }}</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ rx.fulfilled_at|date:"M d, Y" }}</p>
 </div>
 </div>
+{% empty %}
+<p class="font-body-md text-body-md text-on-surface-variant text-center py-8">Nothing fulfilled yet.</p>
+{% endfor %}
 </div>
-<button class="mt-4 w-full py-2 text-primary font-label-md text-label-md text-center hover:bg-primary-fixed rounded-lg transition-colors">
-                        Mark all as read
-                    </button>
 </div>
 </section>
 </div>

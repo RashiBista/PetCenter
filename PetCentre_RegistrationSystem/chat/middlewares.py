@@ -4,8 +4,8 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import get_user_model
-
 User = get_user_model()
+
 
 @database_sync_to_async
 def get_user_from_token(token_key):
@@ -16,6 +16,7 @@ def get_user_from_token(token_key):
     except (TokenError, KeyError, User.DoesNotExist):
         return AnonymousUser()
 
+
 class JWTAuthMiddleware:
     def __init__(self, app):
         self.app = app
@@ -25,6 +26,5 @@ class JWTAuthMiddleware:
         params = parse_qs(query_string)
         token_list = params.get('token', [None])
         token = token_list[0] if token_list else None
-
         scope['user'] = await get_user_from_token(token) if token else AnonymousUser()
         return await self.app(scope, receive, send)

@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
     def _create_vets(self):
         vets_data = [
-            ('demo_vet_amy', 'Amy', 'Chen', 'Small Animal Medicine', 27.7172, 85.3240),   # Kathmandu-ish
+            ('demo_vet_amy', 'Amy', 'Chen', 'Small Animal Medicine', 27.7172, 85.3240),   
             ('demo_vet_raj', 'Raj', 'Sharma', 'Surgery', 27.6710, 85.4298),
         ]
         vets = []
