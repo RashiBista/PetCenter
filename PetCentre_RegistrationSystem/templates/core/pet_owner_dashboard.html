@@ -362,42 +362,36 @@
 <div class="lg:col-span-4 bg-surface-container-lowest rounded-3xl p-8 shadow-soft flex flex-col">
 <div class="flex justify-between items-center mb-6">
 <h3 class="font-headline-md text-headline-md text-on-surface">Recent Notifications</h3>
+<a href="{% url 'core:pet_owner_notifications' %}" class="font-label-md text-label-md text-primary hover:underline">View all</a>
 </div>
 <div class="flex-1 overflow-y-auto pr-2 space-y-4">
-<!-- Notification Item -->
-<div class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
-<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-[20px]">vaccines</span>
+{% for notification in recent_notifications %}
+<a href="{% if notification.action_url %}{{ notification.action_url }}{% else %}{% url 'core:pet_owner_notifications' %}{% endif %}" class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
+<div class="w-10 h-10 rounded-full {% if notification.is_read %}bg-surface-variant text-on-surface-variant{% else %}bg-primary-container text-on-primary-container{% endif %} flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">{{ notification.icon }}</span>
 </div>
-<div>
-<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Annual vaccination reminder for Pet A.</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">2 hours ago</p>
+<div class="min-w-0">
+<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">{{ notification.title }}</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ notification.created_at|timesince }} ago</p>
 </div>
+</a>
+{% empty %}
+<div class="flex flex-col items-center justify-center text-center py-8 gap-2">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">notifications_off</span>
+<p class="font-body-md text-body-md text-on-surface-variant">No notifications yet.</p>
 </div>
-<!-- Notification Item -->
-<div class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
-<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-[20px]">mark_email_unread</span>
+{% endfor %}
 </div>
-<div>
-<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">New message from Dr. Vet A regarding test results.</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Yesterday</p>
-</div>
-</div>
-<!-- Notification Item -->
-<div class="flex gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-surface-container-low transition-colors">
-<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-[20px]">inventory_2</span>
-</div>
-<div>
-<p class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Your prescription refill is ready for pickup.</p>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Oct 20</p>
-</div>
-</div>
-</div>
-<button class="mt-4 w-full py-2 text-primary font-label-md text-label-md text-center hover:bg-primary-fixed rounded-lg transition-colors">
+{% if recent_notifications %}
+<form method="post" action="{% url 'core:pet_owner_notifications' %}">
+{% csrf_token %}
+<input type="hidden" name="action" value="mark_all_read"/>
+<input type="hidden" name="next" value="{% url 'core:pet_owner_dashboard' %}"/>
+<button type="submit" class="mt-4 w-full py-2 text-primary font-label-md text-label-md text-center hover:bg-primary-fixed rounded-lg transition-colors">
                         Mark all as read
                     </button>
+</form>
+{% endif %}
 </div>
 </section>
 </div>

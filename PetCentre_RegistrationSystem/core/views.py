@@ -17,7 +17,9 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
+from chat.models import ChatRoom
 from myapp.decorators import role_required
 from myapp.models import (
     Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
@@ -784,6 +786,12 @@ def pet_owner_notifications_view(request):
         Notification.objects.filter(recipient=request.user, is_read=False).update(
             is_read=True, read_at=timezone.now()
         )
+        # The dashboard's "Mark all as read" button posts here too — send
+        # the user back where they came from instead of always landing on
+        # the notifications page.
+        next_url = request.POST.get('next', '')
+        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+            return redirect(next_url)
         return redirect('core:pet_owner_notifications')
 
     notifications = Notification.objects.filter(recipient=request.user)
@@ -1015,6 +1023,21 @@ def update_my_location_view(request):
 # Dashboards
 # ------------------------------------------------------------------
 
+# Material Symbols icon per notification type, for the dashboard's
+# "Recent Notifications" card (the full notifications page has its own
+# richer layout).
+NOTIFICATION_TYPE_ICONS = {
+    Notification.NotificationType.APPOINTMENT: 'event',
+    Notification.NotificationType.MEDICINE: 'pill',
+    Notification.NotificationType.CHAT: 'mark_email_unread',
+    Notification.NotificationType.ADOPTION: 'pets',
+    Notification.NotificationType.LOST_FOUND: 'search',
+    Notification.NotificationType.REPORT: 'description',
+    Notification.NotificationType.SYSTEM: 'settings',
+    Notification.NotificationType.GENERAL: 'notifications',
+}
+
+
 @role_required(User.Role.USER)
 def pet_owner_dashboard(request):
     pets = Pet.objects.filter(owner=request.user)
@@ -1024,10 +1047,19 @@ def pet_owner_dashboard(request):
         status__in=[Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED],
     ).select_related('pet', 'vet').first()
 
+    recent_notifications = list(
+        Notification.objects.filter(recipient=request.user)[:5]
+    )
+    for notification in recent_notifications:
+        notification.icon = NOTIFICATION_TYPE_ICONS.get(
+            notification.notification_type, 'notifications'
+        )
+
     return render(request, 'core/pet_owner_dashboard.html', {
         'pets': pets,
         'pet_count': pets.count(),
         'next_appointment': next_appointment,
+        'recent_notifications': recent_notifications,
     })
 
 
@@ -1066,10 +1098,56 @@ def veterinary_dashboard(request):
         vet=request.user, status=Prescription.Status.PENDING
     ).count()
 
+    # Latest chat conversations for the "Recent Messages" card. Only a
+    # handful of rooms, so the per-room last_message property (one small
+    # query each) is fine here — unlike the full inbox, which batches.
+    rooms = ChatRoom.objects.filter(
+        Q(participant_1=request.user) | Q(participant_2=request.user)
+    ).select_related('participant_1', 'participant_2').order_by('-updated_at')[:3]
+    recent_messages = [
+        {
+            'room': room,
+            'other_user': room.get_other_participant(request.user),
+            'last_message': room.last_message,
+        }
+        for room in rooms
+    ]
+
+    # "Appointments Trend" — this vet's appointment count per day of the
+    # current week (Mon–Sun). Counted in Python via localtime so a late
+    # Sunday-night UTC timestamp lands on the correct local weekday.
+    week_start = today - timedelta(days=today.weekday())
+    day_counts = [0] * 7
+    week_appointments = Appointment.objects.filter(
+        vet=request.user,
+        scheduled_time__date__range=(week_start, week_start + timedelta(days=6)),
+    ).only('scheduled_time')
+    for appointment in week_appointments:
+        day_counts[timezone.localtime(appointment.scheduled_time).weekday()] += 1
+
+    # Even y-axis ceiling (min 4) so the midpoint label is a whole number
+    # and a quiet week doesn't render one appointment as a full-height bar.
+    trend_max = max(4, max(day_counts))
+    if trend_max % 2:
+        trend_max += 1
+    appointments_trend = [
+        {
+            'label': (week_start + timedelta(days=i)).strftime('%a')[0],
+            'count': day_counts[i],
+            'pct': round(day_counts[i] / trend_max * 100),
+            'is_today': week_start + timedelta(days=i) == today,
+        }
+        for i in range(7)
+    ]
+
     return render(request, 'core/veterinary_dashboard.html', {
         'todays_appointments': todays_appointments,
         'total_patients': total_patients,
         'pending_prescriptions_count': pending_prescriptions_count,
+        'recent_messages': recent_messages,
+        'appointments_trend': appointments_trend,
+        'trend_max': trend_max,
+        'trend_mid': trend_max // 2,
     })
 
 

@@ -294,69 +294,51 @@
 <div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest flex-1">
 <div class="flex justify-between items-center mb-4">
 <h3 class="font-title-lg text-title-lg text-on-surface">Recent Messages</h3>
+<a href="{% url 'chat:inbox' %}" aria-label="Open inbox">
 <span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-primary">open_in_new</span>
+</a>
 </div>
 <div class="space-y-4">
-<!-- Message 1 -->
-<div class="flex gap-3 cursor-pointer group">
+{% for item in recent_messages %}
+<a href="{% url 'chat:room' item.room.pk %}" class="flex gap-3 cursor-pointer group">
 <div class="w-10 h-10 rounded-full bg-secondary-container flex-shrink-0 flex items-center justify-center text-on-secondary-container">
 <span class="material-symbols-outlined text-sm">person</span>
 </div>
 <div class="flex-1 min-w-0 border-b border-surface-container-high pb-3 group-hover:border-primary/30 transition-colors">
 <div class="flex justify-between items-baseline mb-1">
-<h4 class="font-label-md text-label-md text-on-surface font-semibold truncate">User A</h4>
-<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">10m ago</span>
+<h4 class="font-label-md text-label-md text-on-surface font-semibold truncate">{{ item.other_user.get_full_name|default:item.other_user.username }}</h4>
+{% if item.last_message %}
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px] whitespace-nowrap flex-shrink-0 ml-2">{{ item.last_message.timestamp|timesince }} ago</span>
+{% endif %}
 </div>
-<p class="font-body-md text-body-md text-sm text-on-surface-variant truncate">Is it normal for Max to sleep this much after...</p>
+<p class="font-body-md text-body-md text-sm text-on-surface-variant truncate">{% if item.last_message %}{{ item.last_message.content }}{% else %}No messages yet.{% endif %}</p>
 </div>
+</a>
+{% empty %}
+<div class="flex flex-col items-center justify-center text-center py-8 gap-2">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant">chat_bubble</span>
+<p class="font-body-md text-body-md text-sm text-on-surface-variant">No conversations yet.</p>
 </div>
-<!-- Message 2 -->
-<div class="flex gap-3 cursor-pointer group">
-<div class="w-10 h-10 rounded-full bg-secondary-container flex-shrink-0 flex items-center justify-center text-on-secondary-container">
-<span class="material-symbols-outlined text-sm">person</span>
-</div>
-<div class="flex-1 min-w-0 border-b border-surface-container-high pb-3 group-hover:border-primary/30 transition-colors">
-<div class="flex justify-between items-baseline mb-1">
-<h4 class="font-label-md text-label-md text-on-surface font-semibold truncate">Clinic Reception</h4>
-<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">1h ago</span>
-</div>
-<p class="font-body-md text-body-md text-sm text-on-surface-variant truncate">The lab results for Bella are ready for review.</p>
+{% endfor %}
 </div>
 </div>
-</div>
-</div>
-<!-- Simple Chart Placeholder -->
+<!-- Appointments per day, this week (Mon-Sun) -->
 <div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest">
-<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Appointments Trend</h3>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-4">Appointments Trend <span class="font-label-sm text-label-sm text-on-surface-variant font-normal">(this week)</span></h3>
 <div class="h-32 w-full flex items-end gap-2 px-2 relative">
 <!-- Y Axis marks -->
 <div class="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-on-surface-variant pb-6">
-<span>20</span>
-<span>10</span>
+<span>{{ trend_max }}</span>
+<span>{{ trend_mid }}</span>
 <span>0</span>
 </div>
 <!-- Bars -->
 <div class="flex-1 ml-4 flex items-end justify-between gap-1 h-full pb-6 relative">
-<!-- Bar 1 -->
-<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[40%] relative group">
-<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">M</span>
+{% for day in appointments_trend %}
+<div class="w-full {% if day.is_today %}bg-primary hover:bg-primary-container{% else %}bg-primary-container hover:bg-primary{% endif %} transition-colors rounded-t-sm relative group" style="height: {{ day.pct }}%" title="{{ day.count }} appointment{{ day.count|pluralize }}">
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] {% if day.is_today %}font-bold text-primary{% else %}text-on-surface-variant{% endif %}">{{ day.label }}</span>
 </div>
-<!-- Bar 2 -->
-<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[60%] relative group">
-<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">T</span>
-</div>
-<!-- Bar 3 -->
-<div class="w-full bg-primary hover:bg-primary-container transition-colors rounded-t-sm h-[80%] relative group">
-<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant font-bold text-primary">W</span>
-</div>
-<!-- Bar 4 -->
-<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[50%] relative group">
-<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">T</span>
-</div>
-<!-- Bar 5 -->
-<div class="w-full bg-primary-container hover:bg-primary transition-colors rounded-t-sm h-[90%] relative group">
-<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant">F</span>
-</div>
+{% endfor %}
 </div>
 <!-- X axis line -->
 <div class="absolute bottom-6 left-4 right-0 h-px bg-outline-variant"></div>

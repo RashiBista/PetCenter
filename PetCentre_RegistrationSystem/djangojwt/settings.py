@@ -247,7 +247,16 @@ CACHES = {
         'LOCATION': f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1')}:{os.environ.get('REDIS_PORT', '6379')}/1",
     }
 }
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# cached_db, NOT the pure `cache` backend: with `cache`, Redis is the ONLY
+# copy of every session, and Django's cache-session load() swallows ANY
+# Redis error (connection reset/timeout — easy to hit through Docker
+# Desktop's port proxy under concurrent load) and silently treats it as
+# "no session" → the user is logged out at random for no visible reason;
+# a Redis restart likewise logs out everyone at once. cached_db keeps the
+# fast path (reads are served from Redis on a cache hit) but persists
+# sessions in the database, so a Redis blip or restart just falls back to
+# the DB instead of destroying the session.
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 # Allow tests to run without a PostgreSQL server / without DB_PASSWORD set.
 # Uses SpatiaLite (SQLite's spatial extension) rather than plain SQLite,
@@ -403,13 +412,18 @@ if not DEBUG:
 # ------------------------------------------------------------------
 # Session lifetime — controlled per-login by the "Remember Me"
 # checkbox (see core/views.py login views), not a single fixed value:
-#   - Checked   → session.set_expiry(SESSION_COOKIE_AGE) → rolls for 14 days
+#   - Checked   → session.set_expiry(SESSION_COOKIE_AGE) → 14 days from login
 #   - Unchecked → session.set_expiry(0) → ends when the browser closes
-# SESSION_SAVE_EVERY_REQUEST makes the "remembered" case a genuine
-# rolling window (resets on activity) rather than fixed from login.
+# SESSION_SAVE_EVERY_REQUEST must stay False now that the session engine
+# is cached_db (see SESSION_ENGINE above): True would write the session
+# to the remote Neon DB on EVERY authenticated request, reinstating the
+# exact per-request WAN round trips that moving sessions off the db
+# backend was meant to eliminate. The cost is that "remembered" sessions
+# are a fixed 14-day window from login rather than a rolling one — an
+# acceptable trade for not paying a DB write per page load.
 # ------------------------------------------------------------------
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 14 days, in seconds — used only when "Remember Me" is checked
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_SAVE_EVERY_REQUEST = False
 
 # IPs listed here (comma-separated in .env) are exempt from IP-level
 # login lockout only. Useful for a presentation/dev machine, so
