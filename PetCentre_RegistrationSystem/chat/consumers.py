@@ -83,7 +83,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Notify the other participant — this creates a real Notification
+        # Notify the other participant  this creates a real Notification
         # row and schedules a real email via notifications.services, same
         # as the appointment-booking trigger in core/views.py.
         #

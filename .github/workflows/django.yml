@@ -7,6 +7,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Sessions moved to a Redis-backed cache (SESSION_ENGINE =
+    # django.contrib.sessions.backends.cache) to cut DB round trips on
+    # every request — see djangojwt/settings.py. That means anything
+    # touching a session (client.login()/force_login() in the test
+    # suite, e.g. myapp/test_appointments.py) needs a reachable Redis,
+    # or it fails with redis.exceptions.ConnectionError. This service
+    # container provides one; REDIS_HOST/REDIS_PORT below point the
+    # app at it exactly like docker-compose.yml does for local dev.
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.python-version }}-${{ matrix.project }}
       cancel-in-progress: true
@@ -64,5 +82,7 @@ jobs:
         env:
           DJANGO_DEBUG: "True"
           DJANGO_SECRET_KEY: "ci-test-secret-key-not-for-production-use"
+          REDIS_HOST: "localhost"
+          REDIS_PORT: "6379"
         run: |
           python manage.py test

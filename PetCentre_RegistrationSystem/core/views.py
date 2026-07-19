@@ -1,10 +1,11 @@
 import random
 from datetime import datetime, timedelta
+from decimal import Decimal, InvalidOperation
 
 import cloudinary.uploader
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -14,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils import timezone
 
 from myapp.decorators import role_required
@@ -293,6 +295,13 @@ def verify_signup_view(request):
     if not pending:
         return redirect('core:landing_page')
 
+    # So the confirmation screen can show "code sent to X" — without
+    # this a typo'd email/phone during signup is invisible until the
+    # user realizes the code never arrives, since there's nothing on
+    # screen to double-check it against.
+    last_otp = SignupOTP.objects.filter(session_key=request.session.session_key).order_by('-created_at').first()
+    destination = last_otp.destination if last_otp else None
+
     error = None
     if request.method == 'POST':
         code = request.POST.get('otp', '').strip()
@@ -351,7 +360,7 @@ def verify_signup_view(request):
                 }
                 return redirect(dashboard_map[role])
 
-    return render(request, 'core/verify_signup.html', {'error': error, 'destination': None})
+    return render(request, 'core/verify_signup.html', {'error': error, 'destination': destination})
 
 
 def resend_signup_otp_view(request):
@@ -801,6 +810,103 @@ def pet_profile_view(request):
 
 
 # ------------------------------------------------------------------
+# Account settings — username/email/phone/profile picture/password.
+# Shared by every role: pet owners get their own dedicated page
+# (account_settings_view); vets get the same fields folded into their
+# richer settings page (vet_settings_view) alongside practice details.
+# ------------------------------------------------------------------
+
+def _update_account_fields(request, user):
+    """
+    Handles the username/email/phone/profile-picture section of an
+    account settings form. Returns a list of error strings — empty
+    means the update was validated and saved.
+    """
+    username = request.POST.get('username', '').strip()
+    email = request.POST.get('email', '').strip()
+    phone_number = request.POST.get('phone_number', '').strip()
+    profile_picture = request.FILES.get('profile_picture')
+
+    errors = []
+    if not username:
+        errors.append('Username is required.')
+    elif User.objects.filter(username__iexact=username).exclude(pk=user.pk).exists():
+        errors.append('That username is already taken.')
+
+    if not email:
+        errors.append('Email is required.')
+    elif User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+        errors.append('That email is already in use.')
+
+    if errors:
+        return errors
+
+    update_fields = ['username', 'email', 'phone_number']
+    user.username = username
+    user.email = email
+    user.phone_number = phone_number
+    if profile_picture:
+        user.profile_picture = profile_picture
+        update_fields.append('profile_picture')
+    user.save(update_fields=update_fields)
+    return []
+
+
+def _update_password(request, user):
+    """
+    Handles the change-password section of an account settings form.
+    Returns a list of error strings — empty means the password was
+    changed (caller must call update_session_auth_hash() afterward, or
+    the now-stale session gets logged out on the very next request).
+    """
+    current_password = request.POST.get('current_password', '')
+    new_password = request.POST.get('new_password', '')
+    new_password2 = request.POST.get('new_password2', '')
+
+    errors = []
+    if not user.check_password(current_password):
+        errors.append('Current password is incorrect.')
+    if new_password != new_password2:
+        errors.append('New passwords do not match.')
+    if not errors:
+        try:
+            validate_password(new_password, user=user)
+        except ValidationError as e:
+            errors.extend(e.messages)
+
+    if errors:
+        return errors
+
+    user.set_password(new_password)
+    user.save(update_fields=['password'])
+    return []
+
+
+@login_required(login_url='core:pet_owner_login')
+def account_settings_view(request):
+    """
+    Self-service account settings for pet owners. Vets have the same
+    fields available on their own settings page (vet_settings_view)
+    alongside specialization/fee/location.
+    """
+    errors = []
+
+    if request.method == 'POST':
+        section = request.POST.get('section')
+        if section == 'password':
+            errors = _update_password(request, request.user)
+        else:
+            errors = _update_account_fields(request, request.user)
+
+        if not errors:
+            update_session_auth_hash(request, request.user)
+            messages.success(request, "Your settings have been updated.")
+            return redirect('core:account_settings')
+
+    return render(request, 'core/account_settings.html', {'errors': errors})
+
+
+# ------------------------------------------------------------------
 # Find nearest vets "lists real vet accounts. NOTE: there is no real
 # geolocation, distance, or ratings data anywhere in this system yet,
 # so "distance" and star ratings from the original design are NOT
@@ -831,6 +937,13 @@ def find_nearest_vets_view(request):
             user_point = Point(float(lng), float(lat), srid=4326)
         except (TypeError, ValueError):
             user_point = None
+    elif request.user.is_pet_owner:
+        # No lat/lng in this request — fall back to whatever was saved
+        # via "Use my location" on a previous visit, so distance sorting
+        # doesn't require asking every single time.
+        profile = getattr(request.user, 'user_profile', None)
+        if profile and profile.location:
+            user_point = profile.location
 
     vets = []
     pharmacies = []
@@ -855,6 +968,47 @@ def find_nearest_vets_view(request):
         'type_filter': type_filter,
         'has_location': bool(user_point),
     })
+
+
+@login_required(login_url='core:pet_owner_login')
+def update_my_location_view(request):
+    """
+    Shared "Use my location" save endpoint for any role with a
+    location-bearing profile (pet owner, vet, pharmacy) — persists
+    coordinates the browser's geolocation API supplied, so distance
+    features (find-nearby-care sorting, appointment booking proximity)
+    work on future visits without asking again every time.
+    """
+    next_url = request.POST.get('next') or reverse('core:landing_page')
+
+    if request.method != 'POST':
+        return redirect(next_url)
+
+    lat = request.POST.get('lat')
+    lng = request.POST.get('lng')
+    try:
+        point = Point(float(lng), float(lat), srid=4326)
+    except (TypeError, ValueError):
+        messages.error(request, "Couldn't read that location — please try again.")
+        return redirect(next_url)
+
+    if request.user.is_vet:
+        profile = getattr(request.user, 'vet_profile', None)
+    elif request.user.is_pharmacy:
+        profile = getattr(request.user, 'pharmacy_profile', None)
+    else:
+        profile = getattr(request.user, 'user_profile', None)
+
+    if profile is None:
+        messages.error(request, "No profile found to save a location to.")
+        return redirect(next_url)
+
+    profile.location = point
+    profile.save(update_fields=['location'])
+    messages.success(request, "Your location has been saved.")
+
+    separator = '&' if '?' in next_url else '?'
+    return redirect(f"{next_url}{separator}lat={lat}&lng={lng}")
 
 
 # ------------------------------------------------------------------
@@ -917,6 +1071,55 @@ def veterinary_dashboard(request):
         'total_patients': total_patients,
         'pending_prescriptions_count': pending_prescriptions_count,
     })
+
+
+@role_required(User.Role.VET)
+def vet_settings_view(request):
+    """
+    Self-service profile settings for vets — specialization and the
+    NRS consultation fee shown to pet owners at booking time. Both
+    previously only editable by an admin via Django admin; this is the
+    vet's own equivalent of the pharmacy/admin catalog forms.
+    Location (for find-nearby-care distance sorting) is set separately
+    via the shared "Use my location" button, same flow as pet owners.
+    """
+    profile = request.user.vet_profile
+    errors = []
+
+    if request.method == 'POST':
+        section = request.POST.get('section')
+
+        if section == 'account':
+            errors = _update_account_fields(request, request.user)
+            if not errors:
+                messages.success(request, "Your account details have been updated.")
+                return redirect('core:vet_settings')
+
+        elif section == 'password':
+            errors = _update_password(request, request.user)
+            if not errors:
+                update_session_auth_hash(request, request.user)
+                messages.success(request, "Your password has been changed.")
+                return redirect('core:vet_settings')
+
+        else:
+            specialization = request.POST.get('specialization', '').strip()
+            fee_raw = request.POST.get('consultation_fee', '').strip()
+
+            profile.specialization = specialization or 'General Practice'
+            if fee_raw:
+                try:
+                    profile.consultation_fee = Decimal(fee_raw)
+                except InvalidOperation:
+                    messages.error(request, "Consultation fee must be a number.")
+                    return redirect('core:vet_settings')
+            else:
+                profile.consultation_fee = None
+            profile.save(update_fields=['specialization', 'consultation_fee'])
+            messages.success(request, "Your settings have been updated.")
+            return redirect('core:vet_settings')
+
+    return render(request, 'core/vet_settings.html', {'profile': profile, 'errors': errors})
 
 
 @role_required(User.Role.PHARMACY)
