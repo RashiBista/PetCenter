@@ -408,6 +408,19 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    # Behind a hosting platform's proxy / Cloudflare, TLS terminates at
+    # the proxy and Django itself receives plain HTTP. Without trusting
+    # X-Forwarded-Proto, request.is_secure() is always False in prod →
+    # SECURE_SSL_REDIRECT loops forever and CSRF origin checks reject
+    # every https POST. Only safe because in any real deployment the app
+    # is only reachable through that proxy.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Django 4+ requires the public https origin(s) to be listed
+    # explicitly for POSTs to pass CSRF, e.g.
+    # DJANGO_CSRF_TRUSTED_ORIGINS=https://example.com,https://www.example.com
+    CSRF_TRUSTED_ORIGINS = [
+        o.strip() for o in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()
+    ]
 
 # ------------------------------------------------------------------
 # Session lifetime — controlled per-login by the "Remember Me"
