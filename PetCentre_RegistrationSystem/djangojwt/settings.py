@@ -341,6 +341,19 @@ CLOUDINARY_STORAGE = {
 if 'test' in sys.argv:
     STORAGES['default'] = {'BACKEND': 'django.core.files.storage.InMemoryStorage'}
 
+# Same reasoning as the STORAGES override above, for the same reason:
+# SESSION_ENGINE/CACHES point at Redis (see CACHES below) so real
+# requests don't round-trip to the DB for every session read — but the
+# test suite calls client.login()/force_login() throughout, and each
+# of those touches a session. Without this override, `manage.py test`
+# would need a real Redis reachable at REDIS_HOST/REDIS_PORT or every
+# login-touching test fails with redis.exceptions.ConnectionError —
+# including in CI, where no Redis is running unless a workflow
+# explicitly adds one. locmem keeps tests fast, offline, and immune to
+# whatever machine happens to run them.
+if 'test' in sys.argv:
+    CACHES['default'] = {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Where @login_required sends unauthenticated users for the

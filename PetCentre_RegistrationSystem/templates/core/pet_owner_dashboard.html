@@ -241,7 +241,11 @@
 <div class="hidden sm:block text-right">
 <p class="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">{{ request.user.get_full_name|default:request.user.username }}</p>
 </div>
-<img alt="User A" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container shadow-sm" data-alt="A small, soft-lit portrait photograph of a smiling person, serving as a user profile avatar. Clean white background, modern soft corporate style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz4Ryy9ciiT_c5XsAEKp1RAeSwc1IEsMuT074frMfJOGsN12hmcwh86gGc4YMXzvasgiokfLzQsFQeSlK9ZHGzcvz54DZM-45htrred-W1fMs8I45xRhe0pBy8TJSFUFdchkjeE-JhAB2ZDgQnMZ4BwSA2FNTP0A1A1jWJnKxzh-Klscfxj78071GG9L41AeUVO8lhgd0-cu0yv-WKvx1rKwoTwduJxwOOOMHwKRb8HUMJWXrsSWaLeoLfrJV8fsIy4k3JlitG5y2Q"/>
+{% if request.user.profile_picture %}
+<img alt="Profile picture" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container shadow-sm" src="{{ request.user.profile_picture.url }}"/>
+{% else %}
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold border-2 border-primary-container shadow-sm">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+{% endif %}
 </div>
 </div>
 </header>

@@ -175,7 +175,11 @@
 <span class="material-symbols-outlined">support_agent</span>
 </button>
 <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container cursor-pointer hover:border-primary transition-colors">
-<img alt="User A" class="w-full h-full object-cover" data-alt="A professional headshot of a friendly veterinarian wearing a clean white coat over a soft lavender scrub. Warm, inviting lighting in a modern clinic setting. The aesthetic is reassuring, trustworthy, and high-quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAlvKatG4Nf4d-jlDzLX_q8t-WY4On34Hif7zDIqBLf79HkV1j_xCunKF4oj3FKV42g0Nmk2T7u_wI0HY0X-WUS4qMdJUkT5ch6OjTzavlVY4rThkRFqYAy2Io9v29RoVxceJ1DR-unWpqLGALWUiNF4QEnaIRKKxJkpGTBF0FP72HoTpvkLsVDHm6kQrtTwYzdBAXI_gcH2nUiOv3_QlnaNcYmQd4hKMeBZ3OxQ6_3lsAElF323EAMjCXbSmWtrI-7pusEv6ve6FT"/>
+{% if request.user.profile_picture %}
+<img alt="Profile picture" class="w-full h-full object-cover" src="{{ request.user.profile_picture.url }}"/>
+{% else %}
+<div class="w-full h-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+{% endif %}
 </div>
 </div>
 </header>

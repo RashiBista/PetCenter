@@ -227,7 +227,7 @@
 <span class="material-symbols-outlined">calendar_today</span>
 <span class="font-label-md text-label-md font-semibold">Appointments</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:chatbot' %}">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'chat:inbox' %}">
 <span class="material-symbols-outlined">chat</span>
 <span class="font-label-md text-label-md">Chat</span>
 </a>
@@ -271,7 +271,11 @@
 <span class="material-symbols-outlined">support_agent</span>
 </button>
 <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-variant cursor-pointer">
-<img alt="User A" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional looking woman, soft natural lighting, light neutral background, high resolution, soft focus on edges, calm and approachable demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwA768YQaPedLmdrI8FhhP5eTxpWaIuU4GlBh5aSCsC0ga3Mt9BzDBs4JVpajor9xccpnEkI90Vb7qhNJMVnTa68dxjE_f6CtWLeG3hT4MS1XhcTBT9KeJ4d2Z18mqfF1ErmvIoXTir_j_8g6t50cVkFnPsPkhw37te4CRXLJTwKn26B0GIumNuXJLkFrm7O7bmVY5dt5xfLmfOG-o9QUwRzRgxEfr0k3NffsxHboTyDK7MfrzdnCu_X0FZZ-4oJZcOTR-vQ-FYtoV"/>
+{% if request.user.profile_picture %}
+<img alt="Profile picture" class="w-full h-full object-cover" src="{{ request.user.profile_picture.url }}"/>
+{% else %}
+<div class="w-full h-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+{% endif %}
 </div>
 </div>
 </header>
