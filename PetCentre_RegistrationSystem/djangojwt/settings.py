@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'pet_profiles',
     'corsheaders',
     'drf_spectacular',
+    'anymail',
 ]
 
 # Lets the pet-owner login page's "Email or Phone" field authenticate
@@ -385,6 +386,13 @@ EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').strip().lower() in ('true', '1', 'yes')
+
+# Anymail (HTTP-API email) — only active when EMAIL_BACKEND is set to
+# anymail.backends.brevo.EmailBackend (e.g. on Render, where outbound
+# SMTP is blocked on the free tier). SMTP/console setups above ignore it.
+ANYMAIL = {
+    'BREVO_API_KEY': os.environ.get('BREVO_API_KEY', ''),
+}
 
 # --- pet_profiles app config ---
 # Demo mode intentionally OFF — this project has a complete, real auth

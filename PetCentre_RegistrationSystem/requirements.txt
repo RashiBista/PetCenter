@@ -29,6 +29,12 @@ cloudinary==1.*
 django-cloudinary-storage==0.3.0
 Pillow==12.2.0
 
+# --- Email via HTTP API (Render's free tier blocks outbound SMTP, so
+# Gmail/any SMTP host is unreachable there; Anymail's Brevo backend
+# sends over HTTPS instead. Activated per-environment by setting
+# EMAIL_BACKEND=anymail.backends.brevo.EmailBackend + BREVO_API_KEY.) ---
+django-anymail==13.*
+
 # --- Misc ---
 sqlparse==0.5.5
 asgiref==3.11.1

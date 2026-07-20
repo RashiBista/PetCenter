@@ -60,6 +60,10 @@ services:
         sync: false
       - key: DEFAULT_FROM_EMAIL
         sync: false
+      # Brevo HTTP-API key (Render free tier blocks outbound SMTP, so
+      # EMAIL_BACKEND should be anymail.backends.brevo.EmailBackend here)
+      - key: BREVO_API_KEY
+        sync: false
       - key: REDIS_HOST
         fromService:
           type: keyvalue
