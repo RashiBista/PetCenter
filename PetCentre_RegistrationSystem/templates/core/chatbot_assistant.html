@@ -190,39 +190,44 @@
 </div>
 <div class="flex flex-col gap-2 flex-grow">
 <!-- Dashboard -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_dashboard' %}{% else %}{% url 'core:pet_owner_dashboard' %}{% endif %}">
 <span class="material-symbols-outlined">dashboard</span>
 <span class="font-label-md text-label-md">Dashboard</span>
 </a>
 <!-- Medicine -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
 <span class="font-label-md text-label-md">Medicine</span>
 </a>
 <!-- Appointments -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_appointments' %}{% else %}{% url 'core:appointment_booking' %}{% endif %}">
 <span class="material-symbols-outlined">calendar_today</span>
 <span class="font-label-md text-label-md">Appointments</span>
 </a>
 <!-- Chat (Active) -->
-<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="#">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary scale-[0.98] transition-transform" href="{% url 'core:chatbot' %}">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
 <span class="font-label-md text-label-md font-bold">Chat</span>
 </a>
 <!-- Notifications -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_notifications' %}">
 <span class="material-symbols-outlined">notifications</span>
 <span class="font-label-md text-label-md">Notifications</span>
 </a>
 <!-- Profile -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:vet_settings' %}{% else %}{% url 'core:pet_profile' %}{% endif %}">
 <span class="material-symbols-outlined">person</span>
 <span class="font-label-md text-label-md">Profile</span>
 </a>
 <!-- Settings -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:vet_settings' %}{% else %}{% url 'core:account_settings' %}{% endif %}">
 <span class="material-symbols-outlined">settings</span>
 <span class="font-label-md text-label-md">Settings</span>
+</a>
+<!-- Log Out -->
+<a class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error-container/30 transition-colors duration-200 rounded-lg" href="{% url 'core:logout' %}">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
 </a>
 </div>
 <div class="mt-auto pt-4">
