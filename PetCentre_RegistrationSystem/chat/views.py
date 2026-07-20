@@ -70,11 +70,24 @@ def start_chat(request, user_id):
         return redirect("chat:inbox")
 
     room, _ = ChatRoom.get_or_create_room(request.user, target_user)
-    return redirect("chat:room", room_id=room.pk)
+    return redirect("chat:room", room_uuid=room.uuid)
 
 
 @login_required
-def room(request, room_id):
+def room_legacy(request, room_id):
+    """
+    Backward-compat for integer room URLs that still exist in the wild
+    (stored notification action_urls, old bookmarks) — permanently
+    redirects to the opaque UUID address.
+    """
+    chat_room = get_object_or_404(ChatRoom, pk=room_id)
+    if request.user not in (chat_room.participant_1, chat_room.participant_2):
+        return redirect("chat:inbox")
+    return redirect("chat:room", room_uuid=chat_room.uuid)
+
+
+@login_required
+def room(request, room_uuid):
     """
     The main chat room view. Renders the last 50 messages.
     WebSocket connection is established client-side via JS.
@@ -86,7 +99,7 @@ def room(request, room_id):
     like ?token= with nothing after it, which JWTAuthMiddleware treats as
     AnonymousUser and the consumer rejects.
     """
-    chat_room = get_object_or_404(ChatRoom, pk=room_id)
+    chat_room = get_object_or_404(ChatRoom, uuid=room_uuid)
 
     # Security: only participants may view the room
     if request.user not in (chat_room.participant_1, chat_room.participant_2):

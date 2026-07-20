@@ -52,7 +52,7 @@ tailwind.config = {
 
   <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
     {% for entry in rooms_data %}
-    <a href="{% url 'chat:room' entry.room.pk %}"
+    <a href="{% url 'chat:room' entry.room.uuid %}"
        class="flex items-center gap-4 px-5 py-4 border-b border-surface-container last:border-b-0 hover:bg-surface-container-low transition-colors">
 
       <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg flex-shrink-0">
@@ -91,13 +91,28 @@ tailwind.config = {
 <script>
   // Server sends raw UTC ISO timestamps (data-iso) since Django doesn't
   // know the viewer's timezone — render each in the browser's local time.
+  // Today shows just the time; older messages get the date too.
   document.querySelectorAll(".msg-time[data-iso]").forEach((el) => {
     const d = new Date(el.dataset.iso);
+    const now = new Date();
     let hours = d.getHours();
     const minutes = d.getMinutes().toString().padStart(2, "0");
     const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12 || 12;
-    el.textContent = `${hours}:${minutes} ${ampm}`;
+    const time = `${hours}:${minutes} ${ampm}`;
+    if (d.toDateString() === now.toDateString()) {
+      el.textContent = time;
+      return;
+    }
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) {
+      el.textContent = `Yesterday, ${time}`;
+      return;
+    }
+    const opts = { month: "short", day: "numeric" };
+    if (d.getFullYear() !== now.getFullYear()) opts.year = "numeric";
+    el.textContent = `${d.toLocaleDateString(undefined, opts)}, ${time}`;
   });
 </script>
 </body></html>

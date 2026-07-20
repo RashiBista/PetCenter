@@ -82,7 +82,7 @@ tailwind.config = {
         <div>
           <p class="font-label-md text-label-md text-on-surface font-semibold">Dr. {{ vet.get_full_name|default:vet.username }}</p>
           <p class="font-label-sm text-label-sm text-on-surface-variant">{{ vet.vet_profile.specialization|default:"General Practice" }}</p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ vet.email }}{% if vet.phone_number %} · {{ vet.phone_number }}{% endif %}</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{% if vet.phone_number %}{{ vet.phone_number }}{% endif %}</p>
         </div>
         {% if vet.distance %}<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-medium flex-shrink-0">{{ vet.distance.km|floatformat:1 }} km</span>{% endif %}
       </div>
@@ -105,7 +105,7 @@ tailwind.config = {
       <div class="flex items-start justify-between gap-3">
         <div>
           <p class="font-label-md text-label-md text-on-surface font-semibold">{{ pharmacy.pharmacy_profile.pharmacy_name|default:pharmacy.username }}</p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{{ pharmacy.email }}{% if pharmacy.phone_number %} · {{ pharmacy.phone_number }}{% endif %}</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">{% if pharmacy.phone_number %}{{ pharmacy.phone_number }}{% endif %}</p>
         </div>
         {% if pharmacy.distance %}<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-medium flex-shrink-0">{{ pharmacy.distance.km|floatformat:1 }} km</span>{% endif %}
       </div>

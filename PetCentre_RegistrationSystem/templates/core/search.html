@@ -87,7 +87,7 @@ tailwind.config = {
         </div>
         <div class="flex-1">
           <p class="font-label-md text-label-md text-on-surface font-semibold">{{ person.get_full_name|default:person.username }}</p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant">{{ person.get_role_display }} · {{ person.email }}</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">{{ person.get_role_display }}</p>
         </div>
         <a href="{% url 'chat:start_chat' person.id %}" class="px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
           Message

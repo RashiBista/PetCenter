@@ -229,7 +229,7 @@
 <button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative hidden sm:block">
 <span class="material-symbols-outlined">search</span>
 </button>
-<button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative">
+<button onclick="window.location.href='{% url 'core:pet_owner_notifications' %}'" class="p-2 text-on-surface-variant hover:text-primary transition-colors relative">
 <span class="material-symbols-outlined">notifications</span>
 <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
 </button>
@@ -237,7 +237,7 @@
 <span class="material-symbols-outlined">chat</span>
 </button>
 <div class="h-8 w-px bg-outline-variant mx-2 hidden sm:block"></div>
-<div class="flex items-center gap-3 cursor-pointer group">
+<div onclick="window.location.href='{% url 'core:account_settings' %}'" class="flex items-center gap-3 cursor-pointer group">
 <div class="hidden sm:block text-right">
 <p class="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">{{ request.user.get_full_name|default:request.user.username }}</p>
 </div>

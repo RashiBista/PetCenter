@@ -56,7 +56,7 @@ tailwind.config = {
       <p class="font-label-md text-label-md text-on-surface font-semibold leading-tight">
         {{ other_user.get_full_name|default:other_user.username }}
       </p>
-      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ other_user.email }}</p>
+      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ other_user.get_role_display }}</p>
     </div>
     <span id="online-dot" class="w-2.5 h-2.5 rounded-full bg-outline-variant transition-colors duration-300" title="Connecting…"></span>
   </div>
@@ -113,7 +113,7 @@ tailwind.config = {
 
 {# ── WebSocket JavaScript — logic unchanged from the working version, only visual classes above changed ── #}
 <script>
-  const ROOM_ID = "{{ room.pk }}";
+  const ROOM_ID = "{{ room.uuid }}";
   const CURRENT_USER_ID = {{ request.user.pk|default:0 }};
   const WS_TOKEN = "{{ ws_token }}";
 
@@ -163,7 +163,19 @@ tailwind.config = {
 
   function formatTime(isoString) {
     const d = new Date(isoString);
-    return d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
+    const now = new Date();
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+    const time = `${hours}:${minutes} ${ampm}`;
+    if (d.toDateString() === now.toDateString()) return time;
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return `Yesterday, ${time}`;
+    const opts = { month: "short", day: "numeric" };
+    if (d.getFullYear() !== now.getFullYear()) opts.year = "numeric";
+    return `${d.toLocaleDateString(undefined, opts)}, ${time}`;
   }
 
   // Server-rendered history ships raw UTC ISO timestamps (data-iso) since

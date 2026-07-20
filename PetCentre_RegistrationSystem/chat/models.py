@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -21,6 +23,11 @@ class ChatRoom(models.Model):
     room_type = models.CharField(
         max_length=20, choices=ROOM_TYPE_CHOICES, default="general"
     )
+
+    # Opaque public identifier used in room URLs and the WebSocket path,
+    # so links don't expose the sequential integer pk (which would let
+    # anyone enumerate/guess how many rooms exist and probe them).
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # Use settings.AUTH_USER_MODEL string instead of get_user_model()
     # This avoids AppRegistryNotReady errors at import time

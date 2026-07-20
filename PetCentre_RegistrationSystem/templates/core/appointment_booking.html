@@ -260,17 +260,17 @@
 </div>
 </div>
 <div class="flex items-center gap-6">
-<button class="text-on-surface-variant hover:text-primary transition-colors relative">
+<button onclick="window.location.href='{% url 'core:pet_owner_notifications' %}'" class="text-on-surface-variant hover:text-primary transition-colors relative">
 <span class="material-symbols-outlined">notifications</span>
 <span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
 </button>
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+<button onclick="window.location.href='{% url 'chat:inbox' %}'" class="text-on-surface-variant hover:text-primary transition-colors">
 <span class="material-symbols-outlined">chat</span>
 </button>
-<button class="text-on-surface-variant hover:text-primary transition-colors">
+<button onclick="window.location.href='mailto:itsswiper5@gmail.com?subject=Pet%20Centre%20Support'" title="Contact customer service" class="text-on-surface-variant hover:text-primary transition-colors">
 <span class="material-symbols-outlined">support_agent</span>
 </button>
-<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-variant cursor-pointer">
+<div onclick="window.location.href='{% url 'core:account_settings' %}'" class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-variant cursor-pointer">
 {% if request.user.profile_picture %}
 <img alt="Profile picture" class="w-full h-full object-cover" src="{{ request.user.profile_picture.url }}"/>
 {% else %}

@@ -20,7 +20,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     (NOT Django's session-based AuthMiddlewareStack). The frontend must connect
     with the JWT access token as a query param:
 
-        ws://<host>/ws/chat/<room_id>/?token=<access_token>
+        ws://<host>/ws/chat/<room_uuid>/?token=<access_token>
     """
 
     async def connect(self):
@@ -30,18 +30,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close(code=4001)
             return
 
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.room_uuid = self.scope['url_route']['kwargs']['room_uuid']
 
         # Cached here instead of re-fetched on every message — the room
         # and its participants don't change for the life of a connection,
         # so there's no reason send_message() should pay another Neon
         # round trip just to look up the other participant each time.
+        # (Also caches self.room_pk, since messages FK onto the integer
+        # pk while the public URL/group name only carry the opaque uuid.)
         self.other_user = await self.get_other_participant()
         if self.other_user is None:
             await self.close(code=4003)
             return
 
-        self.room_group_name = f'chat_{self.room_id}'
+        self.room_group_name = f'chat_{self.room_uuid}'
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
@@ -114,17 +116,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def get_other_participant(self):
         try:
             room = ChatRoom.objects.get(
-                Q(pk=self.room_id),
+                Q(uuid=self.room_uuid),
                 Q(participant_1=self.user) | Q(participant_2=self.user)
             )
-        except ChatRoom.DoesNotExist:
+        except (ChatRoom.DoesNotExist, ValueError):
             return None
+        self.room_pk = room.pk
         return room.get_other_participant(self.user)
 
     @database_sync_to_async
     def save_message(self, content):
         return Message.objects.create(
-            room_id=self.room_id,
+            room_id=self.room_pk,
             sender=self.user,
             content=content
         )
@@ -148,7 +151,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             notification_type='chat',
             title=f"New message from {self.user.get_full_name() or self.user.username}",
             message=preview,
-            action_url=f"/chat/room/{self.room_id}/",
+            action_url=f"/chat/room/{self.room_uuid}/",
             # We send the email ourselves (see receive()) via a
             # non-thread-sensitive executor so the slow SMTP call can't
             # stall the shared DB thread — don't let create_notification's
