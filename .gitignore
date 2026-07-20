@@ -2,6 +2,7 @@
 .env
 *.env
 !.env.example
+DATABASE_DATA.txt
 
 # --- Python ---
 __pycache__/
