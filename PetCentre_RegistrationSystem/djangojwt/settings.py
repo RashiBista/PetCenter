@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     'anymail',
 ]
 
-# Lets the pet-owner login page's "Email or Phone" field authenticate
+# Lets the pet-owner login page's "Email or username" field authenticate
 # by username OR email, since AUTH_USER_MODEL's USERNAME_FIELD is
 # still 'username'. ModelBackend stays as a fallback for code paths
 # that only ever pass a username (e.g. the DRF JWT login view).
@@ -100,9 +100,6 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# NOTE: was previously misspelled as SPECTULAR_SETTINGS, which meant
-# drf-spectacular silently ignored this whole block and fell back to
-# its own defaults (generic title, no description, version "").
 SPECTACULAR_SETTINGS = {
     'TITLE': 'PetCentre API',
     'DESCRIPTION': 'API documentation for PetCentre',
@@ -136,6 +133,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.unread_notification_count',
             ],
         },
     },
@@ -205,7 +203,7 @@ DATABASES = {
 # GDAL/GEOS native library paths — ONLY needed for local `runserver`
 # on Windows, where these libraries aren't on the system path the way
 # they are inside the Docker image (which installs gdal-bin/libgeos
-# via apt-get — see Dockerfile). Leave these unset entirely if running
+# via apt-get  Dockerfile). Leave these unset entirely if running
 # via Docker, or if GDAL/GEOS are already discoverable on your system.
 # Set them in .env only if you hit "Could not find the GDAL/GEOS
 # library" errors when running manage.py directly on Windows.
@@ -232,7 +230,7 @@ CHANNEL_LAYERS = {
 }
 
 # Sessions default to Django's `db` backend, which means every single
-# authenticated request — every page load, everywhere in the app — did a
+# authenticated request  every page load, everywhere in the app did a
 # session-table SELECT against the remote Neon DB, plus (because
 # SESSION_SAVE_EVERY_REQUEST=True below) a full UPDATE transaction on
 # every request too. That's 3-4 extra WAN round trips per page, on top

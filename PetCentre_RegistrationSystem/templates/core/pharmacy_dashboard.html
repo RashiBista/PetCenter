@@ -209,12 +209,12 @@
 <h1 class="md:hidden font-title-lg text-title-lg text-primary font-bold">Pet Centre</h1>
 <!-- Trailing Actions & Profile -->
 <div class="flex items-center gap-2 md:gap-6">
-<button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative hidden sm:block">
+<button onclick="window.location.href='{% url 'core:search' %}'" class="p-2 text-on-surface-variant hover:text-primary transition-colors relative hidden sm:block">
 <span class="material-symbols-outlined">search</span>
 </button>
-<button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative">
+<button onclick="window.location.href='{% url 'core:pet_owner_notifications' %}'" class="p-2 text-on-surface-variant hover:text-primary transition-colors relative">
 <span class="material-symbols-outlined">notifications</span>
-<span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+{% if unread_notification_count %}<span class="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>{% endif %}
 </button>
 <button onclick="window.location.href='{% url 'chat:inbox' %}'" class="p-2 text-on-surface-variant hover:text-primary transition-colors hidden sm:block">
 <span class="material-symbols-outlined">chat</span>

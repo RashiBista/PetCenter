@@ -9,12 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     # Sessions moved to a Redis-backed cache (SESSION_ENGINE =
     # django.contrib.sessions.backends.cache) to cut DB round trips on
-    # every request — see djangojwt/settings.py. That means anything
-    # touching a session (client.login()/force_login() in the test
-    # suite, e.g. myapp/test_appointments.py) needs a reachable Redis,
-    # or it fails with redis.exceptions.ConnectionError. This service
-    # container provides one; REDIS_HOST/REDIS_PORT below point the
-    # app at it exactly like docker-compose.yml does for local dev.
+    # every request. Redis is a separate service in the workflow, and the
+    # Django settings are configured to connect to it via the REDIS_HOST 
     services:
       redis:
         image: redis:7

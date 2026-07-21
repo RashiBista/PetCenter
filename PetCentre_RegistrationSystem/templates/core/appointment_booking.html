@@ -262,7 +262,7 @@
 <div class="flex items-center gap-6">
 <button onclick="window.location.href='{% url 'core:pet_owner_notifications' %}'" class="text-on-surface-variant hover:text-primary transition-colors relative">
 <span class="material-symbols-outlined">notifications</span>
-<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+{% if unread_notification_count %}<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>{% endif %}
 </button>
 <button onclick="window.location.href='{% url 'chat:inbox' %}'" class="text-on-surface-variant hover:text-primary transition-colors">
 <span class="material-symbols-outlined">chat</span>

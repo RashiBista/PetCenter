@@ -1,11 +1,4 @@
-# Render Blueprint — deploys the PetCentre_RegistrationSystem Docker app
-# plus a managed Redis (Key Value) instance for Channels/cache.
-#
-# The database is NOT provisioned here: the app connects to the existing
-# remote Neon Postgres directly (no pgbouncer sidecar on Render — the
-# pooler in docker-compose.yml is a local-dev latency optimization).
-#
-# Env vars marked `sync: false` are secrets — Render prompts for them
+# Env vars marked `sync: false` are secrets : Render prompts for them
 # when the blueprint is first applied; copy the values from your local
 # PetCentre_RegistrationSystem/.env (DB_HOST must be the real Neon host,
 # not "pgbouncer").
