@@ -217,7 +217,7 @@
                             Premium care for your beloved pets.
                         </h1>
 <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
-                            Seamless vet appointments, meticulous medicine management, and dedicated lost/found support—all in a calming, sophisticated platform designed for modern pet owners.
+                            Seamless vet appointments, meticulous medicine management, and nearby-care discovery—all in a calming, sophisticated platform designed for modern pet owners.
                         </p>
 </div>
 <!-- Onboarding Widget -->
@@ -305,42 +305,82 @@
 </div>
 </div>
 </section>
-<!-- Brief Features Section to establish scrolling context -->
+<!-- Services / Features Section — cards link straight into their real
+     (login-gated) pages, so an anonymous visitor who clicks one is taken
+     to log in/sign up to actually use it, rather than a dead preview. -->
+<div id="services"></div>
 <section class="bg-surface-container-lowest py-section-margin" id="features">
 <div class="max-w-[1360px] mx-auto px-container-padding-mobile md:px-container-padding-desktop">
 <div class="text-center mb-16 max-w-2xl mx-auto">
 <h2 class="font-headline-lg text-headline-lg text-on-surface mb-4">Comprehensive Care Ecosystem</h2>
-<p class="font-body-md text-body-md text-on-surface-variant">Everything you need to ensure your pet lives a long, healthy, and happy life, consolidated in one serene interface.</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Everything you need to ensure your pet lives a long, healthy, and happy life, consolidated in one serene interface. Log in or sign up to unlock each service.</p>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap">
 <!-- Feature 1 -->
-<div class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<a href="{% url 'core:pet_profile' %}" class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group block">
 <div class="w-14 h-14 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined text-3xl">medical_services</span>
 </div>
 <h3 class="font-title-lg text-title-lg text-on-surface mb-3">Health Tracking</h3>
-<p class="font-body-md text-body-md text-on-surface-variant">Monitor weight, vaccinations, and log daily observations to share instantly with your veterinary team.</p>
-</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Monitor weight, vaccinations, and log daily observations to share instantly with your veterinary team.</p>
+<span class="font-label-md text-label-md text-primary inline-flex items-center gap-1">Log in to explore <span class="material-symbols-outlined text-base">arrow_forward</span></span>
+</a>
 <!-- Feature 2 -->
-<div class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<a href="{% url 'core:find_nearest_vets' %}" class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group block">
 <div class="w-14 h-14 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined text-3xl">location_on</span>
 </div>
-<h3 class="font-title-lg text-title-lg text-on-surface mb-3">Lost &amp; Found Network</h3>
-<p class="font-body-md text-body-md text-on-surface-variant">Rapidly mobilize the local community with automated alerts if your pet goes missing.</p>
-</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mb-3">Find Care Near You</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Discover nearby vets and pharmacies, sorted by distance, so help is never far away.</p>
+<span class="font-label-md text-label-md text-primary inline-flex items-center gap-1">Log in to explore <span class="material-symbols-outlined text-base">arrow_forward</span></span>
+</a>
 <!-- Feature 3 -->
-<div class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group">
+<a href="{% url 'core:chatbot' %}" class="bg-surface p-8 rounded-2xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow group block">
 <div class="w-14 h-14 rounded-xl bg-tertiary-container text-on-tertiary-container flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
 <span class="material-symbols-outlined text-3xl">forum</span>
 </div>
 <h3 class="font-title-lg text-title-lg text-on-surface mb-3">Talk to our AI assistant</h3>
-<p class="font-body-md text-body-md text-on-surface-variant">Get quick insights from our AI Assistant</p>
-</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Get quick insights from our AI Assistant</p>
+<span class="font-label-md text-label-md text-primary inline-flex items-center gap-1">Log in to explore <span class="material-symbols-outlined text-base">arrow_forward</span></span>
+</a>
 </div>
 </div>
 </section>
 </main>
+<!-- Contact / Footer -->
+<footer class="bg-surface border-t border-outline-variant/20 py-section-margin" id="contact">
+<div class="max-w-[1360px] mx-auto px-container-padding-mobile md:px-container-padding-desktop grid grid-cols-1 md:grid-cols-3 gap-8">
+<div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined fill">pets</span>
+</div>
+<span class="font-headline-md text-headline-md text-primary font-bold tracking-tight">Pet Centre</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs">Your sanctuary for pet wellness — vet care, medicine, and community support in one calm, trusted place.</p>
+</div>
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface mb-4">Contact</h4>
+<a href="mailto:itsswiper5@gmail.com" class="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">mail</span> itsswiper5@gmail.com
+</a>
+</div>
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface mb-4">Follow Us</h4>
+<div class="flex items-center gap-3">
+<a href="#" aria-label="Facebook" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-colors">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+</a>
+<a href="#" aria-label="Instagram" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container transition-colors">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.21.6 1.76 1.15.55.55.89 1.1 1.15 1.76.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.76 4.9 4.9 0 0 1-1.76 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.76-1.15 4.9 4.9 0 0 1-1.15-1.76c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.21 1.15-1.76A4.9 4.9 0 0 1 5.44.54C6.08.29 6.81.12 7.87.07 8.93.02 9.27 0 12 0Zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 8.25A3.25 3.25 0 1 1 12 6.75a3.25 3.25 0 0 1 0 6.5ZM17.5 4.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z"/></svg>
+</a>
+</div>
+</div>
+</div>
+<div class="max-w-[1360px] mx-auto px-container-padding-mobile md:px-container-padding-desktop mt-10 pt-6 border-t border-outline-variant/20">
+<p class="font-label-sm text-label-sm text-on-surface-variant">© Pet Centre. All rights reserved.</p>
+</div>
+</footer>
 <!-- Floating Action Button (Chatbot Assistant) from JSON specification -->
 <button onclick="window.location.href='{% url 'core:chatbot' %}'" aria-label="Assistant" class="fixed bottom-10 right-10 rounded-full p-4 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed font-label-md text-label-md z-50 flex items-center justify-center shadow-xl hover:scale-110 hover:shadow-2xl transition-all duration-200 active:scale-95 group">
 <span class="material-symbols-outlined">smart_toy</span>
