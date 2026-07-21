@@ -198,7 +198,7 @@
 </div>
 {% endif %}
 <!-- Hero Section -->
-<section class="relative min-h-[calc(100vh-80px)] flex items-center overflow-y-auto">
+<section class="relative min-h-[calc(100vh-80px)] flex items-center">
 <!-- Background Decorative Elements -->
 <div class="absolute inset-0 pointer-events-none z-0">
 <!-- Abstract Lavender Mist blobs -->
@@ -226,13 +226,13 @@
 <div class="space-y-1.5">
 <label class="font-label-md text-label-md text-on-surface" for="userType">I am a...</label>
 <div class="relative">
-<select class="w-full appearance-none bg-surface-container-low border border-outline-variant rounded-lg px-4 py-3.5 font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer" id="userType">
+<select class="w-full appearance-none bg-surface-container-low border border-outline-variant rounded-lg pl-4 pr-11 py-3.5 font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer" id="userType" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;">
 <option value="owner">Pet Owner</option>
 <option value="vet">Veterinary Professional</option>
 <option value="admin">Administrator</option>
 <option value="pharmacy">Pharmacy</option>
 </select>
-<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
 </div>
 </div>
 <div class="pt-2 flex flex-col sm:flex-row gap-3">
@@ -283,8 +283,10 @@
 <div class="absolute inset-0 rounded-3xl overflow-hidden shadow-[0px_12px_24px_rgba(46,46,56,0.08)]">
 <div class="bg-cover bg-center w-full h-full" data-alt="A bright, modern veterinary clinic room with large windows letting in soft, diffused daylight, creating a calming, clean light-mode aesthetic. A golden retriever sits calmly on an examination table while a smiling veterinarian in a clean white coat gently examines it. The room features subtle lavender and soft grey accents, conveying a premium, nurturing, and professional environment." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDWu715vq6bmfHfXRFfOFrTqnRgHBXC7uU8SFJ9z-PpcUtmRAnZbduAIYkCfwfedaKcA8DJPyvS3mhj_DLgUPSuSI8aXYoSzPDik0ckAGCA0kmaIiSaeqtk0JvZQLx0_kL-9FkfjTcImVxE59iyGni0iVHjXXzDCvEnmvoiHDY5jQbSKjQ0R89gxvv7c_w0HtpSzmUkA4kiG343zv-JK3vUziPzNwqx5FEcO1ky0pc8xETBgiSttREXQ086zKz77eL49-zN_VdiaDjD')"></div>
 </div>
-<!-- Floating Glassmorphism Cards -->
-<div class="absolute top-8 -left-8 bg-surface/80 backdrop-blur-xl p-4 rounded-xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-white/50 flex items-center gap-4 animate-[bounce_4s_infinite]">
+<!-- Floating Glassmorphism Cards — clickable teasers for the services
+     section below, so hovering/clicking one guides the visitor straight
+     to the matching part of the page instead of sitting there inert. -->
+<a href="#services" class="absolute top-8 -left-8 bg-surface/80 backdrop-blur-xl p-4 rounded-xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-white/50 flex items-center gap-4 animate-[bounce_4s_infinite] cursor-pointer hover:shadow-[0px_12px_24px_rgba(46,46,56,0.1)] hover:-translate-y-0.5 transition-all">
 <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
 <span class="material-symbols-outlined">calendar_clock</span>
 </div>
@@ -292,8 +294,8 @@
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"></p>
 <p class="font-title-lg text-title-lg text-on-surface">Book your appointment today</p>
 </div>
-</div>
-<div class="absolute bottom-12 -right-8 bg-surface/80 backdrop-blur-xl p-4 rounded-xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-white/50 flex items-center gap-4">
+</a>
+<a href="#services" class="absolute bottom-12 -right-8 bg-surface/80 backdrop-blur-xl p-4 rounded-xl shadow-[0px_8px_16px_rgba(46,46,56,0.04)] border border-white/50 flex items-center gap-4 cursor-pointer hover:shadow-[0px_12px_24px_rgba(46,46,56,0.1)] hover:-translate-y-0.5 transition-all">
 <div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
 <span class="material-symbols-outlined">vaccines</span>
 </div>
@@ -301,7 +303,7 @@
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Medication Due</p>
 <p class="font-title-lg text-title-lg text-on-surface">Heartworm Preventative</p>
 </div>
-</div>
+</a>
 </div>
 </div>
 </section>
