@@ -52,54 +52,14 @@ tailwind.config = {
 
   <form method="get" class="relative mb-6">
     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-    <input name="q" value="{{ query }}" placeholder="Search people, medicine, accessories..."
+    <input name="q" value="{{ query }}" placeholder="Search medicine, accessories..."
            class="w-full pl-12 pr-4 py-3 rounded-full border border-outline-variant bg-surface-container-low text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"/>
-    <input type="hidden" name="category" value="{{ category }}"/>
   </form>
-
-  <!-- Tabs -->
-  <div class="flex gap-2 mb-8 border-b border-surface-container-high">
-    <a href="?q={{ query }}&category=all"
-       class="px-4 py-2 font-label-md text-label-md {% if category == 'all' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">
-      All
-    </a>
-    <a href="?q={{ query }}&category=people"
-       class="px-4 py-2 font-label-md text-label-md {% if category == 'people' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">
-      People
-    </a>
-    <a href="?q={{ query }}&category=pet_things"
-       class="px-4 py-2 font-label-md text-label-md {% if category == 'pet_things' %}text-primary border-b-2 border-primary{% else %}text-on-surface-variant{% endif %}">
-      Medicine &amp; Accessories
-    </a>
-  </div>
 
   {% if not query %}
   <p class="text-on-surface-variant font-body-md text-body-md text-center py-10">Type something above to search.</p>
   {% else %}
 
-    {% if category == 'all' or category == 'people' %}
-    <h2 class="font-title-lg text-title-lg text-on-surface mb-3">People</h2>
-    <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden mb-8">
-      {% for person in people_results %}
-      <div class="flex items-center gap-4 px-5 py-4 border-b border-surface-container last:border-b-0">
-        <div class="w-11 h-11 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold flex-shrink-0">
-          {{ person.get_full_name|default:person.username|first|upper }}
-        </div>
-        <div class="flex-1">
-          <p class="font-label-md text-label-md text-on-surface font-semibold">{{ person.get_full_name|default:person.username }}</p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant">{{ person.get_role_display }}</p>
-        </div>
-        <a href="{% url 'chat:start_chat' person.id %}" class="px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
-          Message
-        </a>
-      </div>
-      {% empty %}
-      <p class="text-on-surface-variant font-body-md text-body-md text-center py-8">No people found matching "{{ query }}".</p>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if category == 'all' or category == 'pet_things' %}
     <h2 class="font-title-lg text-title-lg text-on-surface mb-3">Medicine &amp; Accessories</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {% for item in pet_things_results %}
@@ -122,7 +82,6 @@ tailwind.config = {
       <p class="text-on-surface-variant font-body-md text-body-md text-center py-8 col-span-2">No medicine or accessories found matching "{{ query }}".</p>
       {% endfor %}
     </div>
-    {% endif %}
 
   {% endif %}
 </div>

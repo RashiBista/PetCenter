@@ -111,7 +111,6 @@ tailwind.config = {
       </div>
       <div class="flex gap-2 mt-4">
         <a href="{% url 'core:search' %}?category=pet_things" class="flex-1 text-center px-3 py-2 rounded-lg bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Browse Medicine</a>
-        <a href="{% url 'chat:start_chat' pharmacy.id %}" class="flex-1 text-center px-3 py-2 rounded-lg border border-outline-variant text-on-surface text-sm font-medium hover:bg-surface-container transition-colors">Message</a>
       </div>
     </div>
     {% empty %}
