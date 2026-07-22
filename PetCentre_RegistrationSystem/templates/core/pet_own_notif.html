@@ -274,12 +274,14 @@
 <h2 class="font-headline-lg-mobile md:font-headline-lg text-on-background">Notification History</h2>
 <p class="font-body-md text-body-md text-on-surface-variant mt-1">Stay updated on your pet's care journey.</p>
 </div>
+{% if had_unread %}
 <form method="post">{% csrf_token %}<input type="hidden" name="action" value="mark_all_read">
 <button type="submit" class="font-label-md text-label-md text-primary hover:text-surface-tint hover:bg-primary-container/20 px-4 py-2 rounded-full transition-colors duration-200 flex items-center gap-2">
 <span class="material-symbols-outlined text-[18px]">done_all</span>
                 Mark all as read
             </button>
 </form>
+{% endif %}
 </div>
 <!-- Notifications List -->
 <div class="max-w-3xl flex flex-col gap-4">
@@ -316,7 +318,7 @@
 </div>
 {% endfor %}
 {% if has_more %}
-<a href="?page={{ next_page }}" class="self-center font-label-md text-label-md text-primary hover:text-surface-tint hover:bg-primary-container/20 px-5 py-2.5 rounded-full transition-colors duration-200 flex items-center gap-2 mt-2">
+<a href="?page={{ next_page }}" class="self-center no-underline font-label-md text-label-md text-primary hover:text-surface-tint hover:bg-primary-container/20 px-5 py-2.5 rounded-full transition-colors duration-200 flex items-center gap-2 mt-2 border-0">
 View more
 <span class="material-symbols-outlined text-[18px]">expand_more</span>
 </a>

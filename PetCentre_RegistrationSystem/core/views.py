@@ -796,15 +796,20 @@ def pet_owner_notifications_view(request):
         Notification.objects.filter(recipient=request.user, is_read=False).update(
             is_read=True, read_at=timezone.now()
         )
-        # The dashboard's "Mark all as read" button posts here too — send
-        # the user back where they came from instead of always landing on
-        # the notifications page.
+        # Other pages that also submit this form (if any) can send the
+        # user back where they came from via `next` instead of always
+        # landing on the notifications page.
         next_url = request.POST.get('next', '')
         if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
             return redirect(next_url)
         return redirect('core:pet_owner_notifications')
 
     all_notifications = Notification.objects.filter(recipient=request.user)
+    # Checked BEFORE the auto-mark-as-read below, so the "Mark all as
+    # read" button reflects whether there was anything to mark when the
+    # user arrived — not the post-view state, which is always "all read"
+    # since viewing the page marks everything read.
+    had_unread = all_notifications.filter(is_read=False).exists()
     # Viewing the page marks everything as read, same pattern as chat's unread_count.
     Notification.objects.filter(recipient=request.user, is_read=False).update(
         is_read=True, read_at=timezone.now()
@@ -829,6 +834,7 @@ def pet_owner_notifications_view(request):
         'notifications': notifications,
         'has_more': has_more,
         'next_page': page + 1,
+        'had_unread': had_unread,
     })
 
 

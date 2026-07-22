@@ -387,16 +387,6 @@
 </div>
 {% endfor %}
 </div>
-{% if recent_notifications %}
-<form method="post" action="{% url 'core:pet_owner_notifications' %}">
-{% csrf_token %}
-<input type="hidden" name="action" value="mark_all_read"/>
-<input type="hidden" name="next" value="{% url 'core:pet_owner_dashboard' %}"/>
-<button type="submit" class="mt-4 w-full py-2 text-primary font-label-md text-label-md text-center hover:bg-primary-fixed rounded-lg transition-colors">
-                        Mark all as read
-                    </button>
-</form>
-{% endif %}
 </div>
 </section>
 </div>

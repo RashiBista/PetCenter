@@ -68,3 +68,32 @@ class NotificationsViewPaginationTests(TestCase):
         self.assertEqual(len(response.context["notifications"]), 20)
         self.assertFalse(response.context["has_more"])
         self.assertNotContains(response, "View more")
+
+
+class MarkAllAsReadButtonTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="notif_read_owner", email="notif_read@example.com",
+            password="pass123!", role=User.Role.USER,
+        )
+        self.client.force_login(self.user)
+
+    def test_button_shown_when_unread_notifications_exist(self):
+        Notification.objects.create(
+            recipient=self.user, recipient_role=Notification.RecipientRole.CLIENT,
+            notification_type=Notification.NotificationType.GENERAL,
+            title="Test", message="Test message",
+        )
+        response = self.client.get("/notifications/")
+        self.assertTrue(response.context["had_unread"])
+        self.assertContains(response, "Mark all as read")
+
+    def test_button_hidden_once_nothing_unread(self):
+        Notification.objects.create(
+            recipient=self.user, recipient_role=Notification.RecipientRole.CLIENT,
+            notification_type=Notification.NotificationType.GENERAL,
+            title="Test", message="Test message", is_read=True,
+        )
+        response = self.client.get("/notifications/")
+        self.assertFalse(response.context["had_unread"])
+        self.assertNotContains(response, "Mark all as read")
