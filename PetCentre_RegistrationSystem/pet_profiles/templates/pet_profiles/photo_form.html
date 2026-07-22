@@ -21,7 +21,13 @@
         {% csrf_token %}
         <div class="form-group">
             <label for="{{ form.photo.id_for_label }}">Choose a new photo</label>
-            {{ form.photo }}
+            <div class="file-picker">
+                {{ form.photo }}
+                <label class="file-picker-label" for="{{ form.photo.id_for_label }}">
+                    <span aria-hidden="true">📷</span> Choose Photo
+                </label>
+                <span class="file-picker-name" data-file-name>No file chosen</span>
+            </div>
             {% for error in form.photo.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
             <small>PNG, JPG, or WebP. Maximum 5 MB.</small>
         </div>

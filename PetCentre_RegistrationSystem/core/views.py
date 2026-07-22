@@ -1059,7 +1059,7 @@ def veterinary_appointments_view(request):
     real to go until now.
     """
     status_filter = request.GET.get('status', 'all')
-    appointments = Appointment.objects.filter(vet=request.user).select_related('pet', 'pet__owner').order_by('scheduled_time')
+    appointments = Appointment.objects.filter(vet=request.user).select_related('pet', 'pet__owner').order_by('-scheduled_time')
     if status_filter in (Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED, Appointment.Status.COMPLETED, Appointment.Status.CANCELLED):
         appointments = appointments.filter(status=status_filter)
 
