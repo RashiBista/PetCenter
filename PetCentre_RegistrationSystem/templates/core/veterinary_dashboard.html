@@ -245,7 +245,7 @@
 <!-- Bento Layout -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap">
 <!-- Appointments List (Left Column, spans 8) -->
-<div class="lg:col-span-8 bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest">
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-[20px] p-6 shadow-md border border-outline-variant/50">
 <div class="flex justify-between items-center mb-6">
 <h3 class="font-title-lg text-title-lg text-on-surface">Today's Appointments</h3>
 <button class="text-primary font-label-md text-label-md hover:underline">View All</button>
@@ -298,7 +298,7 @@
 <!-- Right Column (spans 4) -->
 <div class="lg:col-span-4 flex flex-col gap-card-gap">
 <!-- Recent Messages -->
-<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest flex-1">
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-md border border-outline-variant/50 flex-1">
 <div class="flex justify-between items-center mb-4">
 <h3 class="font-title-lg text-title-lg text-on-surface">Recent Messages</h3>
 <a href="{% url 'chat:inbox' %}" aria-label="Open inbox">
@@ -330,7 +330,7 @@
 </div>
 </div>
 <!-- Appointments per day, this week (Mon-Sun) -->
-<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-sm border border-surface-container-highest">
+<div class="bg-surface-container-lowest rounded-[20px] p-6 shadow-md border border-outline-variant/50">
 <h3 class="font-title-lg text-title-lg text-on-surface mb-4">Appointments Trend <span class="font-label-sm text-label-sm text-on-surface-variant font-normal">(this week)</span></h3>
 <div class="h-32 w-full flex items-end gap-2 px-2 relative">
 <!-- Y Axis marks -->
