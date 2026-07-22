@@ -76,7 +76,7 @@ tailwind.config = {
             {% if item.kind == 'medicine' %}Medicine{% else %}Accessory{% endif %} · {{ item.obj.category|default:"—" }}
           </p>
         </div>
-        {% if item.obj.price %}<span class="font-label-md text-label-md text-primary">NRS {{ item.obj.price }}</span>{% endif %}
+        {% if item.kind != 'medicine' and item.obj.price %}<span class="font-label-md text-label-md text-primary">NRS {{ item.obj.price }}</span>{% endif %}
       </a>
       {% empty %}
       <p class="text-on-surface-variant font-body-md text-body-md text-center py-8 col-span-2">No medicine or accessories found matching "{{ query }}".</p>

@@ -137,14 +137,10 @@
 <h2 class="font-display-lg text-display-lg text-on-surface">{{ medicine.name }}</h2>
 </div>
 <p class="font-body-lg text-body-lg text-on-surface-variant mb-6">{{ medicine.description|default:"No description available." }}</p>
-<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="grid grid-cols-1 gap-4 mb-6">
 <div class="bg-surface-container-low p-4 rounded-lg">
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Category</p>
 <p class="font-title-lg text-title-lg text-on-surface">{{ medicine.category|default:"—" }}</p>
-</div>
-<div class="bg-surface-container-low p-4 rounded-lg">
-<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Price</p>
-<p class="font-title-lg text-title-lg text-on-surface">{% if medicine.price %}NRS {{ medicine.price }}{% else %}—{% endif %}</p>
 </div>
 </div>
 <div class="glass-card p-6 rounded-xl shadow-sm mb-6">

@@ -73,7 +73,6 @@ tailwind.config = {
           {{ medicine.category|default:"—" }}
         </p>
       </div>
-      {% if medicine.price %}<span class="font-label-md text-label-md text-primary flex-shrink-0">NRS {{ medicine.price }}</span>{% endif %}
     </a>
     {% empty %}
     <p class="text-on-surface-variant font-body-md text-body-md text-center py-10 col-span-2">
