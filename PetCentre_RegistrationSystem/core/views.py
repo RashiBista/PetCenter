@@ -640,6 +640,28 @@ def update_appointment_status_view(request, appointment_id):
             ),
             action_url="/dashboard/pet-owner/",
         )
+        # Chat is gated on having a confirmed appointment (see
+        # chat.views.start_chat) — the moment that gate opens, let the
+        # owner know a conversation is now possible, with a direct link
+        # into it, rather than leaving them to discover it themselves.
+        if new_status == Appointment.Status.CONFIRMED:
+            create_notification(
+                recipient=owner,
+                recipient_role=_recipient_role_for(owner),
+                notification_type='chat',
+                title=f"You can now message Dr. {request.user.get_full_name() or request.user.username}",
+                message=(
+                    f"Your appointment for {appointment.pet.name} was confirmed — "
+                    f"you can now send Dr. {request.user.get_full_name() or request.user.username} a message."
+                ),
+                action_url=f"/chat/start/{request.user.id}/",
+                # The appointment-confirmed notification above already
+                # emails the owner about this same event — a second email
+                # just for "you can also chat now" would be redundant
+                # noise, so this stays in-app only (same reasoning as the
+                # chat consumer's own new-message notifications).
+                send_email_notification=False,
+            )
         # Also send the vet their own confirmation receipt of the action
         # they just took, so both sides have a paper trail in email.
         create_notification(

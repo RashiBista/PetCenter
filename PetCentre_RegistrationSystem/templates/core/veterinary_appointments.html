@@ -78,6 +78,9 @@ tailwind.config = {
         <button type="submit" class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-xs font-medium hover:bg-error-container/80 transition-colors">Cancel</button>
         </form>
         {% elif appt.status == 'confirmed' %}
+        <a href="{% url 'chat:start_chat' appt.pet.owner.id %}" class="px-3 py-1 rounded-full bg-primary-container/40 text-on-primary-container text-xs font-medium hover:bg-primary-container/70 transition-colors inline-flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">chat</span> Message
+        </a>
         <form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
         {% csrf_token %}
         <input type="hidden" name="status" value="completed">
