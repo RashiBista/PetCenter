@@ -1,6 +1,14 @@
 #!/bin/sh
 set -e
 
+# When extra arguments are passed (e.g. Render's cron job dockerCommand),
+# run that instead of the normal web-server boot sequence. Used by the
+# scheduled notification-cleanup job, which just needs to run one
+# management command and exit — not migrate+serve.
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 echo "Waiting for database..."
 python manage.py migrate --noinput
 

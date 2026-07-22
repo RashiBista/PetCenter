@@ -804,12 +804,32 @@ def pet_owner_notifications_view(request):
             return redirect(next_url)
         return redirect('core:pet_owner_notifications')
 
-    notifications = Notification.objects.filter(recipient=request.user)
+    all_notifications = Notification.objects.filter(recipient=request.user)
     # Viewing the page marks everything as read, same pattern as chat's unread_count.
     Notification.objects.filter(recipient=request.user, is_read=False).update(
         is_read=True, read_at=timezone.now()
     )
-    return render(request, 'core/pet_own_notif.html', {'notifications': notifications})
+
+    # Cumulative "View More" pagination (each click shows PAGE_SIZE more
+    # on top of what's already on screen, like Facebook's notification
+    # list) rather than a full page of numbered pagination — notifications
+    # are a short-lived feed (see notifications.management.commands.
+    # cleanup_old_notifications), not something worth deep-linking into.
+    PAGE_SIZE = 15
+    try:
+        page = max(1, int(request.GET.get('page', 1)))
+    except ValueError:
+        page = 1
+    limit = page * PAGE_SIZE
+    notifications = list(all_notifications[:limit + 1])
+    has_more = len(notifications) > limit
+    notifications = notifications[:limit]
+
+    return render(request, 'core/pet_own_notif.html', {
+        'notifications': notifications,
+        'has_more': has_more,
+        'next_page': page + 1,
+    })
 
 
 # ------------------------------------------------------------------

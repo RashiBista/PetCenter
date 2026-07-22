@@ -315,6 +315,12 @@
 <p class="font-body-md text-body-md text-on-surface-variant">No notifications yet.</p>
 </div>
 {% endfor %}
+{% if has_more %}
+<a href="?page={{ next_page }}" class="self-center font-label-md text-label-md text-primary hover:text-surface-tint hover:bg-primary-container/20 px-5 py-2.5 rounded-full transition-colors duration-200 flex items-center gap-2 mt-2">
+View more
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</a>
+{% endif %}
 </div>
 </main>
 <!-- FloatingActionButton -->
