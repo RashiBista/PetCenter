@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q, Count
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import ChatRoom, Message
+from myapp.models import Appointment
 
 User = get_user_model()
 
@@ -63,10 +65,34 @@ def start_chat(request, user_id):
     """
     GET  → renders a confirmation page  (rarely needed)
     POST → creates/fetches a room with the target user and redirects to it
+
+    Chat is restricted to pet-owner <-> vet pairs, and only once the vet
+    has accepted (confirmed) an appointment from that pet owner — chat is
+    meant as a follow-up channel for an existing consultation, not a
+    general-purpose messenger.
     """
     target_user = get_object_or_404(User, pk=user_id)
 
     if target_user == request.user:
+        return redirect("chat:inbox")
+
+    if request.user.is_pet_owner and target_user.is_vet:
+        owner, vet = request.user, target_user
+    elif request.user.is_vet and target_user.is_pet_owner:
+        owner, vet = target_user, request.user
+    else:
+        messages.error(request, "Chat is only available between a pet owner and a vet.")
+        return redirect("chat:inbox")
+
+    has_confirmed_appointment = Appointment.objects.filter(
+        pet__owner=owner, vet=vet, status=Appointment.Status.CONFIRMED
+    ).exists()
+
+    if not has_confirmed_appointment:
+        messages.error(
+            request,
+            "You can only chat with a vet once they've accepted an appointment with you.",
+        )
         return redirect("chat:inbox")
 
     room, _ = ChatRoom.get_or_create_room(request.user, target_user)

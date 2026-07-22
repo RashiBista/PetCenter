@@ -737,29 +737,19 @@ def accessory_detail_view(request, pk):
 
 # ------------------------------------------------------------------
 # Unified search module — the "Search for medicine, vets..." bar
-# visible in every dashboard header feeds into this one view. Two
-# modes, switchable via ?category=:
-#   'people'     — search registered pet owners/vets/pharmacies, each
-#                  result links straight to starting a chat with them
-#   'pet_things' — search Medicine + Accessory together
-#   'all' (default) — shows both sections on one page
+# visible in every dashboard header feeds into this one view.
+# People search (finding any registered user to start a chat with) has
+# been removed for now — chat is now only reachable once a vet has
+# confirmed an appointment, so a general people-finder no longer fits.
 # ------------------------------------------------------------------
 
 @login_required(login_url='core:pet_owner_login')
 def search_view(request):
     query = request.GET.get('q', '').strip()
-    category = request.GET.get('category', 'all')
 
-    people_results = []
     pet_things_results = []
 
-    if query and category in ('people', 'all'):
-        people_results = User.objects.filter(
-            Q(username__icontains=query) | Q(email__icontains=query) |
-            Q(first_name__icontains=query) | Q(last_name__icontains=query)
-        ).exclude(id=request.user.id).exclude(is_superuser=True)[:20]
-
-    if query and category in ('pet_things', 'all'):
+    if query:
         medicines = Medicine.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
         accessories = Accessory.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
         pet_things_results = (
@@ -769,8 +759,6 @@ def search_view(request):
 
     return render(request, 'core/search.html', {
         'query': query,
-        'category': category,
-        'people_results': people_results,
         'pet_things_results': pet_things_results,
     })
 

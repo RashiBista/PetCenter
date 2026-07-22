@@ -50,6 +50,12 @@ tailwind.config = {
     <h1 class="font-headline-md text-headline-md text-on-surface">Messages</h1>
   </div>
 
+  {% if messages %}
+  {% for message in messages %}
+  <div class="mb-6 px-4 py-3 rounded-xl bg-error-container text-on-error-container text-body-md">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+
   <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
     {% for entry in rooms_data %}
     <a href="{% url 'chat:room' entry.room.uuid %}"
