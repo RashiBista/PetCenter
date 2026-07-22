@@ -1,0 +1,54 @@
+name: Notification cleanup
+on:
+  schedule:
+    # 18:00 UTC daily — same time originally planned for the Render cron
+    # job before it turned out Render Cron Jobs have no free plan.
+    - cron: "0 18 * * *"
+  workflow_dispatch: {}
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - name: Install GDAL/GEOS/PROJ (required by django.contrib.gis / PostGIS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            gdal-bin \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev \
+            libsqlite3-mod-spatialite
+      - name: Install dependencies
+        working-directory: ./PetCentre_RegistrationSystem
+        env:
+          CPLUS_INCLUDE_PATH: /usr/include/gdal
+          C_INCLUDE_PATH: /usr/include/gdal
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run cleanup_old_notifications
+        working-directory: ./PetCentre_RegistrationSystem
+        env:
+          # DEBUG=True + a throwaway key, same pattern as django.yml's
+          # test job — this command never serves HTTP, so none of the
+          # DEBUG=False hardening (allowed hosts, CSRF origins, etc.)
+          # applies or matters here.
+          DJANGO_DEBUG: "True"
+          DJANGO_SECRET_KEY: "ci-notification-cleanup-not-for-production-use"
+          DB_ENGINE: django.contrib.gis.db.backends.postgis
+          DB_SSLMODE: require
+          DB_PORT: "5432"
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          python manage.py cleanup_old_notifications

@@ -76,35 +76,9 @@ services:
     # matches settings.py's password-less REDIS_HOST/REDIS_PORT config).
     ipAllowList: []
 
-  # Daily cleanup — deletes notifications older than 14 days (see
-  # notifications/management/commands/cleanup_old_notifications.py).
-  # dockerCommand is passed as args to entrypoint.sh, which runs it
-  # directly instead of the normal migrate+Daphne boot sequence when
-  # arguments are present.
-  - type: cron
-    name: petcenter-notification-cleanup
-    runtime: docker
-    rootDir: PetCentre_RegistrationSystem
-    dockerfilePath: ./Dockerfile
-    dockerCommand: python manage.py cleanup_old_notifications
-    schedule: "0 18 * * *"
-    plan: free
-    envVars:
-      - key: DJANGO_DEBUG
-        value: "False"
-      - key: DJANGO_SECRET_KEY
-        generateValue: true
-      - key: DB_ENGINE
-        value: django.contrib.gis.db.backends.postgis
-      - key: DB_SSLMODE
-        value: require
-      - key: DB_PORT
-        value: "5432"
-      - key: DB_HOST
-        sync: false
-      - key: DB_NAME
-        sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
+  # NOTE: the daily notification-cleanup job intentionally does NOT run
+  # here. Render Cron Jobs have no free plan (services[*].plan: free is
+  # rejected for type: cron) — it runs as a scheduled GitHub Actions
+  # workflow instead (.github/workflows/notification-cleanup.yml),
+  # connecting directly to the same Neon database. No Render service,
+  # no cost.
