@@ -37,9 +37,19 @@ COPY . .
 # Collect static files at build time (admin CSS/JS, DRF browsable API assets)
 # Uses dummy values so this doesn't require real secrets during the build —
 # collectstatic never touches the database or external services.
+#
+# --upload-unhashed-files is required even though nothing is actually
+# uploaded anywhere: django-cloudinary-storage installs its OWN
+# collectstatic command (it wins over Django's built-in one via
+# INSTALLED_APPS command resolution), and that override's copy_file()
+# silently no-ops — copies nothing, creates no STATIC_ROOT dir, exits 0
+# — for any STATICFILES_STORAGE other than its own StaticCloudinaryStorage,
+# UNLESS this flag is passed. Without it every static file 404s at
+# runtime (admin CSS, pet_profiles' own CSS/JS, everything) with no
+# build-time error to signal it.
 RUN DJANGO_SECRET_KEY=build-time-placeholder \
     DB_PASSWORD=build-time-placeholder \
-    python manage.py collectstatic --noinput
+    python manage.py collectstatic --noinput --upload-unhashed-files
 
 EXPOSE 8000
 
