@@ -8,10 +8,10 @@
         <p>Checkups, treatments, vaccinations, prescriptions, and attachments.</p>
     </div>
     <div class="heading-actions">
-        <a class="button button-ghost" href="{% url 'pet_profiles:detail' pet.pk %}">Back</a>
-        <a class="button button-outline" href="{% url 'pet_profiles:medication_add' pet.pk %}">Add prescription</a>
-        <a class="button button-outline" href="{% url 'pet_profiles:vaccination_add' pet.pk %}">Add vaccination</a>
-        <a class="button button-primary" href="{% url 'pet_profiles:record_add' pet.pk %}">Add record</a>
+        <a class="button button-ghost" href="{% url 'pet_profiles:detail' pet.uuid %}">Back</a>
+        <a class="button button-outline" href="{% url 'pet_profiles:medication_add' pet.uuid %}">Add prescription</a>
+        <a class="button button-outline" href="{% url 'pet_profiles:vaccination_add' pet.uuid %}">Add vaccination</a>
+        <a class="button button-primary" href="{% url 'pet_profiles:record_add' pet.uuid %}">Add record</a>
     </div>
 </section>
 

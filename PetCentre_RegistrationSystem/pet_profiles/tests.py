@@ -33,7 +33,7 @@ class PetProfileTests(TestCase):
 
     def test_owner_can_open_pet_profile(self):
         response = self.client.get(
-            reverse("pet_profiles:detail", kwargs={"pk": self.pet.pk})
+            reverse("pet_profiles:detail", kwargs={"pet_uuid": self.pet.uuid})
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Milo")
@@ -43,13 +43,13 @@ class PetProfileTests(TestCase):
             owner=self.other_owner, name="Luna", species=Pet.Species.CAT,
         )
         response = self.client.get(
-            reverse("pet_profiles:detail", kwargs={"pk": foreign_pet.pk})
+            reverse("pet_profiles:detail", kwargs={"pet_uuid": foreign_pet.uuid})
         )
         self.assertEqual(response.status_code, 404)
 
     def test_edit_pet_details(self):
         response = self.client.post(
-            reverse("pet_profiles:edit", kwargs={"pk": self.pet.pk}),
+            reverse("pet_profiles:edit", kwargs={"pet_uuid": self.pet.uuid}),
             {
                 "name": "Milo Updated", "species": Pet.Species.DOG,
                 "breed": "Golden Retriever",
@@ -59,14 +59,14 @@ class PetProfileTests(TestCase):
             },
         )
         self.assertRedirects(
-            response, reverse("pet_profiles:detail", kwargs={"pk": self.pet.pk}),
+            response, reverse("pet_profiles:detail", kwargs={"pet_uuid": self.pet.uuid}),
         )
         self.pet.refresh_from_db()
         self.assertEqual(self.pet.name, "Milo Updated")
 
     def test_edit_medical_summary(self):
         response = self.client.post(
-            reverse("pet_profiles:medical_summary_edit", kwargs={"pk": self.pet.pk}),
+            reverse("pet_profiles:medical_summary_edit", kwargs={"pet_uuid": self.pet.uuid}),
             {"current_conditions": "Seasonal allergies", "emergency_notes": "Call owner first"},
         )
         self.assertEqual(response.status_code, 302)
@@ -75,7 +75,7 @@ class PetProfileTests(TestCase):
 
     def test_add_medical_record(self):
         response = self.client.post(
-            reverse("pet_profiles:record_add", kwargs={"pk": self.pet.pk}),
+            reverse("pet_profiles:record_add", kwargs={"pet_uuid": self.pet.uuid}),
             {
                 "record_date": date.today().isoformat(),
                 "record_type": MedicalRecord.RecordType.CHECKUP,
@@ -93,7 +93,7 @@ class PetProfileTests(TestCase):
         )
         upload = SimpleUploadedFile("pet.gif", tiny_gif, content_type="image/gif")
         response = self.client.post(
-            reverse("pet_profiles:photo_edit", kwargs={"pk": self.pet.pk}),
+            reverse("pet_profiles:photo_edit", kwargs={"pet_uuid": self.pet.uuid}),
             {"photo": upload},
         )
         self.assertEqual(response.status_code, 302)

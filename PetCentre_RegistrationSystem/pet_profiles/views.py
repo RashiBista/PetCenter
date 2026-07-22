@@ -32,7 +32,7 @@ def home(request):
     owner = owner_for_request(request)
     first_pet = Pet.objects.filter(owner=owner).first()
     if first_pet:
-        return redirect("pet_profiles:detail", pk=first_pet.pk)
+        return redirect("pet_profiles:detail", pet_uuid=first_pet.uuid)
     return redirect("pet_profiles:create")
 
 
@@ -48,7 +48,7 @@ def pet_create(request):
             pet.save()
             MedicalSummary.objects.get_or_create(pet=pet)
             messages.success(request, f"{pet.name}'s profile was created.")
-            return redirect("pet_profiles:detail", pk=pet.pk)
+            return redirect("pet_profiles:detail", pet_uuid=pet.uuid)
     else:
         form = PetForm()
 
@@ -66,10 +66,10 @@ def pet_create(request):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def pet_detail(request, pk):
+def pet_detail(request, pet_uuid):
     owner = owner_for_request(request)
     pet = (
-        Pet.objects.filter(pk=pk, owner=owner)
+        Pet.objects.filter(uuid=pet_uuid, owner=owner)
         .prefetch_related(
             Prefetch(
                 "medications",
@@ -96,7 +96,7 @@ def pet_detail(request, pk):
         .order_by('scheduled_time')
         .first()
     )
-    pets = Pet.objects.filter(owner=owner).only("id", "name", "photo")
+    pets = Pet.objects.filter(owner=owner).only("id", "uuid", "name", "photo")
 
     return render(
         request,
@@ -113,14 +113,14 @@ def pet_detail(request, pk):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def pet_edit(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def pet_edit(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     if request.method == "POST":
         form = PetForm(request.POST, instance=pet)
         if form.is_valid():
             form.save()
             messages.success(request, "Pet details updated.")
-            return redirect("pet_profiles:detail", pk=pet.pk)
+            return redirect("pet_profiles:detail", pet_uuid=pet.uuid)
     else:
         form = PetForm(instance=pet)
 
@@ -132,21 +132,21 @@ def pet_edit(request, pk):
             "pet": pet,
             "page_title": f"Edit {pet.name}",
             "submit_label": "Save changes",
-            "cancel_url": reverse("pet_profiles:detail", kwargs={"pk": pet.pk}),
+            "cancel_url": reverse("pet_profiles:detail", kwargs={"pet_uuid": pet.uuid}),
         },
     )
 
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def pet_photo_edit(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def pet_photo_edit(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     if request.method == "POST":
         form = PetPhotoForm(request.POST, request.FILES, instance=pet)
         if form.is_valid():
             form.save()
             messages.success(request, "Pet photo updated.")
-            return redirect("pet_profiles:detail", pk=pet.pk)
+            return redirect("pet_profiles:detail", pet_uuid=pet.uuid)
     else:
         form = PetPhotoForm(instance=pet)
 
@@ -159,15 +159,15 @@ def pet_photo_edit(request, pk):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def medical_summary_edit(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def medical_summary_edit(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     summary, _ = MedicalSummary.objects.get_or_create(pet=pet)
     if request.method == "POST":
         form = MedicalSummaryForm(request.POST, instance=summary)
         if form.is_valid():
             form.save()
             messages.success(request, "Medical summary updated.")
-            return redirect("pet_profiles:detail", pk=pet.pk)
+            return redirect("pet_profiles:detail", pet_uuid=pet.uuid)
     else:
         form = MedicalSummaryForm(instance=summary)
 
@@ -179,15 +179,15 @@ def medical_summary_edit(request, pk):
             "pet": pet,
             "page_title": "Edit medical summary",
             "submit_label": "Save medical summary",
-            "cancel_url": reverse("pet_profiles:detail", kwargs={"pk": pet.pk}),
+            "cancel_url": reverse("pet_profiles:detail", kwargs={"pet_uuid": pet.uuid}),
         },
     )
 
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def medical_records(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def medical_records(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     return render(
         request,
         "pet_profiles/medical_records.html",
@@ -202,8 +202,8 @@ def medical_records(request, pk):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def add_medical_record(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def add_medical_record(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     return _create_related_record(
         request=request,
         pet=pet,
@@ -215,8 +215,8 @@ def add_medical_record(request, pk):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def add_vaccination(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def add_vaccination(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     return _create_related_record(
         request=request,
         pet=pet,
@@ -228,8 +228,8 @@ def add_vaccination(request, pk):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def add_medication(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def add_medication(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     return _create_related_record(
         request=request,
         pet=pet,
@@ -247,7 +247,7 @@ def _create_related_record(request, pet, form_class, page_title, success_message
             item.pet = pet
             item.save()
             messages.success(request, success_message)
-            return redirect("pet_profiles:records", pk=pet.pk)
+            return redirect("pet_profiles:records", pet_uuid=pet.uuid)
     else:
         form = form_class()
 
@@ -259,26 +259,26 @@ def _create_related_record(request, pet, form_class, page_title, success_message
             "pet": pet,
             "page_title": page_title,
             "submit_label": "Save",
-            "cancel_url": reverse("pet_profiles:records", kwargs={"pk": pet.pk}),
+            "cancel_url": reverse("pet_profiles:records", kwargs={"pet_uuid": pet.uuid}),
         },
     )
 
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def appointment_open(request, pk):
+def appointment_open(request, pet_uuid):
     """
     Always redirects into the REAL appointment system — the module's
     own local Appointment model/list/add views were removed entirely
     since a real, vet-linked, notification-triggering appointment
     system already exists project-wide.
     """
-    pet = owned_pet_or_404(request, pk)
+    pet = owned_pet_or_404(request, pet_uuid)
     external_name = getattr(settings, "PET_PROFILE_APPOINTMENT_URL_NAME", "")
     if external_name:
         try:
             url = reverse(external_name)
-            query = urlencode({"pet_id": pet.pk})
+            query = urlencode({"pet_id": pet.uuid})
             return HttpResponseRedirect(f"{url}?{query}")
         except NoReverseMatch:
             messages.warning(request, "The appointments page could not be found.")
@@ -287,14 +287,14 @@ def appointment_open(request, pk):
 
 @login_required(login_url=LOGIN_URL)
 @role_required(User.Role.USER)
-def assistant_open(request, pk):
-    pet = owned_pet_or_404(request, pk)
+def assistant_open(request, pet_uuid):
+    pet = owned_pet_or_404(request, pet_uuid)
     chatbot_name = getattr(settings, "PET_PROFILE_CHATBOT_URL_NAME", "core:chatbot")
     try:
         url = reverse(chatbot_name)
     except NoReverseMatch:
         messages.error(request, "Chatbot route not found.")
-        return redirect("pet_profiles:detail", pk=pet.pk)
+        return redirect("pet_profiles:detail", pet_uuid=pet.uuid)
 
-    query = urlencode({"pet_id": pet.pk, "pet_name": pet.name})
+    query = urlencode({"pet_id": pet.uuid, "pet_name": pet.name})
     return HttpResponseRedirect(f"{url}?{query}")

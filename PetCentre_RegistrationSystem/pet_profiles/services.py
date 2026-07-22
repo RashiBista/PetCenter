@@ -15,6 +15,6 @@ def owner_for_request(request):
     return request.user
 
 
-def owned_pet_or_404(request, pk):
+def owned_pet_or_404(request, pet_uuid):
     owner = owner_for_request(request)
-    return get_object_or_404(Pet, pk=pk, owner=owner)
+    return get_object_or_404(Pet, uuid=pet_uuid, owner=owner)

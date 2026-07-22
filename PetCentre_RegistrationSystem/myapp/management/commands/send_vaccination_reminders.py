@@ -50,7 +50,7 @@ class Command(BaseCommand):
                     f"Reminder: {vaccine.pet.name}'s {vaccine.vaccine_name} "
                     f"vaccination is due tomorrow, {vaccine.next_due_on:%b %d, %Y}."
                 ),
-                action_url=f"/pets/{vaccine.pet.pk}/records/",
+                action_url=f"/pets/{vaccine.pet.uuid}/records/",
             )
             vaccine.reminder_sent = True
             vaccine.save(update_fields=['reminder_sent'])

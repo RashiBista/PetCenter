@@ -6,23 +6,22 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Custom file picker (see .file-picker in pet_profile.css) — keeps the
-  // filename readout and the circular preview in sync with whatever the
-  // user actually picked, since the real <input type="file"> is hidden.
-  var fileInput = document.querySelector('.file-picker input[type="file"]');
-  var fileNameEl = document.querySelector('[data-file-name]');
+  // Photo dropzone (see .photo-dropzone in pet_profile.css) — swaps the
+  // preview image the moment a file is picked, since the real
+  // <input type="file"> is hidden. Only .photo-dropzone-visual's
+  // contents are replaced — the input itself is a sibling, never
+  // touched, so the form still submits the selected file.
+  var fileInput = document.querySelector('.photo-dropzone input[type="file"]');
   var preview = document.querySelector('[data-photo-preview]');
-  if (fileInput && fileNameEl) {
+  if (fileInput && preview) {
     fileInput.addEventListener('change', function () {
       var file = this.files && this.files[0];
-      fileNameEl.textContent = file ? file.name : 'No file chosen';
-      if (file && preview) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-          preview.innerHTML = '<img src="' + e.target.result + '" alt="Selected photo preview">';
-        };
-        reader.readAsDataURL(file);
-      }
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        preview.innerHTML = '<img src="' + e.target.result + '" alt="Selected photo preview">';
+      };
+      reader.readAsDataURL(file);
     });
   }
 });

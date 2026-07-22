@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -24,6 +25,12 @@ class Pet(models.Model):
         on_delete=models.CASCADE,
         related_name="pets",
     )
+    # Opaque public identifier used in every pet_profiles URL instead of
+    # the sequential integer pk — otherwise a bookmarked/shared link like
+    # /pets/13/ tells anyone who sees it there are (at least) 13 pets in
+    # the whole system, and incrementing the number would probe for
+    # others' (ownership-checked, so not viewable, but still guessable).
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=80)
     species = models.CharField(max_length=20, choices=Species.choices)
     breed = models.CharField(max_length=100, blank=True)

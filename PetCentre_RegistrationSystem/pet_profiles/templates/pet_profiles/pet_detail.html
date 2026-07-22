@@ -11,7 +11,7 @@
             <label class="pet-switcher-label" for="pet-switcher">Switch pet</label>
             <select id="pet-switcher" class="pet-switcher" data-pet-switcher>
                 {% for option in pets %}
-                    <option value="{% url 'pet_profiles:detail' option.pk %}" {% if option.pk == pet.pk %}selected{% endif %}>{{ option.name }}</option>
+                    <option value="{% url 'pet_profiles:detail' option.uuid %}" {% if option.uuid == pet.uuid %}selected{% endif %}>{{ option.name }}</option>
                 {% endfor %}
             </select>
         {% endif %}
@@ -21,9 +21,9 @@
 
 <div class="profile-grid">
     <aside class="card identity-card">
-        <a class="edit-profile-button" href="{% url 'pet_profiles:edit' pet.pk %}">Edit profile</a>
+        <a class="edit-profile-button" href="{% url 'pet_profiles:edit' pet.uuid %}">Edit profile</a>
 
-        <a class="photo-wrap" href="{% url 'pet_profiles:photo_edit' pet.pk %}" aria-label="Change {{ pet.name }}'s photo">
+        <a class="photo-wrap" href="{% url 'pet_profiles:photo_edit' pet.uuid %}" aria-label="Change {{ pet.name }}'s photo">
             {% if pet.photo %}
                 <img src="{{ pet.photo.url }}" alt="{{ pet.name }}">
             {% else %}
@@ -64,7 +64,7 @@
                     </span>
                     <h2>Medical Summary</h2>
                 </div>
-                <a class="icon-button" href="{% url 'pet_profiles:medical_summary_edit' pet.pk %}" aria-label="Edit medical summary">
+                <a class="icon-button" href="{% url 'pet_profiles:medical_summary_edit' pet.uuid %}" aria-label="Edit medical summary">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/></svg>
                 </a>
             </div>
@@ -104,7 +104,7 @@
                         </span>
                         <h2>Vaccinations</h2>
                     </div>
-                    <a class="text-link" href="{% url 'pet_profiles:vaccination_add' pet.pk %}">Add</a>
+                    <a class="text-link" href="{% url 'pet_profiles:vaccination_add' pet.uuid %}">Add</a>
                 </div>
 
                 <div class="vaccine-list">
@@ -121,7 +121,7 @@
                         <p class="empty-copy">No vaccination records yet.</p>
                     {% endfor %}
                 </div>
-                <a class="button button-wide button-outline" href="{% url 'pet_profiles:records' pet.pk %}">View All Records</a>
+                <a class="button button-wide button-outline" href="{% url 'pet_profiles:records' pet.uuid %}">View All Records</a>
             </section>
 
             <section class="card upcoming-card">
@@ -134,7 +134,7 @@
                     </div>
                 </div>
 
-                <a class="appointment-preview" href="{% url 'pet_profiles:appointment_open' pet.pk %}">
+                <a class="appointment-preview" href="{% url 'pet_profiles:appointment_open' pet.uuid %}">
                     {% if upcoming %}
                         <div class="appointment-title-row">
                             <strong>{{ upcoming.reason|default:"Appointment" }}</strong>
@@ -158,7 +158,7 @@
     </div>
 </div>
 
-<a class="assistant-button" href="{% url 'pet_profiles:assistant_open' pet.pk %}" aria-label="Open assistant">
+<a class="assistant-button" href="{% url 'pet_profiles:assistant_open' pet.uuid %}" aria-label="Open assistant">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="13" rx="3"/><path d="M9 11h.01M15 11h.01M9 15h6M12 3v3"/></svg>
     <span>Assistant</span>
 </a>
