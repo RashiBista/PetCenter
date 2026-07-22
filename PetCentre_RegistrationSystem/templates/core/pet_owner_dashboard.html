@@ -256,8 +256,8 @@
 <h2 class="font-display-lg text-display-lg text-on-surface">Hello, {{ request.user.get_full_name|default:request.user.username }}</h2>
 <p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">Welcome back to your pet's wellness sanctuary. Here is an overview of your upcoming care activities.</p>
 </section>
-<!-- Quick Action Cards (4-column grid) -->
-<section class="grid grid-cols-2 lg:grid-cols-4 gap-card-gap">
+<!-- Quick Action Cards (3-column grid) -->
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-card-gap">
 <!-- Action 1 -->
 <button onclick="window.location.href='{% url 'core:medicine_search' %}'" class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
 <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed group-hover:scale-110 transition-transform">
@@ -288,16 +288,6 @@
 <p class="font-body-md text-body-md text-on-surface-variant mt-1">
 {% if pet_count %}{{ pet_count }} pet{{ pet_count|pluralize }} registered.{% else %}No pets added yet.{% endif %}
 </p>
-</div>
-</button>
-<!-- Action 4 -->
-<button class="bg-surface-container-lowest rounded-2xl p-6 shadow-soft hover:shadow-active transition-all duration-300 group text-left border border-transparent hover:border-primary-container flex flex-col gap-4">
-<div class="w-12 h-12 rounded-xl bg-surface-variant flex items-center justify-center text-on-surface-variant group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined">location_on</span>
-</div>
-<div>
-<h3 class="font-title-lg text-title-lg text-on-surface">Lost / Found Report</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">Community alert network.</p>
 </div>
 </button>
 </section>
