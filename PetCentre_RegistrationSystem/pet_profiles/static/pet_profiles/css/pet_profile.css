@@ -161,25 +161,28 @@ hr { border: none; border-top: 1px solid var(--outline-variant); margin: 8px 0; 
 /* Photo dropzone — a single clickable box that IS both the preview and
    the picker: shows the current/selected photo, or an upload icon +
    "Upload Photo" prompt when empty. Replaces the old separate preview
-   circle + pill-button-with-camera-emoji + filename readout. The real
-   <input type="file"> is visually hidden but stays in the DOM (never
-   removed/replaced by JS) so the form still submits it; only the
-   .photo-dropzone-visual sibling's contents get swapped on selection. */
-.photo-dropzone {
-  display: block; width: 200px; height: 200px; margin: 0 auto 20px;
-  border-radius: 16px; cursor: pointer; position: relative;
-}
-.photo-dropzone input[type="file"] {
+   circle + pill-button-with-camera-emoji + filename readout.
+
+   The real <input type="file"> is NOT nested inside .photo-dropzone —
+   it's a sibling, associated purely via label[for]/input[id], because
+   Django's ClearableFileInput (see widgets.py's custom template) also
+   renders a "Remove current photo" checkbox+label right after it, and
+   that needs to render as its own visible row below the box, not get
+   swallowed into the hidden/clipped file input's styling. */
+.photo-dropzone-input {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.photo-dropzone {
+  display: block; width: 200px; height: 200px; margin: 0 auto 12px;
+  border-radius: 16px; cursor: pointer;
 }
 .photo-dropzone-visual {
   width: 100%; height: 100%; overflow: hidden; border-radius: 16px;
   border: 2px dashed var(--outline-variant); background: var(--surface-container);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.photo-dropzone:hover .photo-dropzone-visual,
-.photo-dropzone input[type="file"]:focus-visible ~ .photo-dropzone-visual {
+.photo-dropzone:hover .photo-dropzone-visual {
   border-color: var(--primary); background: var(--primary-container);
 }
 .photo-dropzone-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -189,6 +192,16 @@ hr { border: none; border-top: 1px solid var(--outline-variant); margin: 8px 0; 
 }
 .photo-dropzone-placeholder svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.6; }
 .photo-dropzone-placeholder span { font-weight: 600; font-size: 0.85rem; }
+
+/* "Remove current photo" — sits below the dropzone box, only rendered
+   by the widget when the pet already has a photo (widget.is_initial). */
+.photo-clear-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 0 auto 16px; width: fit-content; cursor: pointer;
+  font-size: 0.85rem; color: var(--on-surface-variant);
+}
+.photo-clear-row input[type="checkbox"] { accent-color: var(--error); cursor: pointer; }
+.photo-clear-row:hover { color: var(--error); }
 
 /* Records */
 .records-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }

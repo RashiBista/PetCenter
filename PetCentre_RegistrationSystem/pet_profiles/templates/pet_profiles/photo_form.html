@@ -13,7 +13,6 @@
         {% csrf_token %}
         <div class="form-group">
             <label class="photo-dropzone" for="{{ form.photo.id_for_label }}">
-                {{ form.photo }}
                 <div class="photo-dropzone-visual" data-photo-preview>
                     {% if pet.photo %}
                         <img src="{{ pet.photo.url }}" alt="Current photo of {{ pet.name }}">
@@ -25,6 +24,7 @@
                     {% endif %}
                 </div>
             </label>
+            {{ form.photo }}
             {% for error in form.photo.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
             <small>PNG, JPG, or WebP. Maximum 5 MB.</small>
         </div>

@@ -7,6 +7,7 @@ from .models import (
     Pet,
     VaccinationRecord,
 )
+from .widgets import DropzoneClearableFileInput
 
 
 class StyledModelForm(forms.ModelForm):
@@ -42,8 +43,8 @@ class PetPhotoForm(StyledModelForm):
         model = Pet
         fields = ["photo"]
         widgets = {
-            "photo": forms.ClearableFileInput(
-                attrs={"accept": "image/png,image/jpeg,image/webp"}
+            "photo": DropzoneClearableFileInput(
+                attrs={"accept": "image/png,image/jpeg,image/webp", "class": "photo-dropzone-input"}
             )
         }
 
