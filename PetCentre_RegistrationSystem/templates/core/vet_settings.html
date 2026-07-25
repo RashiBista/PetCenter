@@ -237,7 +237,7 @@ Change Photo
 <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6">
 <h3 class="font-title-lg text-title-lg text-on-surface mb-2">Clinic Location</h3>
 <p class="font-body-md text-body-md text-on-surface-variant mb-4">Used to sort you by distance when pet owners search "Find Nearby Care".</p>
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-4 mb-4">
 <span class="material-symbols-outlined text-primary text-2xl">
 {% if profile.location %}location_on{% else %}location_off{% endif %}
 </span>
@@ -245,13 +245,21 @@ Change Photo
 {% if profile.location %}A location is currently saved for your clinic.{% else %}No location saved yet.{% endif %}
 </p>
 </div>
-<form id="location-form" method="post" action="{% url 'core:update_my_location' %}" class="mt-4">
+<form id="location-form" method="post" action="{% url 'core:update_my_location' %}">
 {% csrf_token %}
 <input type="hidden" name="lat" id="loc-lat"/>
 <input type="hidden" name="lng" id="loc-lng"/>
 <input type="hidden" name="next" value="{% url 'core:vet_settings' %}"/>
-<button type="button" id="use-location-btn" onclick="useMyLocation()" class="flex items-center gap-2 px-5 py-2.5 rounded-full border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors">
-<span class="material-symbols-outlined text-[18px]">my_location</span> Use my current location
+<label class="font-label-md text-label-md text-on-surface-variant block mb-1.5" for="clinic-address-input">Clinic address</label>
+<div class="relative">
+<input type="text" id="clinic-address-input" autocomplete="off" placeholder="Start typing your clinic's address..."
+       class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"/>
+<div id="clinic-address-results" class="hidden absolute z-10 mt-1 w-full bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-64 overflow-y-auto"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1.5">Pick your clinic from the suggestions — that's what saves an accurate location, not free-typed text.</p>
+<button type="submit" id="save-location-btn" disabled
+        class="hidden items-center gap-2 mt-4 px-5 py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+<span class="material-symbols-outlined text-[18px]">check</span> Save this location
 </button>
 </form>
 </div>
@@ -295,26 +303,80 @@ Change Photo
 </div>
 </main>
 <script>
-  function useMyLocation() {
-    const btn = document.getElementById("use-location-btn");
-    if (!navigator.geolocation) {
-      alert("Your browser doesn't support location access.");
-      return;
+  // Clinic address autocomplete — replaces the old browser-geolocation
+  // "use my current location" flow, which recorded wherever the vet
+  // happened to be standing (often home, not the clinic) rather than
+  // the clinic's actual address. Debounced live search against
+  // core:geocode_search (a server-side proxy to Nominatim); the saved
+  // lat/lng only ever comes from an actual selected suggestion, never
+  // from free-typed text, since Nominatim geocoding never runs on raw
+  // input the user hasn't confirmed.
+  (function () {
+    const input = document.getElementById("clinic-address-input");
+    const resultsBox = document.getElementById("clinic-address-results");
+    const latField = document.getElementById("loc-lat");
+    const lngField = document.getElementById("loc-lng");
+    const saveBtn = document.getElementById("save-location-btn");
+    let debounceTimer = null;
+
+    function hideResults() {
+      resultsBox.classList.add("hidden");
+      resultsBox.innerHTML = "";
     }
-    btn.disabled = true;
-    btn.textContent = "Getting your location...";
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        document.getElementById("loc-lat").value = pos.coords.latitude;
-        document.getElementById("loc-lng").value = pos.coords.longitude;
-        document.getElementById("location-form").submit();
-      },
-      (err) => {
-        alert("Couldn't get your location: " + err.message);
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">my_location</span> Use my current location';
+
+    function selectResult(item) {
+      input.value = item.display_name;
+      latField.value = item.lat;
+      lngField.value = item.lon;
+      hideResults();
+      saveBtn.classList.remove("hidden");
+      saveBtn.disabled = false;
+    }
+
+    input.addEventListener("input", function () {
+      // Any manual edit invalidates a previously picked suggestion —
+      // the field must always be saved from a real selected result.
+      latField.value = "";
+      lngField.value = "";
+      saveBtn.classList.add("hidden");
+      saveBtn.disabled = true;
+
+      clearTimeout(debounceTimer);
+      const query = input.value.trim();
+      if (query.length < 3) {
+        hideResults();
+        return;
       }
-    );
-  }
+      debounceTimer = setTimeout(function () {
+        fetch("{% url 'core:geocode_search' %}?q=" + encodeURIComponent(query))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            const results = data.results || [];
+            resultsBox.innerHTML = "";
+            if (!results.length) {
+              resultsBox.innerHTML = '<p class="px-4 py-3 text-body-md text-on-surface-variant">No matching addresses found.</p>';
+              resultsBox.classList.remove("hidden");
+              return;
+            }
+            results.forEach(function (item) {
+              const row = document.createElement("button");
+              row.type = "button";
+              row.className = "block w-full text-left px-4 py-3 hover:bg-surface-container transition-colors text-body-md text-on-surface border-b border-surface-container last:border-b-0";
+              row.textContent = item.display_name;
+              row.addEventListener("click", function () { selectResult(item); });
+              resultsBox.appendChild(row);
+            });
+            resultsBox.classList.remove("hidden");
+          })
+          .catch(function () { hideResults(); });
+      }, 400);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!resultsBox.contains(e.target) && e.target !== input) {
+        hideResults();
+      }
+    });
+  })();
 </script>
 </body></html>

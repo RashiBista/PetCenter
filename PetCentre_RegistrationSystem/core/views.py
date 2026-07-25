@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 import cloudinary.uploader
+import requests
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -14,6 +15,7 @@ from django.contrib.gis.geos import Point
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -1053,6 +1055,65 @@ def update_my_location_view(request):
 
     separator = '&' if '?' in next_url else '?'
     return redirect(f"{next_url}{separator}lat={lat}&lng={lng}")
+
+
+# Nominatim's usage policy requires a real, identifying User-Agent (not
+# a browser-default one) — requests without it get silently rate-limited
+# or blocked. This also has to be a server-side proxy rather than a
+# direct client-side fetch: the browser has no reliable way to set a
+# custom User-Agent, and funneling every lookup through one endpoint
+# lets us respect Nominatim's ~1 req/sec policy from a single place.
+NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search"
+NOMINATIM_USER_AGENT = "PetCentre-app/1.0 (https://petcenter-5t80.onrender.com)"
+
+
+@login_required(login_url='core:pet_owner_login')
+def geocode_search_view(request):
+    """
+    Address-autocomplete backend for the Clinic Location field (see
+    vet_settings.html) — lets a vet type their clinic's real street
+    address and pick from actual matching places, instead of the old
+    "use my current location" button, which recorded wherever the vet
+    happened to be standing (e.g. home) rather than the clinic itself.
+    """
+    query = request.GET.get('q', '').strip()
+    if len(query) < 3:
+        return JsonResponse({'results': []})
+
+    try:
+        response = requests.get(
+            NOMINATIM_SEARCH_URL,
+            params={
+                'q': query,
+                'format': 'jsonv2',
+                'limit': 5,
+                # Hard-restricted to Nepal, matching where this clinic
+                # network actually operates (see TIME_ZONE in settings.py)
+                # — cuts out irrelevant global matches for short queries.
+                'countrycodes': 'np',
+                # Without this, Nominatim returns display_name in the
+                # local script (Devanagari) for Nepal results by default
+                # — unreadable dropped next to an otherwise all-English UI.
+                'accept-language': 'en',
+            },
+            headers={'User-Agent': NOMINATIM_USER_AGENT},
+            timeout=5,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError):
+        return JsonResponse({'results': []})
+
+    results = [
+        {
+            'display_name': item.get('display_name', ''),
+            'lat': item.get('lat'),
+            'lon': item.get('lon'),
+        }
+        for item in data
+        if item.get('lat') and item.get('lon')
+    ]
+    return JsonResponse({'results': results})
 
 
 # ------------------------------------------------------------------
