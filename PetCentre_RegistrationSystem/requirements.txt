@@ -43,3 +43,10 @@ asgiref==3.11.1
 requests==2.*
 
 whitenoise==6.*
+
+# --- Medicine search engine (core/medicine_engine) — TF-IDF similarity
+# search over trained artifacts in core/medicine_engine/data/*.pkl.
+# Versions match how those artifacts were trained (see search/requirements.txt).
+pandas==2.2.2
+scikit-learn==1.6.1
+scipy==1.16.3

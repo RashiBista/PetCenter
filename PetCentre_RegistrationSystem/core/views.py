@@ -22,6 +22,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from chat.models import ChatRoom
+from core.medicine_engine import search as medicine_search_engine
 from myapp.decorators import role_required
 from myapp.models import (
     Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
@@ -738,17 +739,29 @@ def book_appointment_view(request):
 
 @login_required(login_url='core:pet_owner_login')
 def medicine_search_view(request):
+    """
+    Backed by core.medicine_engine (a TF-IDF model trained on a curated
+    veterinary-medicine dataset — see core/medicine_engine/search.py),
+    not the admin-managed Medicine catalog table. Gets typo tolerance
+    and category/symptom matching (e.g. "worms" surfaces dewormers) that
+    a plain icontains filter can't do, at the cost of no photos/prices —
+    which the results already don't show (see medicine_search.html's
+    icon fallback, and prices were hidden pending real pricing data).
+    """
     query = request.GET.get('q', '').strip()
-    medicines = Medicine.objects.all()
     if query:
-        medicines = medicines.filter(Q(name__icontains=query) | Q(category__icontains=query))
+        medicines = medicine_search_engine.smart_search(query)
+    else:
+        medicines = medicine_search_engine.list_all()
     return render(request, 'core/medicine_search.html', {'medicines': medicines, 'query': query})
 
 
 @login_required(login_url='core:pet_owner_login')
 def medicine_detail_view(request, pk):
-    from django.shortcuts import get_object_or_404
-    medicine = get_object_or_404(Medicine, pk=pk)
+    medicine = medicine_search_engine.get_by_id(pk)
+    if medicine is None:
+        from django.http import Http404
+        raise Http404("Medicine not found")
     return render(request, 'core/medicine_detail.html', {'medicine': medicine})
 
 

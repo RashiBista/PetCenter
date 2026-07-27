@@ -136,11 +136,15 @@
 <div class="flex justify-between items-start mb-4">
 <h2 class="font-display-lg text-display-lg text-on-surface">{{ medicine.name }}</h2>
 </div>
-<p class="font-body-lg text-body-lg text-on-surface-variant mb-6">{{ medicine.description|default:"No description available." }}</p>
-<div class="grid grid-cols-1 gap-4 mb-6">
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-6">{{ medicine.indications|default:"No description available."|capfirst }}</p>
+<div class="grid grid-cols-2 gap-4 mb-6">
 <div class="bg-surface-container-low p-4 rounded-lg">
 <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Category</p>
 <p class="font-title-lg text-title-lg text-on-surface">{{ medicine.category|default:"—" }}</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Form</p>
+<p class="font-title-lg text-title-lg text-on-surface">{{ medicine.dosage_form|default:"—" }}</p>
 </div>
 </div>
 <div class="glass-card p-6 rounded-xl shadow-sm mb-6">
@@ -148,15 +152,15 @@
 <span class="material-symbols-outlined text-primary" data-icon="medication">medication</span>
                                 Dosage Guidelines
                             </h3>
-<p class="text-on-surface-variant mb-2">{{ medicine.dosage_info|default:"Always consult your veterinarian for specific dosage tailored to your pet's condition." }}</p>
+<p class="text-on-surface-variant mb-2">{% if medicine.strength %}Typical strength: {{ medicine.strength }}. {% endif %}Always consult your veterinarian for specific dosage tailored to your pet's condition.</p>
 </div>
 </div>
 <!-- Action Button -->
 <div class="mt-8 flex gap-4">
-<button class="flex-1 bg-primary text-on-primary py-4 px-8 rounded-full font-label-md text-label-md shadow-md hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<a href="{% url 'chat:inbox' %}" class="flex-1 bg-primary text-on-primary py-4 px-8 rounded-full font-label-md text-label-md shadow-md hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
                             Ask Vet About This
-                        </button>
+                        </a>
 </div>
 </div>
 </div>
