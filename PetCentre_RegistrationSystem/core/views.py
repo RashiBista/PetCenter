@@ -787,7 +787,11 @@ def search_view(request):
     pet_things_results = []
 
     if query:
-        medicines = Medicine.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
+        # Medicine goes through the same fuzzy/typo-tolerant engine as
+        # the dedicated /medicine/ page (see medicine_search_view) —
+        # otherwise this bar answers the same query differently
+        # depending on which search box it came from.
+        medicines = medicine_search_engine.smart_search(query, top_n=10)
         accessories = Accessory.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
         pet_things_results = (
             [{'kind': 'medicine', 'obj': m} for m in medicines] +
