@@ -26,7 +26,7 @@ from core.medicine_engine import search as medicine_search_engine
 from myapp.decorators import role_required
 from myapp.models import (
     Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
-    SignupOTP, User, UserProfile, VetProfile, PharmacyProfile,
+    SignupOTP, User, UserProfile, VetProfile,
 )
 from pet_profiles.models import Pet
 from notifications.models import Notification
@@ -255,41 +255,6 @@ def veterinary_signup_view(request):
     return render(request, 'core/veterinary_signup.html', {'errors': errors, 'form_data': form_data})
 
 
-def pharmacy_signup_view(request):
-    errors = {}
-    form_data = {}
-
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        phone_number = request.POST.get('phone_number', '').strip()
-        pharmacy_name = request.POST.get('pharmacy_name', '').strip()
-        password = request.POST.get('password', '')
-        password2 = request.POST.get('password2', '')
-        channel = request.POST.get('otp_channel', 'email')
-
-        form_data = {
-            'username': username, 'email': email,
-            'phone_number': phone_number, 'pharmacy_name': pharmacy_name,
-        }
-        errors = _validate_signup_fields(username, email, password, password2)
-        if channel == 'phone' and not phone_number:
-            errors.setdefault('otp_channel', []).append('Add a phone number above to receive a code by phone.')
-
-        if not errors:
-            _stash_pending_signup(request, role='pharmacy', form_data=form_data, password=password, extra={'pharmacy_name': pharmacy_name})
-            destination = phone_number if channel == 'phone' else email
-            code = _generate_otp_code()
-            SignupOTP.objects.create(
-                session_key=request.session.session_key or request.session.save() or request.session.session_key,
-                channel=channel, destination=destination, code=code,
-            )
-            _send_otp(channel, destination, code, purpose="signup verification")
-            return redirect('core:verify_signup')
-
-    return render(request, 'core/pharmacy_signup.html', {'errors': errors, 'form_data': form_data})
-
-
 def verify_signup_view(request):
     """
     Step 2 of signup. Reads the pending signup data back out of the
@@ -328,8 +293,6 @@ def verify_signup_view(request):
                     user.role = User.Role.USER
                 elif role == 'vet':
                     user.role = User.Role.VET
-                elif role == 'pharmacy':
-                    user.role = User.Role.PHARMACY
                 user.save()
 
                 extra = pending.get('extra', {})
@@ -350,8 +313,6 @@ def verify_signup_view(request):
                         pet.save()
                 elif role == 'vet':
                     VetProfile.objects.create(user=user)
-                elif role == 'pharmacy':
-                    PharmacyProfile.objects.create(user=user, pharmacy_name=extra.get('pharmacy_name', ''))
 
                 otp.is_used = True
                 otp.save()
@@ -361,7 +322,6 @@ def verify_signup_view(request):
                 dashboard_map = {
                     'user': 'core:pet_owner_dashboard',
                     'vet': 'core:veterinary_dashboard',
-                    'pharmacy': 'core:pharmacy_dashboard',
                 }
                 return redirect(dashboard_map[role])
 
@@ -462,34 +422,6 @@ def veterinary_login_view(request):
     return render(request, 'core/veterinary_login.html', {'error': error})
 
 
-def pharmacy_login_view(request):
-    error = None
-    if request.method == 'POST':
-        identifier = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '')
-        client_ip = _get_client_ip(request)
-        target_user = _find_user_by_identifier(identifier)
-
-        if _is_ip_locked_out(client_ip):
-            error = "Too many failed attempts from this network. Try again in 24 hours."
-        elif target_user and _is_locked_out(target_user):
-            error = "Too many failed attempts. Try again in 24 hours."
-        else:
-            user = authenticate(request, username=identifier, password=password)
-            if user is None:
-                _record_failed_ip_attempt(client_ip)
-                if target_user:
-                    _record_failed_attempt(target_user)
-                error = 'Invalid email or password.'
-            elif not user.is_pharmacy:
-                error = 'This account is not a pharmacy account.'
-            else:
-                login(request, user)
-                _apply_remember_me(request)
-                return redirect('core:pharmacy_dashboard')
-    return render(request, 'core/pharmacy_login.html', {'error': error})
-
-
 def admin_login_view(request):
     error = None
     if request.method == 'POST':
@@ -525,7 +457,7 @@ def logout_view(request):
 
 # ------------------------------------------------------------------
 # Password reset — email OTP flow. Works for any role (pet owner,
-# vet, pharmacy, admin) since it just looks up by email/username.
+# vet, admin) since it just looks up by email/username.
 # ------------------------------------------------------------------
 
 def forgot_password_view(request):
@@ -603,7 +535,7 @@ def _recipient_role_for(user):
     """
     Maps our User.Role values to the notifications app's RecipientRole
     choices, which only has 'client'/'vet'. Anything that isn't VET
-    (pet owner, pharmacy, admin) is treated as 'client' for now.
+    (pet owner, admin) is treated as 'client' for now.
     """
     return Notification.RecipientRole.VET if user.role == User.Role.VET else Notification.RecipientRole.CLIENT
 
@@ -980,9 +912,12 @@ def account_settings_view(request):
 @login_required(login_url='core:pet_owner_login')
 def find_nearest_vets_view(request):
     """
-    Combined "Find Nearby Care" locator — covers both veterinary
-    clinics AND pharmacies, the two location-relevant registered
-    entity types in the system. Filterable via ?type=vet|pharmacy|all.
+    "Find Nearby Care" locator — veterinary clinics, the only
+    location-relevant registered entity type in the system (pharmacies
+    were removed: pet medicine is dispensed by the vet directly, or
+    sourced through a vetpharma supplier the vet is affiliated with —
+    see VetProfile.pharma_partner_name — not a separate standalone
+    account pet owners look for on their own).
 
     If the browser supplies ?lat=&lng= (via navigator.geolocation on
     the frontend), results with a saved location are sorted by real
@@ -990,8 +925,6 @@ def find_nearest_vets_view(request):
     no lat/lng is supplied at all, are just listed with no distance
     shown — no fake numbers are ever displayed.
     """
-    type_filter = request.GET.get('type', 'all')
-
     user_point = None
     lat = request.GET.get('lat')
     lng = request.GET.get('lng')
@@ -1008,27 +941,14 @@ def find_nearest_vets_view(request):
         if profile and profile.location:
             user_point = profile.location
 
-    vets = []
-    pharmacies = []
-
-    if type_filter in ('all', 'vet'):
-        vets = User.objects.filter(role=User.Role.VET).select_related('vet_profile')
-        if user_point:
-            vets = vets.filter(vet_profile__location__isnull=False).annotate(
-                distance=Distance('vet_profile__location', user_point)
-            ).order_by('distance')
-
-    if type_filter in ('all', 'pharmacy'):
-        pharmacies = User.objects.filter(role=User.Role.PHARMACY).select_related('pharmacy_profile')
-        if user_point:
-            pharmacies = pharmacies.filter(pharmacy_profile__location__isnull=False).annotate(
-                distance=Distance('pharmacy_profile__location', user_point)
-            ).order_by('distance')
+    vets = User.objects.filter(role=User.Role.VET).select_related('vet_profile')
+    if user_point:
+        vets = vets.filter(vet_profile__location__isnull=False).annotate(
+            distance=Distance('vet_profile__location', user_point)
+        ).order_by('distance')
 
     return render(request, 'core/find_nearest_vets.html', {
         'vets': vets,
-        'pharmacies': pharmacies,
-        'type_filter': type_filter,
         'has_location': bool(user_point),
     })
 
@@ -1037,7 +957,7 @@ def find_nearest_vets_view(request):
 def update_my_location_view(request):
     """
     Shared "Use my location" save endpoint for any role with a
-    location-bearing profile (pet owner, vet, pharmacy) — persists
+    location-bearing profile (pet owner or vet) — persists
     coordinates the browser's geolocation API supplied, so distance
     features (find-nearby-care sorting, appointment booking proximity)
     work on future visits without asking again every time.
@@ -1057,8 +977,6 @@ def update_my_location_view(request):
 
     if request.user.is_vet:
         profile = getattr(request.user, 'vet_profile', None)
-    elif request.user.is_pharmacy:
-        profile = getattr(request.user, 'pharmacy_profile', None)
     else:
         profile = getattr(request.user, 'user_profile', None)
 
@@ -1314,68 +1232,78 @@ def vet_settings_view(request):
     return render(request, 'core/vet_settings.html', {'profile': profile, 'errors': errors})
 
 
-@role_required(User.Role.PHARMACY)
-def pharmacy_dashboard(request):
-    if request.method == 'POST':
-        action = request.POST.get('action', 'fulfill')
-        prescription_id = request.POST.get('prescription_id')
+@role_required(User.Role.VET)
+def veterinary_prescriptions_view(request):
+    """
+    A vet's own issued prescriptions, with the ability to mark one
+    fulfilled (they dispensed it in-house, or their affiliated
+    vetpharma supplier did — see VetProfile.pharma_partner_name) and to
+    set/change a refill-reminder date. This capability used to live
+    entirely on the pharmacy role's dashboard; pharmacies were removed
+    (standalone pet pharmacies aren't a real local concept), so
+    fulfillment now belongs to whoever actually issued the prescription.
+    """
+    status_filter = request.GET.get('status', 'all')
+    prescriptions = Prescription.objects.filter(vet=request.user).select_related('pet', 'pet__owner')
+    if status_filter in (Prescription.Status.PENDING, Prescription.Status.FULFILLED, Prescription.Status.CANCELLED):
+        prescriptions = prescriptions.filter(status=status_filter)
 
-        if action == 'set_reminder':
-            reminder_date_str = request.POST.get('reminder_date')
-            prescription = Prescription.objects.filter(id=prescription_id).select_related('pet', 'pet__owner').first()
-            # Parse to an actual date before assigning — leaving it as the
-            # raw POST string "works" for the DB write (Django's DateField
-            # converts on save), but the in-memory attribute stays a str,
-            # and formatting a str with a datetime spec below raises
-            # ValueError: every "set reminder" submission 500'd.
-            reminder_date = None
-            if reminder_date_str:
-                try:
-                    reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d').date()
-                except ValueError:
-                    reminder_date = None
-            if prescription and reminder_date:
-                prescription.reminder_date = reminder_date
-                prescription.reminder_sent = False  # allow re-triggering if the date was changed
-                prescription.save(update_fields=['reminder_date', 'reminder_sent'])
-                # Confirmation that the reminder was set — sent immediately,
-                # separate from the actual reminder which fires the day before.
-                create_notification(
-                    recipient=prescription.pet.owner,
-                    recipient_role=_recipient_role_for(prescription.pet.owner),
-                    notification_type='medicine',
-                    title="Medicine reminder set",
-                    message=(
-                        f"A reminder has been set for {prescription.pet.name}'s "
-                        f"{prescription.medicine_name} on {prescription.reminder_date:%b %d, %Y}."
-                    ),
-                    action_url="/dashboard/pet-owner/",
-                )
-            return redirect('core:pharmacy_dashboard')
-
-        # Fulfill action: mark a pending prescription as fulfilled by this pharmacy.
-        Prescription.objects.filter(
-            id=prescription_id, status=Prescription.Status.PENDING
-        ).update(
-            status=Prescription.Status.FULFILLED,
-            pharmacy=request.user,
-            fulfilled_at=timezone.now(),
-        )
-        return redirect('core:pharmacy_dashboard')
-
-    pending_prescriptions = Prescription.objects.filter(
-        status=Prescription.Status.PENDING
-    ).select_related('pet', 'pet__owner', 'vet')
-
-    recently_fulfilled = Prescription.objects.filter(
-        status=Prescription.Status.FULFILLED, pharmacy=request.user
-    ).select_related('pet', 'vet')[:5]
-
-    return render(request, 'core/pharmacy_dashboard.html', {
-        'pending_prescriptions': pending_prescriptions,
-        'pending_count': pending_prescriptions.count(),
-        'recently_fulfilled': recently_fulfilled,
+    return render(request, 'core/veterinary_prescriptions.html', {
+        'prescriptions': prescriptions,
+        'status_filter': status_filter,
+        'status_choices': [('all', 'All')] + list(Prescription.Status.choices),
     })
+
+
+@role_required(User.Role.VET)
+def update_prescription_status_view(request, prescription_id):
+    if request.method != 'POST':
+        return redirect('core:veterinary_prescriptions')
+
+    # Scoped to prescriptions THIS vet issued — the same ownership check
+    # update_appointment_status_view does for appointments.
+    prescription = Prescription.objects.filter(id=prescription_id, vet=request.user).select_related('pet', 'pet__owner').first()
+    if prescription is None:
+        return redirect('core:veterinary_prescriptions')
+
+    action = request.POST.get('action', 'fulfill')
+
+    if action == 'set_reminder':
+        reminder_date_str = request.POST.get('reminder_date')
+        # Parse to an actual date before assigning — leaving it as the
+        # raw POST string "works" for the DB write (Django's DateField
+        # converts on save), but the in-memory attribute stays a str,
+        # and formatting a str with a datetime spec below raises
+        # ValueError: every "set reminder" submission 500'd.
+        reminder_date = None
+        if reminder_date_str:
+            try:
+                reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                reminder_date = None
+        if reminder_date:
+            prescription.reminder_date = reminder_date
+            prescription.reminder_sent = False  # allow re-triggering if the date was changed
+            prescription.save(update_fields=['reminder_date', 'reminder_sent'])
+            # Confirmation that the reminder was set — sent immediately,
+            # separate from the actual reminder which fires the day before.
+            create_notification(
+                recipient=prescription.pet.owner,
+                recipient_role=_recipient_role_for(prescription.pet.owner),
+                notification_type='medicine',
+                title="Medicine reminder set",
+                message=(
+                    f"A reminder has been set for {prescription.pet.name}'s "
+                    f"{prescription.medicine_name} on {prescription.reminder_date:%b %d, %Y}."
+                ),
+                action_url="/dashboard/pet-owner/",
+            )
+    elif action == 'fulfill' and prescription.status == Prescription.Status.PENDING:
+        prescription.status = Prescription.Status.FULFILLED
+        prescription.fulfilled_at = timezone.now()
+        prescription.save(update_fields=['status', 'fulfilled_at'])
+
+    return redirect('core:veterinary_prescriptions')
 
 
 @login_required(login_url='core:admin_login')
@@ -1398,10 +1326,9 @@ def admin_create_user_view(request):
         phone_number = request.POST.get('phone_number', '').strip()
         password = request.POST.get('password', '')
         role = request.POST.get('role', '')
-        pharmacy_name = request.POST.get('pharmacy_name', '').strip()
 
         errors = _validate_signup_fields(username, email, password, password)  # password==password2 since there's no confirm field here
-        if role not in (User.Role.USER, User.Role.VET, User.Role.PHARMACY):
+        if role not in (User.Role.USER, User.Role.VET):
             errors.setdefault('role', []).append('Choose a valid role.')
 
         if not errors:
@@ -1413,8 +1340,6 @@ def admin_create_user_view(request):
                 UserProfile.objects.create(user=user)
             elif role == User.Role.VET:
                 VetProfile.objects.create(user=user)
-            elif role == User.Role.PHARMACY:
-                PharmacyProfile.objects.create(user=user, pharmacy_name=pharmacy_name)
 
             messages.success(request, f"{username} was created as a {user.get_role_display()}.")
             return redirect('core:admin_dashboard')
@@ -1513,7 +1438,6 @@ def admin_dashboard(request):
     stats = {
         'total_owners': User.objects.filter(role=User.Role.USER).count(),
         'total_vets': User.objects.filter(role=User.Role.VET).count(),
-        'total_pharmacies': User.objects.filter(role=User.Role.PHARMACY).count(),
         'total_medicines': Medicine.objects.count(),
         'total_accessories': Accessory.objects.count(),
         'total_appointments': Appointment.objects.count(),
@@ -1525,7 +1449,7 @@ def admin_dashboard(request):
     all_medicines = Medicine.objects.order_by('-created_at')
     all_accessories = Accessory.objects.order_by('-created_at')
     all_appointments = Appointment.objects.select_related('pet', 'pet__owner', 'vet').order_by('-scheduled_time')[:20]
-    all_prescriptions = Prescription.objects.select_related('pet', 'vet', 'pharmacy').order_by('-created_at')[:20]
+    all_prescriptions = Prescription.objects.select_related('pet', 'vet').order_by('-created_at')[:20]
 
     return render(request, 'core/admin_dashboard.html', {
         'stats': stats,

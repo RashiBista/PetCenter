@@ -156,9 +156,6 @@
 <a href="{% url 'core:admin_login' %}" class="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
 <span class="material-symbols-outlined text-[20px] text-primary">admin_panel_settings</span> Administrator
 </a>
-<a href="{% url 'core:pharmacy_login' %}" class="flex items-center gap-3 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
-<span class="material-symbols-outlined text-[20px] text-primary">local_pharmacy</span> Pharmacy
-</a>
 </div>
 </div>
 <button onclick="window.location.href='{% url 'core:pet_owner_signup' %}'" class="font-label-md text-label-md bg-primary text-on-primary px-6 py-2.5 rounded-full hover:bg-primary/90 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
@@ -237,7 +234,6 @@
 <option value="owner">Pet Owner</option>
 <option value="vet">Veterinary Professional</option>
 <option value="admin">Administrator</option>
-<option value="pharmacy">Pharmacy</option>
 </select>
 <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
 </div>
@@ -264,14 +260,12 @@
   const loginUrls = {
     owner: "{% url 'core:pet_owner_login' %}",
     vet: "{% url 'core:veterinary_login' %}",
-    admin: "{% url 'core:admin_login' %}",
-    pharmacy: "{% url 'core:pharmacy_login' %}"
+    admin: "{% url 'core:admin_login' %}"
   };
   const signupUrls = {
     owner: "{% url 'core:pet_owner_signup' %}",
     vet: "{% url 'core:veterinary_signup' %}",
-    admin: "{% url 'core:admin_login' %}",
-    pharmacy: "{% url 'core:pharmacy_signup' %}"
+    admin: "{% url 'core:admin_login' %}"
   };
 
   function selectedRole() {

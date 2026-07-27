@@ -14,9 +14,8 @@ def _recipient_role_for(user):
 class Command(BaseCommand):
     """
     Sends "Your pet's Medicine" reminder emails the day before a
-    prescription's reminder_date (set by the vet or pharmacy via the
-    pharmacy dashboard). Run daily via a scheduled task, same pattern
-    as send_appointment_reminders.
+    prescription's reminder_date (set by the issuing vet). Run daily
+    via a scheduled task, same pattern as send_appointment_reminders.
 
     Usage:
         python manage.py send_medicine_reminders

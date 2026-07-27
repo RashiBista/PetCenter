@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from myapp.models import (
     Accessory, Appointment, Medicine, Prescription,
-    User, UserProfile, VetProfile, PharmacyProfile,
+    User, UserProfile, VetProfile,
 )
 from pet_profiles.models import Pet
 
@@ -26,7 +26,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         vets = self._create_vets()
         owners = self._create_owners_and_pets()
-        pharmacy = self._create_pharmacy()
         medicines = self._create_medicines()
         self._create_accessories()
         self._create_appointments(owners, vets)
@@ -38,12 +37,15 @@ class Command(BaseCommand):
             self.stdout.write(f"  {u.username} ({u.get_role_display()})")
 
     def _create_vets(self):
+        # Second row demonstrates a vet who works with an external
+        # vetpharma supplier rather than dispensing in-house — the
+        # first (blank pharma_partner_name) demonstrates the default.
         vets_data = [
-            ('demo_vet_amy', 'Amy', 'Chen', 'Small Animal Medicine', 27.7172, 85.3240),   
-            ('demo_vet_raj', 'Raj', 'Sharma', 'Surgery', 27.6710, 85.4298),
+            ('demo_vet_amy', 'Amy', 'Chen', 'Small Animal Medicine', 27.7172, 85.3240, ''),
+            ('demo_vet_raj', 'Raj', 'Sharma', 'Surgery', 27.6710, 85.4298, 'Himalayan VetPharma Supplies'),
         ]
         vets = []
-        for username, first, last, specialization, lat, lng in vets_data:
+        for username, first, last, specialization, lat, lng, pharma_partner in vets_data:
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
@@ -54,10 +56,19 @@ class Command(BaseCommand):
             if created:
                 user.set_password('DemoPass123!')
                 user.save()
-            VetProfile.objects.get_or_create(
+            profile, profile_created = VetProfile.objects.get_or_create(
                 user=user,
-                defaults={'specialization': specialization, 'location': Point(lng, lat, srid=4326)},
+                defaults={
+                    'specialization': specialization, 'location': Point(lng, lat, srid=4326),
+                    'pharma_partner_name': pharma_partner,
+                },
             )
+            if not profile_created and profile.pharma_partner_name != pharma_partner:
+                # get_or_create's defaults only apply on creation — a vet
+                # profile from before this field existed needs an
+                # explicit backfill, or demo re-runs never pick it up.
+                profile.pharma_partner_name = pharma_partner
+                profile.save(update_fields=['pharma_partner_name'])
             vets.append(user)
         return vets
 
@@ -80,20 +91,6 @@ class Command(BaseCommand):
                 Pet.objects.get_or_create(owner=user, name=name, defaults={'species': species, 'breed': breed})
             owners.append(user)
         return owners
-
-    def _create_pharmacy(self):
-        user, created = User.objects.get_or_create(
-            username='demo_pharmacy_main',
-            defaults={'email': 'demo_pharmacy_main@example.com', 'role': User.Role.PHARMACY},
-        )
-        if created:
-            user.set_password('DemoPass123!')
-            user.save()
-        PharmacyProfile.objects.get_or_create(
-            user=user,
-            defaults={'pharmacy_name': 'Main Clinic Pharmacy', 'location': Point(85.3300, 27.7000, srid=4326)},
-        )
-        return user
 
     def _create_medicines(self):
         medicines_data = [

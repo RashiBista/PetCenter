@@ -4,7 +4,7 @@ from django.contrib.gis.admin import GISModelAdmin
 
 from .models import (
     Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP,
-    PharmacyProfile, Prescription, SignupOTP, User, UserProfile, VetProfile,
+    Prescription, SignupOTP, User, UserProfile, VetProfile,
 )
 
 
@@ -31,14 +31,8 @@ class VetProfileAdmin(GISModelAdmin):
     # GISModelAdmin (instead of plain ModelAdmin) renders `location` as
     # a clickable map widget in the admin form, so a vet's coordinates
     # can be set visually instead of typing raw lat/lng.
-    list_display = ('user', 'specialization', 'consultation_fee', 'created_at')
-    search_fields = ('user__username', 'user__email')
-
-
-@admin.register(PharmacyProfile)
-class PharmacyProfileAdmin(GISModelAdmin):
-    list_display = ('user', 'pharmacy_name', 'created_at')
-    search_fields = ('user__username', 'user__email', 'pharmacy_name')
+    list_display = ('user', 'specialization', 'consultation_fee', 'pharma_partner_name', 'created_at')
+    search_fields = ('user__username', 'user__email', 'pharma_partner_name')
 
 
 @admin.register(Medicine)
@@ -67,10 +61,10 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 @admin.register(Prescription)
 class PrescriptionAdmin(admin.ModelAdmin):
-    list_display = ('medicine_name', 'pet', 'vet', 'pharmacy', 'status', 'created_at')
+    list_display = ('medicine_name', 'pet', 'vet', 'status', 'created_at')
     list_filter = ('status',)
     search_fields = ('medicine_name', 'pet__name', 'vet__username')
-    autocomplete_fields = ('pet', 'vet', 'pharmacy')
+    autocomplete_fields = ('pet', 'vet')
 
 
 # --- Debugging/visibility only — these aren't meant to be edited by

@@ -14,9 +14,6 @@ urlpatterns = [
     path('login/veterinary/', views.veterinary_login_view, name='veterinary_login'),
     path('signup/veterinary/', views.veterinary_signup_view, name='veterinary_signup'),
 
-    path('login/pharmacy/', views.pharmacy_login_view, name='pharmacy_login'),
-    path('signup/pharmacy/', views.pharmacy_signup_view, name='pharmacy_signup'),
-
     path('login/admin/', views.admin_login_view, name='admin_login'),
     path('logout/', views.logout_view, name='logout'),
 
@@ -43,7 +40,8 @@ urlpatterns = [
     path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),
     path('dashboard/veterinary/appointments/', views.veterinary_appointments_view, name='veterinary_appointments'),
-    path('dashboard/pharmacy/', views.pharmacy_dashboard, name='pharmacy_dashboard'),
+    path('dashboard/veterinary/prescriptions/', views.veterinary_prescriptions_view, name='veterinary_prescriptions'),
+    path('dashboard/veterinary/prescriptions/<int:prescription_id>/update/', views.update_prescription_status_view, name='update_prescription_status'),
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('dashboard/admin/users/create/', views.admin_create_user_view, name='admin_create_user'),
     path('dashboard/admin/users/<int:user_id>/toggle-active/', views.toggle_user_active_view, name='toggle_user_active'),

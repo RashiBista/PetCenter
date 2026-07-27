@@ -19,7 +19,6 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         USER = 'user', 'User'
         VET = 'vet', 'Veterinarian'
-        PHARMACY = 'pharmacy', 'Pharmacy'
 
     role = models.CharField(
         max_length=10,
@@ -48,10 +47,6 @@ class User(AbstractUser):
     def is_pet_owner(self):
         return self.role == self.Role.USER
 
-    @property
-    def is_pharmacy(self):
-        return self.role == self.Role.PHARMACY
-
 
 class UserProfile(models.Model):
     """
@@ -69,8 +64,7 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     # Set via the browser's geolocation API ("Use my location") on the
     # Find Nearby Care page — same geography=True pattern as
-    # VetProfile/PharmacyProfile.location, so distance queries return
-    # real-world meters.
+    # VetProfile.location, so distance queries return real-world meters.
     location = PointField(geography=True, null=True, blank=True)
 
     def __str__(self):
@@ -97,31 +91,18 @@ class VetProfile(models.Model):
     # Django admin — nullable so an unset fee just renders as "—" instead
     # of a misleading 0.
     consultation_fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    # Standalone pet pharmacies aren't really a thing pet owners look
+    # for locally — medicine is dispensed by the vet directly, or
+    # sourced from a wholesale veterinary pharmaceutical supplier
+    # ("vetpharma") the vet works with. Optional free text; blank means
+    # the vet dispenses in-house rather than through a named supplier.
+    # Shown wherever a prescription/appointment previously showed a
+    # separate pharmacy's name — e.g. admin_dashboard.html's
+    # "Dispensed Via" column and veterinary_prescriptions.html.
+    pharma_partner_name = models.CharField(max_length=150, blank=True)
 
     def __str__(self):
         return f'VetProfile<{self.user.username}>'
-
-
-class PharmacyProfile(models.Model):
-    """
-    Extra profile data for the 'pharmacy' role. Kept minimal for now,
-    same pattern as VetProfile — fields like license number, address,
-    or operating hours can be added here later without touching the
-    User/auth model.
-    """
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='pharmacy_profile',
-        limit_choices_to={'role': User.Role.PHARMACY},
-    )
-    pharmacy_name = models.CharField(max_length=150, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    location = PointField(geography=True, null=True, blank=True)
-
-    def __str__(self):
-        return f'PharmacyProfile<{self.user.username}>'
 
 
 #  myapp.Pet has been removed entirely — superseded by
@@ -179,19 +160,14 @@ class Prescription(models.Model):
         'myapp.User', on_delete=models.CASCADE, related_name='issued_prescriptions',
         limit_choices_to={'role': User.Role.VET},
     )
-    pharmacy = models.ForeignKey(
-        'myapp.User', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='fulfilled_prescriptions',
-        limit_choices_to={'role': User.Role.PHARMACY},
-    )
     medicine_name = models.CharField(max_length=150)
     dosage = models.CharField(max_length=100, blank=True)
     instructions = models.TextField(blank=True)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     fulfilled_at = models.DateTimeField(null=True, blank=True)
-    # Set by the vet or pharmacy  a date to remind the owner to give/
-    # refill this medicine. Reminder fires the day before.
+    # Set by the issuing vet — a date to remind the owner to give/refill
+    # this medicine. Reminder fires the day before.
     reminder_date = models.DateField(null=True, blank=True)
     reminder_sent = models.BooleanField(default=False)
 

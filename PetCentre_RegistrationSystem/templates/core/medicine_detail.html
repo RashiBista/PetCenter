@@ -164,42 +164,6 @@
 </div>
 </div>
 </div>
-<!-- Pharmacy/Contact Details -->
-<div class="bg-surface-container-low rounded-xl p-8 border border-surface-variant mb-section-margin">
-<h3 class="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
-<span class="material-symbols-outlined text-primary" data-icon="local_pharmacy">local_pharmacy</span>
-                    Pharmacy Availability
-                </h3>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="flex items-start gap-4">
-<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
-</div>
-<div>
-<p class="font-label-md text-label-md text-on-surface font-semibold">{{ medicine.pharmacy_name|default:"Main Clinic Pharmacy" }}</p>
-<p class="text-on-surface-variant text-sm mt-1">Available for pickup.</p>
-</div>
-</div>
-<div class="flex items-start gap-4">
-<div class="w-12 h-12 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined" data-icon="call">call</span>
-</div>
-<div>
-<p class="font-label-md text-label-md text-on-surface font-semibold">Contact</p>
-<p class="text-on-surface-variant text-sm mt-1">{{ medicine.pharmacy_contact|default:"Contact clinic for details" }}</p>
-</div>
-</div>
-<div class="flex items-start gap-4">
-<div class="w-12 h-12 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
-</div>
-<div>
-<p class="font-label-md text-label-md text-on-surface font-semibold">Hours</p>
-<p class="text-on-surface-variant text-sm mt-1">{{ medicine.pharmacy_hours|default:"Mon-Fri: 8am - 6pm" }}</p>
-</div>
-</div>
-</div>
-</div>
 </div>
 </main>
 </body></html>

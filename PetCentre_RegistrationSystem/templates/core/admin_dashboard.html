@@ -98,11 +98,6 @@ tailwind.config = {
 <p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_vets }}</p>
 </div>
 <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">local_pharmacy</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Pharmacies</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_pharmacies }}</p>
-</div>
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
 <span class="material-symbols-outlined text-primary text-2xl mb-2 block">pets</span>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Registered Pets</p>
 <p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_pets }}</p>
@@ -165,16 +160,11 @@ tailwind.config = {
 </div>
 <div>
 <label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Role</label>
-<select name="role" required onchange="document.getElementById('pharmacy-name-field').classList.toggle('hidden', this.value !== 'pharmacy')" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+<select name="role" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none">
 <option value="">Choose a role</option>
 <option value="user">Pet Owner</option>
 <option value="vet">Veterinarian</option>
-<option value="pharmacy">Pharmacy</option>
 </select>
-</div>
-<div id="pharmacy-name-field" class="hidden">
-<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Pharmacy Name</label>
-<input name="pharmacy_name" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
 </div>
 <div class="md:col-span-2">
 <button type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Create Account</button>
@@ -397,7 +387,7 @@ tailwind.config = {
 <th class="py-2 pr-4">Medicine</th>
 <th class="py-2 pr-4">Pet</th>
 <th class="py-2 pr-4">Veterinarian</th>
-<th class="py-2 pr-4">Pharmacy</th>
+<th class="py-2 pr-4">Dispensed Via</th>
 <th class="py-2 pr-4">Status</th>
 </tr>
 </thead>
@@ -407,7 +397,7 @@ tailwind.config = {
 <td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ rx.medicine_name }}</td>
 <td class="py-3 pr-4 text-on-surface-variant text-sm">{{ rx.pet.name }}</td>
 <td class="py-3 pr-4 text-on-surface-variant text-sm">Dr. {{ rx.vet.get_full_name|default:rx.vet.username }}</td>
-<td class="py-3 pr-4 text-on-surface-variant text-sm">{% if rx.pharmacy %}{{ rx.pharmacy.get_full_name|default:rx.pharmacy.username }}{% else %}—{% endif %}</td>
+<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ rx.vet.vet_profile.pharma_partner_name|default:"Clinic" }}</td>
 <td class="py-3 pr-4">
 {% if rx.status == 'pending' %}<span class="px-2 py-1 rounded-full bg-error-container text-on-error-container text-xs">Pending</span>
 {% elif rx.status == 'fulfilled' %}<span class="px-2 py-1 rounded-full bg-primary-container text-on-primary-container text-xs">Fulfilled</span>
