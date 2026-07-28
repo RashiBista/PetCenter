@@ -46,7 +46,14 @@ whitenoise==6.*
 
 # --- Medicine search engine (core/medicine_engine) — TF-IDF similarity
 # search over trained artifacts in core/medicine_engine/data/*.pkl.
-# Versions match how those artifacts were trained (see search/requirements.txt).
-pandas==2.2.2
+# Base versions match how those artifacts were trained (see
+# search/requirements.txt), except pandas: 2.2.2 has no prebuilt wheel
+# for Python 3.13 (predates its release), so CI's 3.13 matrix leg fell
+# back to compiling from source — which fails outright, since pandas
+# 2.2.2's Cython-generated C++ uses a [[maybe_unused]] attribute
+# placement newer GCC rejects. 2.2.3 ships real 3.13 wheels and is
+# pickle-compatible with artifacts trained under 2.2.2 (patch-version
+# bump, same 2.2.x pickle format).
+pandas==2.2.3
 scikit-learn==1.6.1
 scipy==1.16.3
