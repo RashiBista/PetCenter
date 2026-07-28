@@ -156,12 +156,14 @@
 </div>
 </div>
 <!-- Action Button -->
+{% if request.user.role != 'vet' %}
 <div class="mt-8 flex gap-4">
 <a href="{% url 'chat:inbox' %}" class="flex-1 bg-primary text-on-primary py-4 px-8 rounded-full font-label-md text-label-md shadow-md hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2">
 <span class="material-symbols-outlined" data-icon="forum">forum</span>
                             Ask Vet About This
                         </a>
 </div>
+{% endif %}
 </div>
 </div>
 </div>

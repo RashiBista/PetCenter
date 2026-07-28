@@ -52,7 +52,7 @@ tailwind.config = {
 
   <form method="get" class="relative mb-6">
     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-    <input name="q" value="{{ query }}" placeholder="Search medicine, accessories..."
+    <input name="q" value="{{ query }}" placeholder="Search medicine..."
            class="w-full pl-12 pr-4 py-3 rounded-full border border-outline-variant bg-surface-container-low text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"/>
   </form>
 
@@ -60,26 +60,23 @@ tailwind.config = {
   <p class="text-on-surface-variant font-body-md text-body-md text-center py-10">Type something above to search.</p>
   {% else %}
 
-    <h2 class="font-title-lg text-title-lg text-on-surface mb-3">Medicine &amp; Accessories</h2>
+    <h2 class="font-title-lg text-title-lg text-on-surface mb-3">Medicine</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {% for item in pet_things_results %}
-      <a href="{% if item.kind == 'medicine' %}{% url 'core:medicine_detail' item.obj.id %}{% else %}{% url 'core:accessory_detail' item.obj.id %}{% endif %}"
+      <a href="{% url 'core:medicine_detail' item.obj.id %}"
          class="bg-surface-container-lowest rounded-xl p-5 border border-surface-container-high shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
         <div class="w-14 h-14 rounded-lg bg-surface-container-low flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-outline text-2xl">
-            {% if item.kind == 'medicine' %}medication{% else %}shopping_bag{% endif %}
-          </span>
+          <span class="material-symbols-outlined text-outline text-2xl">medication</span>
         </div>
         <div class="flex-1">
           <p class="font-label-md text-label-md text-on-surface font-semibold">{{ item.obj.name }}</p>
           <p class="font-label-sm text-label-sm text-on-surface-variant">
-            {% if item.kind == 'medicine' %}Medicine{% else %}Accessory{% endif %} · {{ item.obj.category|default:"—" }}
+            Medicine · {{ item.obj.category|default:"—" }}
           </p>
         </div>
-        {% if item.kind != 'medicine' and item.obj.price %}<span class="font-label-md text-label-md text-primary">NRS {{ item.obj.price }}</span>{% endif %}
       </a>
       {% empty %}
-      <p class="text-on-surface-variant font-body-md text-body-md text-center py-8 col-span-2">No medicine or accessories found matching "{{ query }}".</p>
+      <p class="text-on-surface-variant font-body-md text-body-md text-center py-8 col-span-2">No medicine found matching "{{ query }}".</p>
       {% endfor %}
     </div>
 
