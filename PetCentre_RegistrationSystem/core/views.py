@@ -25,7 +25,7 @@ from chat.models import ChatRoom
 from core.medicine_engine import search as medicine_search_engine
 from myapp.decorators import role_required
 from myapp.models import (
-    Accessory, Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
+    Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
     SignupOTP, User, UserProfile, VetProfile,
 )
 from pet_profiles.models import Pet
@@ -697,13 +697,6 @@ def medicine_detail_view(request, pk):
     return render(request, 'core/medicine_detail.html', {'medicine': medicine})
 
 
-@login_required(login_url='core:pet_owner_login')
-def accessory_detail_view(request, pk):
-    from django.shortcuts import get_object_or_404
-    accessory = get_object_or_404(Accessory, pk=pk)
-    return render(request, 'core/accessory_details.html', {'accessory': accessory})
-
-
 # ------------------------------------------------------------------
 # Unified search module — the "Search for medicine, vets..." bar
 # visible in every dashboard header feeds into this one view.
@@ -724,11 +717,7 @@ def search_view(request):
         # otherwise this bar answers the same query differently
         # depending on which search box it came from.
         medicines = medicine_search_engine.smart_search(query, top_n=10)
-        accessories = Accessory.objects.filter(Q(name__icontains=query) | Q(category__icontains=query))
-        pet_things_results = (
-            [{'kind': 'medicine', 'obj': m} for m in medicines] +
-            [{'kind': 'accessory', 'obj': a} for a in accessories]
-        )
+        pet_things_results = [{'kind': 'medicine', 'obj': m} for m in medicines]
 
     return render(request, 'core/search.html', {
         'query': query,
@@ -1390,46 +1379,6 @@ def admin_delete_medicine_view(request, item_id):
 
 
 @login_required(login_url='core:admin_login')
-def admin_add_accessory_view(request):
-    if not (request.user.is_staff or request.user.is_superuser):
-        return redirect('core:landing_page')
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        if name:
-            Accessory.objects.create(
-                name=name,
-                category=request.POST.get('category', '').strip(),
-                price=request.POST.get('price') or None,
-                description=request.POST.get('description', '').strip(),
-                in_stock=True,
-            )
-            messages.success(request, f"{name} added to Accessory catalog.")
-    return redirect('core:admin_dashboard')
-
-
-@login_required(login_url='core:admin_login')
-def admin_toggle_accessory_stock_view(request, item_id):
-    if not (request.user.is_staff or request.user.is_superuser):
-        return redirect('core:landing_page')
-    if request.method == 'POST':
-        item = Accessory.objects.filter(id=item_id).first()
-        if item:
-            item.in_stock = not item.in_stock
-            item.save(update_fields=['in_stock'])
-    return redirect('core:admin_dashboard')
-
-
-@login_required(login_url='core:admin_login')
-def admin_delete_accessory_view(request, item_id):
-    if not (request.user.is_staff or request.user.is_superuser):
-        return redirect('core:landing_page')
-    if request.method == 'POST':
-        Accessory.objects.filter(id=item_id).delete()
-        messages.success(request, "Accessory removed.")
-    return redirect('core:admin_dashboard')
-
-
-@login_required(login_url='core:admin_login')
 def admin_dashboard(request):
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, "You don't have access to that page.")
@@ -1439,7 +1388,6 @@ def admin_dashboard(request):
         'total_owners': User.objects.filter(role=User.Role.USER).count(),
         'total_vets': User.objects.filter(role=User.Role.VET).count(),
         'total_medicines': Medicine.objects.count(),
-        'total_accessories': Accessory.objects.count(),
         'total_appointments': Appointment.objects.count(),
         'pending_prescriptions': Prescription.objects.filter(status=Prescription.Status.PENDING).count(),
         'total_pets': Pet.objects.count(),
@@ -1447,7 +1395,6 @@ def admin_dashboard(request):
 
     recent_users = User.objects.exclude(is_superuser=True).order_by('-date_joined')[:15]
     all_medicines = Medicine.objects.order_by('-created_at')
-    all_accessories = Accessory.objects.order_by('-created_at')
     all_appointments = Appointment.objects.select_related('pet', 'pet__owner', 'vet').order_by('-scheduled_time')[:20]
     all_prescriptions = Prescription.objects.select_related('pet', 'vet').order_by('-created_at')[:20]
 
@@ -1455,7 +1402,6 @@ def admin_dashboard(request):
         'stats': stats,
         'recent_users': recent_users,
         'all_medicines': all_medicines,
-        'all_accessories': all_accessories,
         'all_appointments': all_appointments,
         'all_prescriptions': all_prescriptions,
     })

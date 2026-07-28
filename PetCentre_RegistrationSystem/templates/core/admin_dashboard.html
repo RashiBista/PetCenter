@@ -108,11 +108,6 @@ tailwind.config = {
 <p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_medicines }}</p>
 </div>
 <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">shopping_bag</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Accessories</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_accessories }}</p>
-</div>
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
 <span class="material-symbols-outlined text-primary text-2xl mb-2 block">calendar_today</span>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Appointments</p>
 <p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_appointments }}</p>
@@ -275,69 +270,6 @@ tailwind.config = {
 </tr>
 {% empty %}
 <tr><td colspan="4" class="py-6 text-center text-on-surface-variant">No medicine in the catalog yet.</td></tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-</div>
-
-<!-- Accessory catalog management -->
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6 mt-8">
-<div class="flex items-center justify-between mb-4">
-<h2 class="font-title-lg text-title-lg text-on-surface">Accessory Catalog</h2>
-<button onclick="document.getElementById('add-accessory-form').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
-<span class="material-symbols-outlined text-[18px]">add</span>Add Accessory
-</button>
-</div>
-<div id="add-accessory-form" class="hidden mb-6 p-5 rounded-xl bg-surface-container-low border border-surface-container-high">
-<form method="post" action="{% url 'core:admin_add_accessory' %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-{% csrf_token %}
-<div>
-<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Name</label>
-<input name="name" required class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
-</div>
-<div>
-<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Category</label>
-<input name="category" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
-</div>
-<div>
-<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Price</label>
-<input name="price" type="number" step="0.01" min="0" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
-</div>
-<div class="md:col-span-2">
-<label class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Description</label>
-<input name="description" class="w-full h-11 px-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"/>
-</div>
-<div class="md:col-span-2">
-<button type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">Add Accessory</button>
-</div>
-</form>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left">
-<thead>
-<tr class="border-b border-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
-<th class="py-2 pr-4">Name</th>
-<th class="py-2 pr-4">Category</th>
-<th class="py-2 pr-4">Price</th>
-<th class="py-2 pr-4"></th>
-</tr>
-</thead>
-<tbody>
-{% for a in all_accessories %}
-<tr class="border-b border-surface-container last:border-b-0">
-<td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ a.name }}</td>
-<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ a.category|default:"—" }}</td>
-<td class="py-3 pr-4 text-on-surface-variant text-sm">{% if a.price %}NRS {{ a.price }}{% else %}—{% endif %}</td>
-<td class="py-3 pr-4">
-<form method="post" action="{% url 'core:admin_delete_accessory' a.id %}">
-{% csrf_token %}
-<button type="submit" class="text-sm font-medium text-error hover:underline">Delete</button>
-</form>
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="4" class="py-6 text-center text-on-surface-variant">No accessories in the catalog yet.</td></tr>
 {% endfor %}
 </tbody>
 </table>

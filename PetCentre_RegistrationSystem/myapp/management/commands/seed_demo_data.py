@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from myapp.models import (
-    Accessory, Appointment, Medicine, Prescription,
+    Appointment, Medicine, Prescription,
     User, UserProfile, VetProfile,
 )
 from pet_profiles.models import Pet
@@ -27,7 +27,6 @@ class Command(BaseCommand):
         vets = self._create_vets()
         owners = self._create_owners_and_pets()
         medicines = self._create_medicines()
-        self._create_accessories()
         self._create_appointments(owners, vets)
         self._create_prescriptions(owners, vets, medicines)
 
@@ -105,17 +104,6 @@ class Command(BaseCommand):
             )
             medicines.append(m)
         return medicines
-
-    def _create_accessories(self):
-        accessories_data = [
-            ('Adjustable Nylon Leash', 'Leashes', 'Durable 6ft leash, fits medium to large dogs.', 12.99),
-            ('Stainless Steel Bowl Set', 'Feeding', 'Set of 2 non-slip bowls.', 9.50),
-            ('Grooming Brush', 'Grooming', 'De-shedding brush for short and long fur.', 14.00),
-        ]
-        for name, category, description, price in accessories_data:
-            Accessory.objects.get_or_create(
-                name=name, defaults={'category': category, 'description': description, 'price': price},
-            )
 
     def _create_appointments(self, owners, vets):
         now = timezone.now()

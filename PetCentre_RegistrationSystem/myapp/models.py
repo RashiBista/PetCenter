@@ -29,7 +29,7 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True)
     email = models.EmailField(unique=True)
     # Uploads through the default storage backend (Cloudinary — see
-    # STORAGES in settings.py), same as Pet/Medicine/Accessory photos.
+    # STORAGES in settings.py), same as Pet/Medicine photos.
     # Lives on User rather than the per-role profile models since every
     # role needs one and there's nothing role-specific about it.
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
@@ -210,25 +210,6 @@ class Medicine(models.Model):
 
     def __str__(self):
         return self.name
-
-class Accessory(models.Model):
-    """
-    Mirrors Medicine's structure — same pattern, different content
-    category (leashes, bowls, toys, grooming, etc. instead of drugs).
-    """
-    name = models.CharField(max_length=150)
-    category = models.CharField(max_length=100, blank=True)
-    description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    in_stock = models.BooleanField(default=True)
-    photo = models.ImageField(upload_to='accessories/', blank=True, null=True)
-    pharmacy_name = models.CharField(max_length=150, blank=True, default="Main Clinic Pharmacy")
-    pharmacy_contact = models.CharField(max_length=50, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
 
 class SignupOTP(models.Model):
     """

@@ -25,7 +25,6 @@ urlpatterns = [
 
     path('medicine/', views.medicine_search_view, name='medicine_search'),
     path('medicine/<int:pk>/', views.medicine_detail_view, name='medicine_detail'),
-    path('accessory/<int:pk>/', views.accessory_detail_view, name='accessory_detail'),
     path('search/', views.search_view, name='search'),
 
     path('notifications/', views.pet_owner_notifications_view, name='pet_owner_notifications'),
@@ -48,9 +47,6 @@ urlpatterns = [
     path('dashboard/admin/medicine/add/', views.admin_add_medicine_view, name='admin_add_medicine'),
     path('dashboard/admin/medicine/<int:item_id>/toggle-stock/', views.admin_toggle_medicine_stock_view, name='admin_toggle_medicine_stock'),
     path('dashboard/admin/medicine/<int:item_id>/delete/', views.admin_delete_medicine_view, name='admin_delete_medicine'),
-    path('dashboard/admin/accessory/add/', views.admin_add_accessory_view, name='admin_add_accessory'),
-    path('dashboard/admin/accessory/<int:item_id>/toggle-stock/', views.admin_toggle_accessory_stock_view, name='admin_toggle_accessory_stock'),
-    path('dashboard/admin/accessory/<int:item_id>/delete/', views.admin_delete_accessory_view, name='admin_delete_accessory'),
 
     path('chatbot/', views.chatbot_view, name='chatbot'),
 ]
