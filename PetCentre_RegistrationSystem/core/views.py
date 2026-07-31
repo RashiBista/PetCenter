@@ -26,7 +26,7 @@ from core.medicine_engine import search as medicine_search_engine
 from myapp.decorators import role_required
 from myapp.models import (
     Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Prescription,
-    SignupOTP, User, UserProfile, VetProfile,
+    SignupOTP, User, UserProfile, VetAvailability, VetProfile,
 )
 from pet_profiles.models import Pet
 from notifications.models import Notification
@@ -619,17 +619,33 @@ def update_appointment_status_view(request, appointment_id):
 def book_appointment_view(request):
     """
     Rendered as core/appointment_booking.html (matches the "Book an
-    Appointment" designed page). Pets/vets are real DB records; the
-    7-day date strip is generated here since there's no real
-    per-vet availability system yet — every future date/slot is shown
-    as open. Time slots are a fixed common set for the same reason.
+    Appointment" designed page). Pets/vets are real DB records; date/time
+    options come from each vet's own VetAvailability slots (vet-managed —
+    see vet_availability_view) rather than a shared static list. A slot
+    counts as open if the vet added it AND no active (non-cancelled)
+    appointment already occupies that exact vet+time — computed once here
+    and reused both to build the picker and to validate the POST, so a
+    submission can't slip through for a slot that isn't actually open.
     """
     pets = Pet.objects.filter(owner=request.user)
     vets = User.objects.filter(role=User.Role.VET).select_related('vet_profile')
     error = None
 
-    upcoming_dates = [timezone.localdate() + timezone.timedelta(days=i) for i in range(7)]
-    time_slots = ["09:00", "10:30", "11:15", "13:00", "14:30", "16:00"]
+    today = timezone.localdate()
+    now = timezone.now()
+
+    booked_times_by_vet = {}
+    for vet_id, scheduled_time in Appointment.objects.filter(
+        vet__in=vets, scheduled_time__date__gte=today,
+    ).exclude(status=Appointment.Status.CANCELLED).values_list('vet_id', 'scheduled_time'):
+        booked_times_by_vet.setdefault(vet_id, set()).add(scheduled_time)
+
+    vet_slots = {}
+    for slot in VetAvailability.objects.filter(vet__in=vets, date__gte=today).order_by('date', 'time'):
+        slot_dt = timezone.make_aware(datetime.combine(slot.date, slot.time))
+        if slot_dt < now or slot_dt in booked_times_by_vet.get(slot.vet_id, ()):
+            continue
+        vet_slots.setdefault(str(slot.vet_id), {}).setdefault(slot.date.isoformat(), []).append(slot.time.strftime('%H:%M'))
 
     if request.method == 'POST':
         pet_id = request.POST.get('pet')
@@ -646,7 +662,9 @@ def book_appointment_view(request):
         except Exception:
             error = "Please select a pet, vet, date, and time."
         else:
-            if scheduled_time < timezone.now():
+            if time_str not in vet_slots.get(vet_id, {}).get(date_str, []):
+                error = "That slot isn't available anymore — please choose another."
+            elif scheduled_time < timezone.now():
                 error = "Please choose a future date and time."
             else:
                 appt = Appointment.objects.create(pet=pet, vet=vet, scheduled_time=scheduled_time, reason=reason)
@@ -663,7 +681,7 @@ def book_appointment_view(request):
 
     return render(request, 'core/appointment_booking.html', {
         'pets': pets, 'vets': vets, 'error': error,
-        'upcoming_dates': upcoming_dates, 'time_slots': time_slots,
+        'vet_slots': vet_slots,
     })
 
 # Medicine search + detail
@@ -1119,6 +1137,16 @@ def veterinary_dashboard(request):
         vet=request.user, status=Prescription.Status.PENDING
     ).count()
 
+    booked_times = set(
+        Appointment.objects.filter(vet=request.user, scheduled_time__date__gte=today)
+        .exclude(status=Appointment.Status.CANCELLED)
+        .values_list('scheduled_time', flat=True)
+    )
+    open_slots_count = sum(
+        1 for slot in VetAvailability.objects.filter(vet=request.user, date__gte=today)
+        if timezone.make_aware(datetime.combine(slot.date, slot.time)) not in booked_times
+    )
+
     # Latest chat conversations for the "Recent Messages" card. Only a
     # handful of rooms, so the per-room last_message property (one small
     # query each) is fine here — unlike the full inbox, which batches.
@@ -1165,6 +1193,7 @@ def veterinary_dashboard(request):
         'todays_appointments': todays_appointments,
         'total_patients': total_patients,
         'pending_prescriptions_count': pending_prescriptions_count,
+        'open_slots_count': open_slots_count,
         'recent_messages': recent_messages,
         'appointments_trend': appointments_trend,
         'trend_max': trend_max,
@@ -1219,6 +1248,70 @@ def vet_settings_view(request):
             return redirect('core:vet_settings')
 
     return render(request, 'core/vet_settings.html', {'profile': profile, 'errors': errors})
+
+
+@role_required(User.Role.VET)
+def vet_availability_view(request):
+    """
+    Lets a vet open up individual date+time slots for booking — replaces
+    the old app-wide static date/time list every vet shared regardless
+    of their real schedule (see book_appointment_view). A slot stays in
+    the table even once booked; "booked" is derived by checking for a
+    non-cancelled Appointment at that exact vet+time, so cancelling an
+    appointment naturally reopens the slot without recreating the row.
+    """
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            date_str = request.POST.get('date', '')
+            time_str = request.POST.get('time', '')
+            try:
+                slot_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                slot_time = datetime.strptime(time_str, '%H:%M').time()
+            except ValueError:
+                messages.error(request, "Please choose a valid date and time.")
+            else:
+                slot_dt = timezone.make_aware(datetime.combine(slot_date, slot_time))
+                if slot_dt < timezone.now():
+                    messages.error(request, "Please choose a future date and time.")
+                else:
+                    _, created = VetAvailability.objects.get_or_create(
+                        vet=request.user, date=slot_date, time=slot_time,
+                    )
+                    if created:
+                        messages.success(request, f"Opened {slot_date:%b %d, %Y} at {slot_time:%I:%M %p} for booking.")
+                    else:
+                        messages.info(request, "That slot is already open.")
+        elif action == 'remove':
+            slot = VetAvailability.objects.filter(id=request.POST.get('slot_id'), vet=request.user).first()
+            if slot:
+                slot_dt = timezone.make_aware(datetime.combine(slot.date, slot.time))
+                is_booked = Appointment.objects.filter(
+                    vet=request.user, scheduled_time=slot_dt,
+                ).exclude(status=Appointment.Status.CANCELLED).exists()
+                if is_booked:
+                    messages.error(request, "That slot has a booked appointment and can't be removed.")
+                else:
+                    slot.delete()
+                    messages.success(request, "Slot removed.")
+        return redirect('core:vet_availability')
+
+    today = timezone.localdate()
+    slots = list(VetAvailability.objects.filter(vet=request.user, date__gte=today).order_by('date', 'time'))
+    booked_times = set(
+        Appointment.objects.filter(vet=request.user, scheduled_time__date__gte=today)
+        .exclude(status=Appointment.Status.CANCELLED)
+        .values_list('scheduled_time', flat=True)
+    )
+    slots_by_date = {}
+    for slot in slots:
+        slot.is_booked = timezone.make_aware(datetime.combine(slot.date, slot.time)) in booked_times
+        slots_by_date.setdefault(slot.date, []).append(slot)
+
+    return render(request, 'core/vet_availability.html', {
+        'slots_by_date': sorted(slots_by_date.items()),
+        'today': today,
+    })
 
 
 @role_required(User.Role.VET)

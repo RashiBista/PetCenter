@@ -134,6 +134,10 @@
 <span class="material-symbols-outlined">calendar_today</span>
 <span class="font-label-md text-label-md">Appointments</span>
 </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:vet_availability' %}">
+<span class="material-symbols-outlined">event_available</span>
+<span class="font-label-md text-label-md">Availability</span>
+</a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'chat:inbox' %}">
 <span class="material-symbols-outlined">chat</span>
 <span class="font-label-md text-label-md">Chat</span>
@@ -229,18 +233,18 @@
 </div>
 </a>
 <!-- Card 3 -->
-<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-container-highest hover:shadow-md transition-shadow relative overflow-hidden group">
+<a href="{% url 'core:vet_availability' %}" class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-surface-container-highest hover:shadow-md transition-shadow relative overflow-hidden group block">
 <div class="absolute -right-4 -top-4 w-24 h-24 bg-[#4caf50]/20 rounded-full opacity-20 group-hover:scale-110 transition-transform"></div>
 <div class="flex justify-between items-start mb-4">
 <div class="w-12 h-12 rounded-full bg-[#4caf50]/20 flex items-center justify-center text-[#2e7d32]">
-<span class="material-symbols-outlined">check_circle</span>
+<span class="material-symbols-outlined">event_available</span>
 </div>
 </div>
 <div>
-<h3 class="font-headline-lg text-headline-lg text-on-surface mb-1">Available</h3>
-<p class="font-label-md text-label-md text-on-surface-variant">Status</p>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-1">{{ open_slots_count }}</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">Open Slots</p>
 </div>
-</div>
+</a>
 </div>
 <!-- Bento Layout -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap">

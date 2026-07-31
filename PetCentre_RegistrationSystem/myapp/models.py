@@ -147,6 +147,32 @@ class Appointment(models.Model):
         return self.pet.owner
 
 
+class VetAvailability(models.Model):
+    """
+    A single date+time slot a vet has explicitly opened up for booking.
+    Manually managed by the vet (see core.vet_availability_view) — replaces
+    the old app-wide static date/time list every vet shared regardless of
+    their real schedule. A slot stays "open" here even once booked; the
+    booking flow instead checks for a non-cancelled Appointment at that
+    exact vet+time to decide availability, so a cancellation naturally
+    reopens the slot without needing to recreate the row.
+    """
+    vet = models.ForeignKey(
+        'myapp.User', on_delete=models.CASCADE, related_name='availability_slots',
+        limit_choices_to={'role': User.Role.VET},
+    )
+    date = models.DateField()
+    time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date', 'time']
+        unique_together = ('vet', 'date', 'time')
+
+    def __str__(self):
+        return f'{self.vet.username} available {self.date} {self.time}'
+
+
 class Prescription(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'

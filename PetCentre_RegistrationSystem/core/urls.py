@@ -35,6 +35,7 @@ urlpatterns = [
     path('profile/settings/', views.account_settings_view, name='account_settings'),
 
     path('dashboard/veterinary/settings/', views.vet_settings_view, name='vet_settings'),
+    path('dashboard/veterinary/availability/', views.vet_availability_view, name='vet_availability'),
 
     path('dashboard/pet-owner/', views.pet_owner_dashboard, name='pet_owner_dashboard'),
     path('dashboard/veterinary/', views.veterinary_dashboard, name='veterinary_dashboard'),

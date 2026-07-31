@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Availability — PetCentre</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "on-secondary-fixed-variant": "#444652","on-error": "#ffffff","tertiary-container": "#c0ad5b",
+        "on-primary-fixed-variant": "#473f76","surface-container-low": "#f7f2f8","inverse-primary": "#c8bfff",
+        "surface-container-highest": "#e5e1e6","on-tertiary-container": "#4c4000","on-error-container": "#93000a",
+        "on-background": "#1c1b1f","error": "#ba1a1a","on-primary-fixed": "#1b1248","on-secondary": "#ffffff",
+        "on-secondary-container": "#616470","surface-container-high": "#ebe7ec","inverse-surface": "#313034",
+        "secondary-container": "#e0e1f0","on-surface": "#1c1b1f","primary-fixed": "#e5deff","on-tertiary": "#ffffff",
+        "outline": "#797580","on-surface-variant": "#48454f","surface-container-lowest": "#ffffff",
+        "secondary-fixed": "#e0e1f0","on-tertiary-fixed": "#221b00","inverse-on-surface": "#f4eff5",
+        "surface-bright": "#fdf8fd","surface-tint": "#5f578f","on-primary-container": "#413a70",
+        "primary-container": "#afa6e4","surface-variant": "#e5e1e6","on-secondary-fixed": "#181b26",
+        "secondary": "#5b5e6a","surface-dim": "#ddd9de","primary": "#5f578f","background": "#fdf8fd",
+        "secondary-fixed-dim": "#c4c6d4","surface-container": "#f1ecf2","tertiary": "#6d5e13",
+        "on-tertiary-fixed-variant": "#534600","surface": "#fdf8fd","error-container": "#ffdad6",
+        "on-primary": "#ffffff","tertiary-fixed-dim": "#dac671","tertiary-fixed": "#f8e28a",
+        "primary-fixed-dim": "#c8bfff","outline-variant": "#c9c4d0"
+      },
+      "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+      "fontFamily": {
+        "body-lg": ["Plus Jakarta Sans"],"title-lg": ["Plus Jakarta Sans"],"headline-lg-mobile": ["Manrope"],
+        "label-md": ["Plus Jakarta Sans"],"label-sm": ["Plus Jakarta Sans"],"body-md": ["Plus Jakarta Sans"],
+        "display-lg": ["Manrope"],"headline-md": ["Manrope"],"headline-lg": ["Manrope"]
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen">
+<div class="max-w-4xl mx-auto py-10 px-4">
+
+  <div class="flex items-center gap-3 mb-2">
+    <a href="{% url 'core:veterinary_dashboard' %}" class="text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h1 class="font-headline-md text-headline-md text-on-surface">My Availability</h1>
+  </div>
+  <p class="font-label-sm text-label-sm text-on-surface-variant mb-6 ml-9">
+    Open up individual date and time slots — pet owners can only book a slot you've added here.
+  </p>
+
+  {% if messages %}
+  <div class="mb-6 space-y-2">
+    {% for message in messages %}
+    <div class="px-4 py-3 rounded-xl text-body-md {% if message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-primary-container/30 text-on-primary-container{% endif %}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form method="post" class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm p-5 mb-8 flex flex-wrap items-end gap-3">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add"/>
+    <div>
+      <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1" for="new-slot-date">Date</label>
+      <input class="rounded-lg border border-outline-variant bg-transparent px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary" id="new-slot-date" min="{{ today|date:'Y-m-d' }}" name="date" required="" type="date"/>
+    </div>
+    <div>
+      <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1" for="new-slot-time">Time</label>
+      <input class="rounded-lg border border-outline-variant bg-transparent px-3 py-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary" id="new-slot-time" name="time" required="" type="time"/>
+    </div>
+    <button type="submit" class="px-5 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors">Add Slot</button>
+  </form>
+
+  <div class="space-y-6">
+    {% for date, slots in slots_by_date %}
+    <div>
+      <h2 class="font-label-md text-label-md font-semibold text-on-surface mb-2">{{ date|date:"l, M d, Y" }}</h2>
+      <div class="flex flex-wrap gap-2">
+        {% for slot in slots %}
+        <div class="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full border {% if slot.is_booked %}border-primary bg-primary-container/20{% else %}border-outline-variant{% endif %}">
+          <span class="font-label-sm text-label-sm">{{ slot.time|time:"g:i A" }}</span>
+          {% if slot.is_booked %}
+          <span class="text-label-sm font-label-sm text-primary">Booked</span>
+          {% else %}
+          <form method="post" action="{% url 'core:vet_availability' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove"/>
+            <input type="hidden" name="slot_id" value="{{ slot.id }}"/>
+            <button type="submit" class="text-on-surface-variant hover:text-error transition-colors flex items-center" aria-label="Remove slot">
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-on-surface-variant font-body-md text-body-md text-center py-10">No upcoming slots yet — add one above so pet owners can book you.</p>
+    {% endfor %}
+  </div>
+</div>
+</body></html>

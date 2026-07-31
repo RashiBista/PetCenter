@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from myapp.models import (
     Appointment, Medicine, Prescription,
-    User, UserProfile, VetProfile,
+    User, UserProfile, VetAvailability, VetProfile,
 )
 from pet_profiles.models import Pet
 
@@ -29,6 +29,7 @@ class Command(BaseCommand):
         medicines = self._create_medicines()
         self._create_appointments(owners, vets)
         self._create_prescriptions(owners, vets, medicines)
+        self._create_availability(vets)
 
         self.stdout.write(self.style.SUCCESS("Demo data ready."))
         self.stdout.write(self.style.SUCCESS("Login as any of these (password: DemoPass123!):"))
@@ -122,6 +123,20 @@ class Command(BaseCommand):
             pet=pet1, vet=vets[0], scheduled_time=now - timedelta(days=5),
             defaults={'reason': 'Vaccination', 'status': Appointment.Status.COMPLETED},
         )
+
+    def _create_availability(self, vets):
+        # A handful of open slots per demo vet over the next few days, so
+        # the booking page (core:appointment_booking) has real per-vet
+        # slots to show instead of appearing empty for a fresh demo.
+        times = ['09:00', '10:30', '13:00', '14:30']
+        today = timezone.localdate()
+        for vet in vets:
+            for day_offset in (1, 2, 3):
+                for time_str in times:
+                    VetAvailability.objects.get_or_create(
+                        vet=vet, date=today + timedelta(days=day_offset),
+                        time=datetime.strptime(time_str, '%H:%M').time(),
+                    )
 
     def _create_prescriptions(self, owners, vets, medicines):
         pet1 = owners[0].pets.first()

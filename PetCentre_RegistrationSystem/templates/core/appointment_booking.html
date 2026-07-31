@@ -355,34 +355,18 @@
 <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-md text-label-md">3</div>
 <h3 class="font-title-lg text-title-lg text-on-background">Date &amp; Time</h3>
 </div>
+{{ vet_slots|json_script:"vet-slots-data" }}
+<p id="no-slots-msg" class="hidden text-on-surface-variant font-body-md text-body-md">This vet has no open slots right now — pick another specialist above, or check back later.</p>
+<div id="date-time-fields">
 <!-- Date Selection (Simplified Horizontal Scroll) -->
 <div class="mb-6">
 <p class="font-label-md text-label-md font-medium text-on-surface-variant mb-3">Select Date</p>
-<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-{% for d in upcoming_dates %}
-<label class="cursor-pointer flex-shrink-0">
-<input class="peer sr-only" name="date" type="radio" value="{{ d|date:"Y-m-d" }}" {% if forloop.first %}checked{% endif %}/>
-<div class="w-20 h-24 rounded-xl border-2 border-surface-variant flex flex-col items-center justify-center peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary transition-all hover:bg-surface-container-highest">
-<span class="text-label-sm font-label-sm uppercase mb-1">{{ d|date:"M" }}</span>
-<span class="text-headline-md font-headline-md">{{ d|date:"d" }}</span>
-<span class="text-label-sm font-label-sm">{{ d|date:"D" }}</span>
-</div>
-</label>
-{% endfor %}
-</div>
+<div id="date-options" class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"></div>
 </div>
 <!-- Time Slots -->
 <div>
 <p class="font-label-md text-label-md font-medium text-on-surface-variant mb-3">Available Times</p>
-<div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-{% for t in time_slots %}
-<label class="cursor-pointer">
-<input class="peer sr-only" name="time" type="radio" value="{{ t }}" {% if forloop.first %}checked{% endif %}/>
-<div class="py-2 text-center rounded-lg border border-outline-variant text-body-md font-body-md peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary hover:bg-surface-container transition-all">
-{{ t }}
-</div>
-</label>
-{% endfor %}
+<div id="time-options" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
 </div>
 </div>
 </section>
@@ -453,5 +437,69 @@
   }
   document.querySelectorAll('.vet-radio').forEach((el) => el.addEventListener('change', updateBookingFee));
   updateBookingFee();
+
+  const VET_SLOTS = JSON.parse(document.getElementById('vet-slots-data').textContent);
+  const dateOptionsEl = document.getElementById('date-options');
+  const timeOptionsEl = document.getElementById('time-options');
+  const noSlotsMsgEl = document.getElementById('no-slots-msg');
+  const dateTimeFieldsEl = document.getElementById('date-time-fields');
+
+  function formatDateParts(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return { month: months[dt.getMonth()], day: String(dt.getDate()).padStart(2, '0'), weekday: days[dt.getDay()] };
+  }
+
+  function renderTimesForDate(datesForVet, dateStr) {
+    const times = datesForVet[dateStr] || [];
+    timeOptionsEl.innerHTML = times.map((t, i) => `
+      <label class="cursor-pointer">
+        <input class="peer sr-only" name="time" type="radio" value="${t}" ${i === 0 ? 'checked' : ''}/>
+        <div class="py-2 text-center rounded-lg border border-outline-variant text-body-md font-body-md peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary hover:bg-surface-container transition-all">${t}</div>
+      </label>
+    `).join('');
+  }
+
+  function renderVetSlots(vetId) {
+    const datesForVet = VET_SLOTS[vetId] || {};
+    const dateKeys = Object.keys(datesForVet).sort();
+    if (dateKeys.length === 0) {
+      dateOptionsEl.innerHTML = '';
+      timeOptionsEl.innerHTML = '';
+      noSlotsMsgEl.classList.remove('hidden');
+      dateTimeFieldsEl.classList.add('hidden');
+      return;
+    }
+    noSlotsMsgEl.classList.add('hidden');
+    dateTimeFieldsEl.classList.remove('hidden');
+    dateOptionsEl.innerHTML = dateKeys.map((dateStr, i) => {
+      const { month, day, weekday } = formatDateParts(dateStr);
+      return `
+        <label class="cursor-pointer flex-shrink-0">
+          <input class="peer sr-only" name="date" type="radio" value="${dateStr}" ${i === 0 ? 'checked' : ''}/>
+          <div class="w-20 h-24 rounded-xl border-2 border-surface-variant flex flex-col items-center justify-center peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary transition-all hover:bg-surface-container-highest">
+            <span class="text-label-sm font-label-sm uppercase mb-1">${month}</span>
+            <span class="text-headline-md font-headline-md">${day}</span>
+            <span class="text-label-sm font-label-sm">${weekday}</span>
+          </div>
+        </label>
+      `;
+    }).join('');
+    renderTimesForDate(datesForVet, dateKeys[0]);
+  }
+
+  dateOptionsEl.addEventListener('change', (e) => {
+    if (e.target.name === 'date') {
+      const vetId = document.querySelector('.vet-radio:checked').value;
+      renderTimesForDate(VET_SLOTS[vetId] || {}, e.target.value);
+    }
+  });
+
+  document.querySelectorAll('.vet-radio').forEach((el) => el.addEventListener('change', () => renderVetSlots(el.value)));
+
+  const initialVet = document.querySelector('.vet-radio:checked');
+  if (initialVet) renderVetSlots(initialVet.value);
 </script>
 </body></html>
