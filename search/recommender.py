@@ -53,7 +53,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
 
-# Loaded lazily (on first search) rather than at import time — this file
+# Loaded lazily (on first search) rather than at import time this file
 # gets imported into a running Django process eventually, and a missing
 # or stale pickle shouldn't crash the whole app on startup; it should
 # only fail the specific request that actually needs a search.
@@ -99,7 +99,7 @@ def smart_search(query, top_n=5):
         })
         if len(results) == top_n:
             break
-    return results  # empty list if nothing found — view decides the message
+    return results  # empty list if nothing found  view decides the message
 
 def recommend_medicine(medicine_name, top_n=5):
     _ensure_loaded()
@@ -117,7 +117,7 @@ def recommend_medicine(medicine_name, top_n=5):
     } for i, score in sim]
 
 if __name__ == "__main__":
-    # Manual smoke test — only runs when this file is executed directly
-    # (python recommender.py), not when another module imports it.
+    # Manual smoke test —> only runs when this file is executed directly
+    
     print(smart_search("worms"))
     print(smart_search("rabies"))

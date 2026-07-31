@@ -105,7 +105,7 @@ def _serialize_row(idx, row, similarity=None):
 
 
 def correct_query(query):
-    """Whole-query typo correction against known drug names (e.g. 'amocxilin' -> 'amoxicillin')."""
+    """This is for fuzzy Search of medicine names only — it doesn't handle symptom/lay-term expansion, which is done in _expand_query()."""
     _ensure_loaded()
     match = get_close_matches(query.lower().strip(), _state["medicine_list"], n=1, cutoff=0.7)
     return match[0] if match else query.lower().strip()
@@ -160,7 +160,7 @@ def smart_search(query, top_n=20):
         results.append(_serialize_row(idx, df.iloc[idx], similarity=scores[idx]))
         if len(results) == top_n:
             break
-    return results  # empty list if nothing found — the view decides the message
+    return results  # empty list if nothing found —> the view decides the message
 
 
 def list_all():
