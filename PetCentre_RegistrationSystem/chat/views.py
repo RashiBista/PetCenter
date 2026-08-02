@@ -94,7 +94,7 @@ def start_chat(request, user_id):
     if not has_paid_confirmed_appointment:
         messages.error(
             request,
-            "You can only chat with a vet once they've confirmed an appointment with you "
+            "You can only message once an appointment between you two has been confirmed "
             "and any consultation fee has been paid.",
         )
         return redirect("chat:inbox")

@@ -200,7 +200,7 @@
 <span class="font-label-md text-label-md">Medicine</span>
 </a>
 <!-- Appointments -->
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_appointments' %}{% else %}{% url 'core:appointment_booking' %}{% endif %}">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_appointments' %}{% else %}{% url 'core:pet_owner_appointments' %}{% endif %}">
 <span class="material-symbols-outlined">calendar_today</span>
 <span class="font-label-md text-label-md">Appointments</span>
 </a>
@@ -230,14 +230,16 @@
 <span class="font-label-md text-label-md">Log Out</span>
 </a>
 </div>
+{% if request.user.role != 'vet' %}
 <div class="mt-auto pt-4">
-<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-full shadow-sm hover:shadow-md transition-shadow">Book Appointment</button>
+<a href="{% url 'core:appointment_booking' %}" class="w-full bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-full shadow-sm hover:shadow-md transition-shadow flex items-center justify-center">Book Appointment</a>
 </div>
+{% endif %}
 </nav>
 <!-- Main Content Area -->
 <main class="flex-1 ml-0 md:ml-[280px] flex flex-col h-screen relative">
 <!-- TopNavBar (from JSON) -->
-<header class="flex justify-between items-center px-10 w-full h-20 z-40 bg-surface/80 backdrop-blur-md fixed top-0 right-0 w-[calc(100%-280px)] shadow-sm">
+<header class="flex justify-between items-center px-10 w-full md:w-[calc(100%-280px)] h-20 z-40 bg-surface/80 backdrop-blur-md fixed top-0 right-0 shadow-sm">
 <div class="flex items-center">
 <span class="font-title-lg text-title-lg text-on-surface">Pet Centre Assistant</span>
 </div>

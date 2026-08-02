@@ -210,7 +210,7 @@
 <span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
 <span class="font-title-lg text-title-lg">Medicine</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_appointments' %}{% else %}{% url 'core:appointment_booking' %}{% endif %}">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_appointments' %}{% else %}{% url 'core:pet_owner_appointments' %}{% endif %}">
 <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
 <span class="font-title-lg text-title-lg">Appointments</span>
 </a>
@@ -232,11 +232,13 @@
 <span class="font-title-lg text-title-lg">Settings</span>
 </a>
 </div>
+{% if request.user.role != 'vet' %}
 <div class="mt-auto">
-<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-3 rounded-full hover:bg-surface-tint hover:shadow-lg transition-all duration-200 shadow-sm flex items-center justify-center gap-2">
+<a href="{% url 'core:appointment_booking' %}" class="w-full bg-primary text-on-primary font-label-md text-label-md py-3 rounded-full hover:bg-surface-tint hover:shadow-lg transition-all duration-200 shadow-sm flex items-center justify-center gap-2">
 <span>Book Appointment</span>
-</button>
+</a>
 </div>
+{% endif %}
 </nav>
 <!-- TopNavBar -->
 <header class="hidden md:flex justify-between items-center px-10 w-[calc(100%-280px)] h-20 z-40 fixed top-0 right-0 bg-surface/80 backdrop-blur-md shadow-sm">

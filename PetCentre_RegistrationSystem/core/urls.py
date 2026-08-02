@@ -20,6 +20,7 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
     path('reset-password/', views.reset_password_view, name='reset_password'),
 
+    path('appointments/', views.pet_owner_appointments_view, name='pet_owner_appointments'),
     path('appointments/book/', views.book_appointment_view, name='appointment_booking'),
     path('appointments/<int:appointment_id>/status/', views.update_appointment_status_view, name='update_appointment_status'),
     path('appointments/pay/', views.initiate_khalti_payment_view, name='initiate_khalti_payment'),

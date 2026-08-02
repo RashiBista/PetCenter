@@ -668,6 +668,29 @@ def update_appointment_status_view(request, appointment_id):
 
 
 @role_required(User.Role.USER)
+def pet_owner_appointments_view(request):
+    """
+    A pet owner's own appointments list (requested/confirmed/completed/
+    cancelled, across all their pets) — the sidebar 'Appointments' link
+    previously pointed straight at the booking form with no way to just
+    see what you already have; that's now book_appointment_view's own
+    'Book Appointment' button/CTA instead.
+    """
+    status_filter = request.GET.get('status', 'all')
+    appointments = Appointment.objects.filter(pet__owner=request.user).select_related(
+        'pet', 'vet__vet_profile', 'payment',
+    ).order_by('-scheduled_time')
+    if status_filter in (Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED, Appointment.Status.COMPLETED, Appointment.Status.CANCELLED):
+        appointments = appointments.filter(status=status_filter)
+
+    return render(request, 'core/pet_owner_appointments.html', {
+        'appointments': appointments,
+        'status_filter': status_filter,
+        'status_choices': [('all', 'All')] + list(Appointment.Status.choices),
+    })
+
+
+@role_required(User.Role.USER)
 def book_appointment_view(request):
     """
     Rendered as core/appointment_booking.html (matches the "Book an
@@ -1255,11 +1278,23 @@ NOTIFICATION_TYPE_ICONS = {
 @role_required(User.Role.USER)
 def pet_owner_dashboard(request):
     pets = Pet.objects.filter(owner=request.user)
-    next_appointment = Appointment.objects.filter(
+    open_appointments = list(Appointment.objects.filter(
         pet__owner=request.user,
-        scheduled_time__gte=timezone.now(),
         status__in=[Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED],
-    ).select_related('pet', 'vet__vet_profile', 'payment').first()
+    ).select_related('pet', 'vet__vet_profile', 'payment').order_by('scheduled_time'))
+    # A confirmed-but-unpaid appointment needs the owner's action
+    # regardless of whether its original slot has already passed — if we
+    # only ever showed the soonest upcoming appointment, one that falls
+    # due before it's paid would silently drop off the dashboard with no
+    # way to ever pay for it and unlock chat. That takes priority; a
+    # plain soonest-upcoming pick is the fallback otherwise.
+    next_appointment = next(
+        (a for a in open_appointments if a.status == Appointment.Status.CONFIRMED and not a.is_paid),
+        None,
+    ) or next(
+        (a for a in open_appointments if a.scheduled_time >= timezone.now()),
+        None,
+    )
 
     recent_notifications = list(
         Notification.objects.filter(recipient=request.user)[:5]
@@ -1285,13 +1320,24 @@ def veterinary_appointments_view(request):
     real to go until now.
     """
     status_filter = request.GET.get('status', 'all')
-    appointments = Appointment.objects.filter(vet=request.user).select_related('pet', 'pet__owner').order_by('-scheduled_time')
+    appointments = Appointment.objects.filter(vet=request.user).select_related('pet', 'pet__owner', 'vet__vet_profile', 'payment').order_by('-scheduled_time')
     if status_filter in (Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED, Appointment.Status.COMPLETED, Appointment.Status.CANCELLED):
         appointments = appointments.filter(status=status_filter)
+
+    # The dashboard's "View Appointments" button links here with
+    # ?range=today_tomorrow so a vet lands on what's actually imminent
+    # instead of scrolling through the full history — an additive filter
+    # on top of status, not a change to this page's normal full-list
+    # behavior (the sidebar's plain "Appointments" link has no range param).
+    date_range = request.GET.get('range')
+    if date_range == 'today_tomorrow':
+        today = timezone.localdate()
+        appointments = appointments.filter(scheduled_time__date__in=[today, today + timedelta(days=1)]).order_by('scheduled_time')
 
     return render(request, 'core/veterinary_appointments.html', {
         'appointments': appointments,
         'status_filter': status_filter,
+        'date_range': date_range,
         'status_choices': [('all', 'All')] + list(Appointment.Status.choices),
     })
 
@@ -1302,7 +1348,7 @@ def veterinary_dashboard(request):
     todays_appointments = Appointment.objects.filter(
         vet=request.user,
         scheduled_time__date=today,
-    ).select_related('pet', 'pet__owner').order_by('scheduled_time')
+    ).select_related('pet', 'pet__owner', 'vet__vet_profile', 'payment').order_by('scheduled_time')
 
     total_patients = Pet.objects.filter(
         appointments__vet=request.user

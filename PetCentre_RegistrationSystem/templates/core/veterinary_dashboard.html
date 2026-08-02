@@ -156,10 +156,10 @@
 </a>
 </div>
 <div class="mt-auto pt-4">
-<button class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md text-label-md hover:bg-surface-tint transition-colors shadow-sm flex items-center justify-center gap-2">
-<span class="material-symbols-outlined">calendar_add_on</span>
-                Book Appointment
-            </button>
+<a href="{% url 'core:veterinary_appointments' %}?range=today_tomorrow" class="w-full bg-primary text-on-primary py-3 rounded-full font-label-md text-label-md hover:bg-surface-tint transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">calendar_today</span>
+                View Appointments
+            </a>
 </div>
 </nav>
 <!-- TopNavBar -->
@@ -281,9 +281,15 @@
 <button type="submit" class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-xs font-medium hover:bg-error-container/80 transition-colors">Cancel</button>
 </form>
 {% elif appt.status == 'confirmed' %}
+{% if appt.is_paid %}
 <a href="{% url 'chat:start_chat' appt.pet.owner.id %}" class="px-3 py-1 rounded-full bg-primary-container/40 text-on-primary-container text-xs font-medium hover:bg-primary-container/70 transition-colors inline-flex items-center gap-1">
 <span class="material-symbols-outlined text-sm">chat</span> Message
 </a>
+{% else %}
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-xs font-medium inline-flex items-center gap-1" title="Chat unlocks once the owner pays the consultation fee">
+<span class="material-symbols-outlined text-sm">hourglass_empty</span> Payment Pending
+</span>
+{% endif %}
 <form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
 {% csrf_token %}
 <input type="hidden" name="status" value="completed">
