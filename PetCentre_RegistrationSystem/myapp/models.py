@@ -87,6 +87,12 @@ class VetProfile(models.Model):
     # geography=True makes distance queries return real-world meters
     # (accounting for the Earth's curvature) rather than flat-plane units.
     location = PointField(geography=True, null=True, blank=True)
+    # The human-readable address text behind `location` — Nominatim's
+    # display_name for whichever suggestion the vet picked in Settings
+    # (see core.views.update_my_location_view). `location` alone is only
+    # ever coordinates; without this there'd be nothing readable to show
+    # a pet owner browsing Find Nearby Care.
+    clinic_address = models.CharField(max_length=255, blank=True)
     # Displayed in NRS on the appointment booking page. Set per-vet via
     # Django admin — nullable so an unset fee just renders as "—" instead
     # of a misleading 0.

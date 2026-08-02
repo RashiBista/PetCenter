@@ -1189,8 +1189,16 @@ def update_my_location_view(request):
         messages.error(request, "No profile found to save a location to.")
         return redirect(next_url)
 
+    update_fields = ['location']
     profile.location = point
-    profile.save(update_fields=['location'])
+    # Only the vet clinic-address autocomplete form sends this — pet
+    # owners save via plain browser geolocation, with no address text
+    # to go with it, so this is a harmless no-op for them.
+    address = request.POST.get('address', '').strip()
+    if address and hasattr(profile, 'clinic_address'):
+        profile.clinic_address = address
+        update_fields.append('clinic_address')
+    profile.save(update_fields=update_fields)
     messages.success(request, "Your location has been saved.")
 
     separator = '&' if '?' in next_url else '?'

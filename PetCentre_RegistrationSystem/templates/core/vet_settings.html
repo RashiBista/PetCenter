@@ -246,7 +246,7 @@ Change Photo
 {% if profile.location %}location_on{% else %}location_off{% endif %}
 </span>
 <p class="font-label-md text-label-md text-on-surface">
-{% if profile.location %}A location is currently saved for your clinic.{% else %}No location saved yet.{% endif %}
+{% if profile.clinic_address %}{{ profile.clinic_address }}{% elif profile.location %}A location is currently saved for your clinic.{% else %}No location saved yet.{% endif %}
 </p>
 </div>
 <form id="location-form" method="post" action="{% url 'core:update_my_location' %}">
@@ -256,7 +256,7 @@ Change Photo
 <input type="hidden" name="next" value="{% url 'core:vet_settings' %}"/>
 <label class="font-label-md text-label-md text-on-surface-variant block mb-1.5" for="clinic-address-input">Clinic address</label>
 <div class="relative">
-<input type="text" id="clinic-address-input" autocomplete="off" placeholder="Start typing your clinic's address..."
+<input type="text" id="clinic-address-input" name="address" autocomplete="off" placeholder="Start typing your clinic's address..."
        class="w-full h-12 px-4 rounded-lg border border-outline-variant bg-surface text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"/>
 <div id="clinic-address-results" class="hidden absolute z-10 mt-1 w-full bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-64 overflow-y-auto"></div>
 </div>
