@@ -449,3 +449,10 @@ SESSION_SAVE_EVERY_REQUEST = False
 # deliberately demonstrating account-level lockout can't also
 # accidentally IP-lock a different account's login right after.
 EXEMPT_LOGIN_IPS = [ip.strip() for ip in os.environ.get('EXEMPT_LOGIN_IPS', '').split(',') if ip.strip()]
+
+# Khalti ePayment API (appointment consultation-fee payments — see
+# core.views.initiate_khalti_payment_view). KHALTI_BASE_URL defaults to
+# the sandbox host; swap to https://khalti.com/api/v2 with a live
+# secret key once ready for real transactions.
+KHALTI_SECRET_KEY = os.environ.get('KHALTI_SECRET_KEY', '')
+KHALTI_BASE_URL = os.environ.get('KHALTI_BASE_URL', 'https://dev.khalti.com/api/v2')

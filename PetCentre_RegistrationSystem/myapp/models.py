@@ -146,6 +146,48 @@ class Appointment(models.Model):
     def owner(self):
         return self.pet.owner
 
+    @property
+    def is_paid(self):
+        """
+        Whether this appointment's consultation fee has been settled via
+        Khalti — chat and the "confirmed" notification are gated on this
+        (see core.views.khalti_payment_callback_view and
+        chat.views.start_chat), not just on status=CONFIRMED, so a vet
+        approving an appointment doesn't itself unlock either. A vet with
+        no consultation_fee set has nothing to charge for, so those
+        appointments count as paid immediately.
+        """
+        vet_profile = getattr(self.vet, 'vet_profile', None)
+        if not vet_profile or not vet_profile.consultation_fee:
+            return True
+        return hasattr(self, 'payment') and self.payment.status == Payment.Status.COMPLETED
+
+
+class Payment(models.Model):
+    """
+    One Khalti ePayment transaction for an appointment's consultation
+    fee. Retried payments reuse this same row (see
+    core.views.initiate_khalti_payment_view) rather than piling up
+    duplicate rows per attempt — only the latest attempt matters.
+    """
+    class Status(models.TextChoices):
+        INITIATED = 'initiated', 'Initiated'
+        COMPLETED = 'completed', 'Completed'
+        FAILED = 'failed', 'Failed'
+
+    appointment = models.OneToOneField(
+        'myapp.Appointment', on_delete=models.CASCADE, related_name='payment',
+    )
+    pidx = models.CharField(max_length=100, unique=True)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.INITIATED)
+    khalti_transaction_id = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'Payment<appointment={self.appointment_id}> {self.status}'
+
 
 class VetAvailability(models.Model):
     """

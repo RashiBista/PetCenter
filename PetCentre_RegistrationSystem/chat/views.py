@@ -67,9 +67,11 @@ def start_chat(request, user_id):
     POST → creates/fetches a room with the target user and redirects to it
 
     Chat is restricted to pet-owner <-> vet pairs, and only once the vet
-    has accepted (confirmed) an appointment from that pet owner — chat is
-    meant as a follow-up channel for an existing consultation, not a
-    general-purpose messenger.
+    has confirmed an appointment from that pet owner AND (if the vet
+    charges a consultation fee) it's been paid via Khalti — see
+    Appointment.is_paid and core.views.khalti_payment_callback_view.
+    Chat is meant as a follow-up channel for an existing paid
+    consultation, not a general-purpose messenger.
     """
     target_user = get_object_or_404(User, pk=user_id)
 
@@ -84,14 +86,16 @@ def start_chat(request, user_id):
         messages.error(request, "Chat is only available between a pet owner and a vet.")
         return redirect("chat:inbox")
 
-    has_confirmed_appointment = Appointment.objects.filter(
-        pet__owner=owner, vet=vet, status=Appointment.Status.CONFIRMED
-    ).exists()
+    confirmed_appointments = Appointment.objects.filter(
+        pet__owner=owner, vet=vet, status=Appointment.Status.CONFIRMED,
+    ).select_related('vet__vet_profile', 'payment')
+    has_paid_confirmed_appointment = any(appt.is_paid for appt in confirmed_appointments)
 
-    if not has_confirmed_appointment:
+    if not has_paid_confirmed_appointment:
         messages.error(
             request,
-            "You can only chat with a vet once they've accepted an appointment with you.",
+            "You can only chat with a vet once they've confirmed an appointment with you "
+            "and any consultation fee has been paid.",
         )
         return redirect("chat:inbox")
 

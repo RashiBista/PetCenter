@@ -340,9 +340,19 @@
 </div>
 </div>
 {% if next_appointment.status == 'confirmed' %}
+{% if next_appointment.is_paid %}
 <a href="{% url 'chat:start_chat' next_appointment.vet.id %}" class="mt-3 inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary-container text-on-primary-container text-sm font-medium hover:bg-primary-container/70 transition-colors w-fit">
 <span class="material-symbols-outlined text-[18px]">chat</span> Message Vet
 </a>
+{% else %}
+<form method="post" action="{% url 'core:initiate_khalti_payment' %}" class="mt-3 w-fit">
+{% csrf_token %}
+<input type="hidden" name="appointment_id" value="{{ next_appointment.id }}"/>
+<button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-[18px]">payments</span> Pay NRS {{ next_appointment.vet.vet_profile.consultation_fee }} to Confirm
+</button>
+</form>
+{% endif %}
 {% endif %}
 </div>
 {% else %}
