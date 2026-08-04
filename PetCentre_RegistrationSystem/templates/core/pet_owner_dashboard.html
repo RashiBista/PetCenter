@@ -336,12 +336,9 @@
      their own line on narrow screens instead of being squeezed into a
      third equal-width column alongside Patient/Vet. -->
 <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-surface-container">
-<div class="bg-primary text-on-primary rounded-xl p-3 inline-flex items-center gap-2 shadow-soft w-fit">
-<span class="material-symbols-outlined" data-weight="fill">schedule</span>
-<div>
-<p class="font-label-md text-label-md font-bold">{{ next_appointment.scheduled_time|date:"M d, Y" }}</p>
-<p class="font-label-sm text-label-sm opacity-90">{{ next_appointment.scheduled_time|date:"g:i A" }}</p>
-</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary text-on-primary text-sm font-medium shadow-soft w-fit">
+<span class="material-symbols-outlined text-[18px]" data-weight="fill">schedule</span>
+{{ next_appointment.scheduled_time|date:"M d, Y" }} · {{ next_appointment.scheduled_time|date:"g:i A" }}
 </div>
 {% if next_appointment.status == 'confirmed' %}
 {% if next_appointment.is_paid %}
