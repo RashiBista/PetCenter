@@ -192,7 +192,7 @@
 <body class="font-body-md text-body-md antialiased overflow-x-hidden">
 <!-- SideNavBar -->
 <nav class="hidden md:flex flex-col gap-2 p-4 h-full border-r border-outline-variant bg-surface shadow-sm fixed left-0 top-0 w-[280px] z-50">
-<div class="flex items-center gap-4 mb-8 px-4 py-2">
+<a href="{{ dashboard_url }}" class="flex items-center gap-4 mb-8 px-4 py-2">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline-md text-headline-md font-bold overflow-hidden">
 <img alt="Pet Centre Logo" class="w-full h-full object-cover" data-alt="A minimalist, modern vector logo of a stylized pet paw print or abstract sanctuary archway, using soft lavender mist and off-white tones. The design is extremely clean, communicating professional yet gentle healthcare. It is presented on a plain white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuACp5-5LlyfM3VGsBWaxlNqqo_ufEp9GDzWTLwvNP4y3QOW0vYyIdP50Uf9DbjMa2kEpTAoXFww8EHBr7RVr2bpERC7ZIOYYhiSbH8OsxMgQ9pMXezQ6msAfrgW9nKl8obvHL5uQnl33zt0BZ0xP44aVSx7muV2mfjlbXy7AN5VDnQuRFA5grHEFaLn1Pd2HlO0Zqhvqtm-edBxvzDHCB13eRyuTe7rMSQQYHcXYdvHBLBZ8ZwXDmOrCgtrTSPXYwA8ZblyiCmHXr1r"/>
 </div>
@@ -200,7 +200,7 @@
 <h1 class="font-headline-md text-headline-md font-bold text-primary">Pet Centre</h1>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
 </div>
-</div>
+</a>
 <div class="flex flex-col gap-2 flex-grow">
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_dashboard' %}{% else %}{% url 'core:pet_owner_dashboard' %}{% endif %}">
 <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>

@@ -203,7 +203,7 @@
 <!-- SideNavBar -->
 <nav class="hidden md:flex bg-surface shadow-sm fixed left-0 top-0 h-full w-[280px] bg-surface-container-low shadow-sm flex-col gap-2 p-4 h-full border-r border-outline-variant z-50">
 <div class="mb-8 px-4 py-2">
-<div class="flex items-center gap-3">
+<a href="{{ dashboard_url }}" class="flex items-center gap-3">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
 </div>
@@ -211,7 +211,7 @@
 <h1 class="font-headline-md text-headline-md font-bold text-primary">Pet Centre</h1>
 <p class="text-on-surface-variant font-label-sm text-label-sm">Care Sanctuary</p>
 </div>
-</div>
+</a>
 </div>
 <div class="flex-1 overflow-y-auto space-y-1">
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:pet_owner_dashboard' %}">

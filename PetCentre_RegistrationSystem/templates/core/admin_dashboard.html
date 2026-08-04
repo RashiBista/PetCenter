@@ -44,7 +44,7 @@ tailwind.config = {
 
 <!-- Sidebar -->
 <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-surface-container-high p-6 fixed h-full">
-<div class="flex items-center gap-3 mb-10">
+<a href="{{ dashboard_url }}" class="flex items-center gap-3 mb-10">
 <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
 <span class="material-symbols-outlined text-on-primary">pets</span>
 </div>
@@ -52,7 +52,7 @@ tailwind.config = {
 <p class="font-title-md text-title-md text-on-surface font-bold leading-tight">Pet Centre</p>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
 </div>
-</div>
+</a>
 <nav class="flex flex-col gap-1">
 <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md" href="{% url 'core:admin_dashboard' %}">
 <span class="material-symbols-outlined icon-filled">dashboard</span>Dashboard

@@ -12,6 +12,13 @@ from myapp.views import (
     VetRegisterView,
 )
 
+# Django admin's own "VIEW SITE" link defaults to "/" — pointing it at
+# the app's own admin dashboard instead means an admin browsing
+# /admin/ can get back to their dashboard in one click, matching the
+# same "Pet Centre" brand link behavior every other page has (see
+# core.context_processors.dashboard_url).
+admin.site.site_url = '/dashboard/admin/'
+
 urlpatterns = [
     path('', include('core.urls')),
     path('admin/', admin.site.urls),

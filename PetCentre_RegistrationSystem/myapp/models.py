@@ -155,13 +155,14 @@ class Appointment(models.Model):
     @property
     def is_paid(self):
         """
-        Whether this appointment's consultation fee has been settled via
-        Khalti — chat and the "confirmed" notification are gated on this
-        (see core.views.khalti_payment_callback_view and
-        chat.views.start_chat), not just on status=CONFIRMED, so a vet
-        approving an appointment doesn't itself unlock either. A vet with
-        no consultation_fee set has nothing to charge for, so those
-        appointments count as paid immediately.
+        Whether this appointment's consultation fee has been settled —
+        either through Khalti or a vet/owner manually marking it paid
+        (see core.views.initiate_khalti_payment_view and
+        mark_payment_paid_view). Verified after the visit happens, not
+        before — this never gates confirmation or chat (see
+        chat.views.start_chat). A vet with no consultation_fee set has
+        nothing to charge for, so those appointments count as paid
+        immediately.
         """
         vet_profile = getattr(self.vet, 'vet_profile', None)
         if not vet_profile or not vet_profile.consultation_fee:
@@ -171,8 +172,10 @@ class Appointment(models.Model):
 
 class Payment(models.Model):
     """
-    One Khalti ePayment transaction for an appointment's consultation
-    fee. Retried payments reuse this same row (see
+    One payment record for an appointment's consultation fee — either a
+    Khalti ePayment transaction, or a vet/owner manually marking a fee
+    as received (e.g. paid in cash at the clinic), tracked identically
+    otherwise. Retried Khalti attempts reuse this same row (see
     core.views.initiate_khalti_payment_view) rather than piling up
     duplicate rows per attempt — only the latest attempt matters.
     """
@@ -181,10 +184,17 @@ class Payment(models.Model):
         COMPLETED = 'completed', 'Completed'
         FAILED = 'failed', 'Failed'
 
+    class Method(models.TextChoices):
+        KHALTI = 'khalti', 'Khalti'
+        MANUAL = 'manual', 'Manual'
+
     appointment = models.OneToOneField(
         'myapp.Appointment', on_delete=models.CASCADE, related_name='payment',
     )
-    pidx = models.CharField(max_length=100, unique=True)
+    # Only Khalti payments have a pidx — manual ones have nothing to
+    # look up against an external gateway.
+    pidx = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    method = models.CharField(max_length=10, choices=Method.choices, default=Method.KHALTI)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.INITIATED)
     khalti_transaction_id = models.CharField(max_length=100, blank=True)

@@ -112,7 +112,7 @@
 <body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
 <!-- SideNavBar -->
 <nav class="hidden md:flex fixed left-0 top-0 h-full w-[280px] bg-surface dark:bg-surface-dim flex-col gap-2 p-4 border-r border-outline-variant shadow-sm z-50">
-<div class="flex items-center gap-3 px-4 py-6">
+<a href="{{ dashboard_url }}" class="flex items-center gap-3 px-4 py-6">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold overflow-hidden">
 <img alt="Pet Centre Logo" class="w-full h-full object-cover" data-alt="A clean, minimalist logo featuring a stylized dog and cat intertwined in a circular sanctuary emblem. The design uses primary lavender tones on an off-white background, conveying trust, care, and professional veterinary services. Soft lighting, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqK3IAJalkO2SsxT8p8Ot_Y_CXxrn2zzLCHoOTfRtzhv50RNDGT6kXKo9YEPHH8WARDoIwlbtWcs-GLvt2hey87FMLC3M2FHl7DoG4Ml-WIrTmvHnTyEmjc5cAZAXQXTK85XY1VqyUJiakkuCJx2nfu25NjnSxCXchLu7_lPNU3Qd7Vfan3h2qs2wvFNVe-Ht4nStmzFDOSaauLioEKBCNOaDFtzWRxr9Ae3vlMvPjhZ6Y8J1AH3RhuGdkfe_TztK0qBZPLiJ4a0yC"/>
 </div>
@@ -120,7 +120,7 @@
 <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Pet Centre</h1>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
 </div>
-</div>
+</a>
 <div class="flex-1 overflow-y-auto flex flex-col gap-1 mt-4">
 <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container border-l-4 border-primary transition-transform scale-[0.98]" href="{% url 'core:veterinary_dashboard' %}">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
@@ -281,20 +281,28 @@
 <button type="submit" class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-xs font-medium hover:bg-error-container/80 transition-colors">Cancel</button>
 </form>
 {% elif appt.status == 'confirmed' %}
-{% if appt.is_paid %}
 <a href="{% url 'chat:start_chat' appt.pet.owner.id %}" class="px-3 py-1 rounded-full bg-primary-container/40 text-on-primary-container text-xs font-medium hover:bg-primary-container/70 transition-colors inline-flex items-center gap-1">
 <span class="material-symbols-outlined text-sm">chat</span> Message
 </a>
-{% else %}
-<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-xs font-medium inline-flex items-center gap-1" title="Chat unlocks once the owner pays the consultation fee">
-<span class="material-symbols-outlined text-sm">hourglass_empty</span> Payment Pending
-</span>
-{% endif %}
 <form method="post" action="{% url 'core:update_appointment_status' appt.id %}">
 {% csrf_token %}
 <input type="hidden" name="status" value="completed">
 <button type="submit" class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-medium hover:bg-secondary-container/80 transition-colors">Mark Completed</button>
 </form>
+{% elif appt.status == 'completed' %}
+{% if appt.is_paid %}
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-xs font-medium inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">check_circle</span> Paid
+</span>
+{% else %}
+<form method="post" action="{% url 'core:mark_payment_paid' appt.id %}">
+{% csrf_token %}
+<input type="hidden" name="next" value="{% url 'core:veterinary_dashboard' %}"/>
+<button type="submit" class="px-3 py-1 rounded-full bg-primary text-on-primary text-xs font-medium hover:bg-primary/90 transition-colors inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">check</span> Mark as Paid
+</button>
+</form>
+{% endif %}
 {% endif %}
 </div>
 </div>

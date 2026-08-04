@@ -181,13 +181,13 @@
 <body class="bg-surface text-on-surface font-body-md min-h-screen flex">
 <!-- SideNavBar (from JSON) -->
 <nav class="hidden md:flex flex-col bg-surface shadow-sm fixed left-0 top-0 h-full w-[280px] z-50 bg-surface-container-low border-r border-outline-variant p-4 gap-2">
-<div class="flex items-center gap-4 px-4 py-6 mb-4">
+<a href="{{ dashboard_url }}" class="flex items-center gap-4 px-4 py-6 mb-4">
 <img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A small, elegant circular logo for a premium pet care center. The logo features a minimalist, stylized paw print or a soft silhouette of a dog and cat intertwined, rendered in soft lavender and charcoal tones on a pure white background. The style is modern, clean, and calming." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT8ed6Q3-ESC_8DFFQNUDsxEWvrDnllaigv1KJdYLU-jHUxTqztxmoG5tUnky8ojATVujshy5XRyqrZYmkEhy5gTM5NFsUXqyGR3wVcRDXVyoW4aMIPAsIr1-2tE_KtdxpXBOYen90WOvdMuIuEHz6Mrvj2rWe7g9c4Ddd17DTs5VK8v66c95ksIHgPMlfr29rX1dKgEyN-K8b6dyA6sYgwOybDKNTrWg9daRkbWtQBy8H75dF3Acbckm-hIVz2XqxCv6Kf6UAaqz8"/>
 <div>
 <h1 class="font-headline-md text-headline-md font-bold text-primary">Pet Centre</h1>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
 </div>
-</div>
+</a>
 <div class="flex flex-col gap-2 flex-grow">
 <!-- Dashboard -->
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_dashboard' %}{% else %}{% url 'core:pet_owner_dashboard' %}{% endif %}">

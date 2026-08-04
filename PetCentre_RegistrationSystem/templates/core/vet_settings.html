@@ -107,7 +107,7 @@
 <body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
 <!-- SideNavBar -->
 <nav class="hidden md:flex fixed left-0 top-0 h-full w-[280px] bg-surface dark:bg-surface-dim flex-col gap-2 p-4 border-r border-outline-variant shadow-sm z-50">
-<div class="flex items-center gap-3 px-4 py-6">
+<a href="{{ dashboard_url }}" class="flex items-center gap-3 px-4 py-6">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">
 <span class="material-symbols-outlined">pets</span>
 </div>
@@ -115,7 +115,7 @@
 <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Pet Centre</h1>
 <p class="font-label-sm text-label-sm text-on-surface-variant">Care Sanctuary</p>
 </div>
-</div>
+</a>
 <div class="flex-1 overflow-y-auto flex flex-col gap-1 mt-4">
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 rounded-lg" href="{% url 'core:veterinary_dashboard' %}">
 <span class="material-symbols-outlined">dashboard</span>

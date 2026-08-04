@@ -24,6 +24,7 @@ urlpatterns = [
     path('appointments/book/', views.book_appointment_view, name='appointment_booking'),
     path('appointments/<int:appointment_id>/status/', views.update_appointment_status_view, name='update_appointment_status'),
     path('appointments/pay/', views.initiate_khalti_payment_view, name='initiate_khalti_payment'),
+    path('appointments/<int:appointment_id>/mark-paid/', views.mark_payment_paid_view, name='mark_payment_paid'),
     path('payments/khalti/callback/', views.khalti_payment_callback_view, name='khalti_payment_callback'),
 
     path('medicine/', views.medicine_search_view, name='medicine_search'),

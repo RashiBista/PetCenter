@@ -543,11 +543,11 @@ def _recipient_role_for(user):
 def _notify_appointment_confirmed(appointment):
     """
     Tells the owner their appointment is confirmed and that chat with
-    the vet is now open. Fires immediately when a vet confirms an
-    appointment with no consultation fee to collect, or from
-    khalti_payment_callback_view once a fee-based appointment's payment
-    actually succeeds — either way, this is the "you're all set" moment,
-    kept as one shared helper so both paths send identical notifications.
+    the vet is now open. Fires as soon as a vet confirms an appointment
+    — payment (if the vet charges a fee) is a separate concern, verified
+    only after the appointment is completed (see
+    initiate_khalti_payment_view / mark_payment_paid_view), so it never
+    holds up confirmation or chat access.
     """
     vet = appointment.vet
     owner = appointment.pet.owner
@@ -610,31 +610,27 @@ def update_appointment_status_view(request, appointment_id):
 
         owner = appointment.pet.owner
 
-        if new_status == Appointment.Status.CONFIRMED and not appointment.is_paid:
-            # A consultation fee is owed — hold off on the normal
-            # "confirmed" + "you can chat" notifications until Khalti
-            # actually confirms payment (see khalti_payment_callback_view
-            # and _notify_appointment_confirmed above), so "confirmed"
-            # doesn't mislead the owner into thinking chat is open yet.
+        if new_status == Appointment.Status.CONFIRMED:
+            _notify_appointment_confirmed(appointment)
+        elif new_status == Appointment.Status.COMPLETED and not appointment.is_paid and getattr(appointment.vet.vet_profile, 'consultation_fee', None):
+            # Payment is verified after the visit, not before — see
+            # initiate_khalti_payment_view / mark_payment_paid_view, both
+            # of which are only reachable once an appointment is
+            # Completed. Nudge the owner toward that instead of the
+            # generic "Appointment Completed" message.
             fee = appointment.vet.vet_profile.consultation_fee
             create_notification(
                 recipient=owner,
                 recipient_role=_recipient_role_for(owner),
                 notification_type='appointment',
-                title="Appointment approved — payment required",
+                title="Appointment completed — payment pending",
                 message=(
-                    f"Dr. {request.user.get_full_name() or request.user.username} approved your appointment "
-                    f"for {appointment.pet.name} on {local_scheduled:%b %d, %Y at %I:%M %p}. "
-                    f"Pay NRS {fee} to confirm and unlock chat."
+                    f"Your visit with Dr. {request.user.get_full_name() or request.user.username} for "
+                    f"{appointment.pet.name} on {local_scheduled:%b %d, %Y at %I:%M %p} is complete. "
+                    f"Please verify your NRS {fee} payment for this visit."
                 ),
-                # No dedicated payment page to deep-link to (the Pay
-                # button is a POST form, not a GET-able page) — send the
-                # owner to the dashboard, where that button lives next to
-                # this exact appointment.
-                action_url="/dashboard/pet-owner/",
+                action_url="/appointments/",
             )
-        elif new_status == Appointment.Status.CONFIRMED:
-            _notify_appointment_confirmed(appointment)
         else:
             create_notification(
                 recipient=owner,
@@ -760,30 +756,66 @@ def book_appointment_view(request):
     })
 
 
+def _notify_payment_verified(payment, verified_by):
+    """
+    Tells both sides a consultation fee has been settled — shared by the
+    Khalti success path and the manual mark-paid path so the notification
+    text is identical regardless of how payment actually happened.
+    `verified_by` is the user who took the action (the payer via Khalti,
+    or whichever of vet/owner clicked "Mark as Paid").
+    """
+    appointment = payment.appointment
+    owner = appointment.pet.owner
+    vet = appointment.vet
+    method_label = "via Khalti" if payment.method == Payment.Method.KHALTI else "manually"
+    create_notification(
+        recipient=owner,
+        recipient_role=_recipient_role_for(owner),
+        notification_type='appointment',
+        title="Payment verified",
+        message=(
+            f"Your NRS {payment.amount} payment for {appointment.pet.name}'s visit with "
+            f"Dr. {vet.get_full_name() or vet.username} has been verified."
+        ),
+        action_url="/appointments/",
+        send_email_notification=(verified_by == owner),
+    )
+    create_notification(
+        recipient=vet,
+        recipient_role=_recipient_role_for(vet),
+        notification_type='appointment',
+        title="Payment received",
+        message=(
+            f"The NRS {payment.amount} consultation fee for {appointment.pet.name}'s visit "
+            f"({owner.get_full_name() or owner.username}) was marked paid {method_label}."
+        ),
+        action_url="/dashboard/veterinary/appointments/",
+        send_email_notification=(verified_by == vet),
+    )
+
+
 @role_required(User.Role.USER)
 def initiate_khalti_payment_view(request):
     """
-    Kicks off a Khalti ePayment transaction for a confirmed appointment's
-    consultation fee. A vet confirming an appointment (see
-    update_appointment_status_view) doesn't by itself unlock chat or send
-    the "confirmed" notification when a fee is owed — those wait for
-    payment to actually go through, verified server-side in
-    khalti_payment_callback_view.
+    Kicks off a Khalti ePayment transaction for a completed appointment's
+    consultation fee. Payment is verified after the visit happens, not
+    before — see Appointment.is_paid and mark_payment_paid_view for the
+    manual alternative (e.g. paid in cash at the clinic).
     """
     if request.method != 'POST':
-        return redirect('core:pet_owner_dashboard')
+        return redirect('core:pet_owner_appointments')
 
     appointment = Appointment.objects.filter(
         id=request.POST.get('appointment_id'), pet__owner=request.user,
-        status=Appointment.Status.CONFIRMED,
+        status=Appointment.Status.COMPLETED,
     ).select_related('pet', 'vet__vet_profile').first()
     if not appointment:
         messages.error(request, "That appointment isn't available for payment.")
-        return redirect('core:pet_owner_dashboard')
+        return redirect('core:pet_owner_appointments')
 
     if appointment.is_paid:
         messages.info(request, "This appointment is already paid for.")
-        return redirect('core:pet_owner_dashboard')
+        return redirect('core:pet_owner_appointments')
 
     fee = appointment.vet.vet_profile.consultation_fee
     payload = {
@@ -808,13 +840,13 @@ def initiate_khalti_payment_view(request):
         data = response.json()
     except requests.RequestException:
         messages.error(request, "Couldn't reach Khalti right now — please try again shortly.")
-        return redirect('core:pet_owner_dashboard')
+        return redirect('core:pet_owner_appointments')
 
     # A retried payment (e.g. after a cancelled/expired attempt) reuses
     # this same row — only the latest attempt's pidx matters.
     Payment.objects.update_or_create(
         appointment=appointment,
-        defaults={'pidx': data['pidx'], 'amount': fee, 'status': Payment.Status.INITIATED},
+        defaults={'pidx': data['pidx'], 'amount': fee, 'status': Payment.Status.INITIATED, 'method': Payment.Method.KHALTI},
     )
     return redirect(data['payment_url'])
 
@@ -835,7 +867,7 @@ def khalti_payment_callback_view(request):
     ).select_related('appointment__pet', 'appointment__vet').first()
     if not payment:
         messages.error(request, "We couldn't find that payment.")
-        return redirect('core:pet_owner_dashboard')
+        return redirect('core:pet_owner_appointments')
 
     try:
         response = requests.post(
@@ -853,7 +885,7 @@ def khalti_payment_callback_view(request):
         data = response.json()
     except (requests.RequestException, ValueError):
         messages.error(request, "Couldn't confirm your payment with Khalti — please check back shortly.")
-        return redirect('core:pet_owner_dashboard')
+        return redirect('core:pet_owner_appointments')
 
     appointment = payment.appointment
     paid_amount_matches = int(data.get('total_amount', 0)) == int(payment.amount * 100)
@@ -862,25 +894,50 @@ def khalti_payment_callback_view(request):
             payment.status = Payment.Status.COMPLETED
             payment.khalti_transaction_id = data.get('transaction_id') or ''
             payment.save(update_fields=['status', 'khalti_transaction_id', 'updated_at'])
-            _notify_appointment_confirmed(appointment)
-            create_notification(
-                recipient=appointment.vet,
-                recipient_role=_recipient_role_for(appointment.vet),
-                notification_type='appointment',
-                title="Payment received",
-                message=(
-                    f"{appointment.pet.owner.get_full_name() or appointment.pet.owner.username} paid the "
-                    f"consultation fee for {appointment.pet.name}'s appointment."
-                ),
-                action_url="/dashboard/veterinary/appointments/",
-            )
-        messages.success(request, "Payment successful — you can now message your vet.")
+            _notify_payment_verified(payment, verified_by=request.user)
+        messages.success(request, "Payment successful — verified for this appointment.")
     else:
         payment.status = Payment.Status.FAILED
         payment.save(update_fields=['status', 'updated_at'])
-        messages.error(request, "Payment wasn't completed. You can try again from your dashboard.")
+        messages.error(request, "Payment wasn't completed. You can try again from your appointments list.")
 
-    return redirect('core:pet_owner_dashboard')
+    return redirect('core:pet_owner_appointments')
+
+
+@login_required
+def mark_payment_paid_view(request, appointment_id):
+    """
+    Manual alternative to Khalti — either the vet or the owner can mark
+    a completed appointment's consultation fee as received (e.g. paid in
+    cash at the clinic, or a bank transfer outside the app). Only makes
+    sense once the appointment is actually Completed, matching the
+    Khalti path's own eligibility window.
+    """
+    if request.method != 'POST':
+        return redirect('core:pet_owner_appointments')
+
+    appointment = Appointment.objects.filter(
+        Q(vet=request.user) | Q(pet__owner=request.user),
+        id=appointment_id, status=Appointment.Status.COMPLETED,
+    ).select_related('pet__owner', 'vet__vet_profile').first()
+    if not appointment:
+        messages.error(request, "That appointment isn't available for payment.")
+        return redirect('core:pet_owner_appointments')
+
+    next_url = request.POST.get('next') or 'core:pet_owner_appointments'
+
+    if appointment.is_paid:
+        messages.info(request, "This appointment is already marked paid.")
+        return redirect(next_url)
+
+    fee = getattr(appointment.vet.vet_profile, 'consultation_fee', None) or 0
+    payment, _ = Payment.objects.update_or_create(
+        appointment=appointment,
+        defaults={'amount': fee, 'status': Payment.Status.COMPLETED, 'method': Payment.Method.MANUAL, 'pidx': None},
+    )
+    _notify_payment_verified(payment, verified_by=request.user)
+    messages.success(request, "Payment marked as received.")
+    return redirect(next_url)
 
 # Medicine search + detail
 
@@ -1286,23 +1343,11 @@ NOTIFICATION_TYPE_ICONS = {
 @role_required(User.Role.USER)
 def pet_owner_dashboard(request):
     pets = Pet.objects.filter(owner=request.user)
-    open_appointments = list(Appointment.objects.filter(
+    next_appointment = Appointment.objects.filter(
         pet__owner=request.user,
+        scheduled_time__gte=timezone.now(),
         status__in=[Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED],
-    ).select_related('pet', 'vet__vet_profile', 'payment').order_by('scheduled_time'))
-    # A confirmed-but-unpaid appointment needs the owner's action
-    # regardless of whether its original slot has already passed — if we
-    # only ever showed the soonest upcoming appointment, one that falls
-    # due before it's paid would silently drop off the dashboard with no
-    # way to ever pay for it and unlock chat. That takes priority; a
-    # plain soonest-upcoming pick is the fallback otherwise.
-    next_appointment = next(
-        (a for a in open_appointments if a.status == Appointment.Status.CONFIRMED and not a.is_paid),
-        None,
-    ) or next(
-        (a for a in open_appointments if a.scheduled_time >= timezone.now()),
-        None,
-    )
+    ).select_related('pet', 'vet').order_by('scheduled_time').first()
 
     recent_notifications = list(
         Notification.objects.filter(recipient=request.user)[:5]
