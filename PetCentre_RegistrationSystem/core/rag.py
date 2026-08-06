@@ -8,12 +8,22 @@ No separate vector database or workflow host: everything runs inside
 this Django process against the database already in use for the rest
 of the app.
 """
+import time
+
 from django.conf import settings
 from google import genai
-from google.genai import types
+from google.genai import errors, types
 from pgvector.django import CosineDistance
 
 from core.models import KnowledgeChunk
+
+# Gemini's free tier routinely returns 503 ("high demand") or 429 (rate
+# limit) for a request that succeeds a moment later on retry — observed
+# directly while testing this exact key. Worth one short retry before
+# giving up and showing the user a failure message.
+RETRYABLE_STATUS_CODES = (429, 503)
+MAX_RETRIES = 2
+RETRY_DELAY_SECONDS = 2
 
 # Must match KnowledgeChunk.embedding's dimensions exactly — pgvector
 # enforces a fixed size per column, so changing this without a matching
@@ -63,16 +73,29 @@ def _get_client():
     return _client
 
 
+def _with_retry(call):
+    """Retries `call` on Gemini's transient 429/503 responses — anything
+    else (bad API key, invalid model, etc.) is a real failure and
+    shouldn't be retried."""
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            return call()
+        except errors.APIError as exc:
+            if exc.code not in RETRYABLE_STATUS_CODES or attempt == MAX_RETRIES:
+                raise
+            time.sleep(RETRY_DELAY_SECONDS)
+
+
 def embed_text(text, task_type):
     """task_type is 'RETRIEVAL_DOCUMENT' at ingest time, 'RETRIEVAL_QUERY' at query time — gemini-embedding-001 optimizes the vector differently for each."""
-    result = _get_client().models.embed_content(
+    result = _with_retry(lambda: _get_client().models.embed_content(
         model=EMBEDDING_MODEL,
         contents=text,
         config=types.EmbedContentConfig(
             output_dimensionality=EMBEDDING_DIMENSIONS,
             task_type=task_type,
         ),
-    )
+    ))
     return result.embeddings[0].values
 
 
@@ -92,5 +115,5 @@ def answer_question(question):
     context = "\n\n".join(chunk.content for chunk in chunks)
     prompt = f"{SYSTEM_PROMPT}\n\nContext:\n{context}\n\nUser question:\n{question}"
 
-    response = _get_client().models.generate_content(model=GENERATION_MODEL, contents=prompt)
+    response = _with_retry(lambda: _get_client().models.generate_content(model=GENERATION_MODEL, contents=prompt))
     return response.text
