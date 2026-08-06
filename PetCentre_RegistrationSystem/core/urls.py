@@ -54,4 +54,5 @@ urlpatterns = [
     path('dashboard/admin/medicine/<int:item_id>/delete/', views.admin_delete_medicine_view, name='admin_delete_medicine'),
 
     path('chatbot/', views.chatbot_view, name='chatbot'),
+    path('api/chatbot/message/', views.chatbot_message_view, name='chatbot_message'),
 ]

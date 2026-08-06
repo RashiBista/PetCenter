@@ -1,3 +1,5 @@
+import json
+import logging
 import random
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -20,8 +22,10 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 from chat.models import ChatRoom
+from core import rag
 from core.medicine_engine import search as medicine_search_engine
 from myapp.decorators import role_required
 from myapp.models import (
@@ -33,6 +37,8 @@ from notifications.models import Notification
 from notifications.services import create_notification
 
 MAX_ATTEMPTS_PER_24H = 5
+
+logger = logging.getLogger(__name__)
 
 
 def _generate_otp_code():
@@ -1800,3 +1806,29 @@ def toggle_user_active_view(request, user_id):
 @login_required(login_url='core:pet_owner_login')
 def chatbot_view(request):
     return render(request, 'core/chatbot_assistant.html')
+
+
+MAX_CHATBOT_MESSAGE_LENGTH = 2000
+
+
+@login_required(login_url='core:pet_owner_login')
+@require_POST
+def chatbot_message_view(request):
+    """POST {"message": "..."} -> {"reply": "..."} — see core.rag.answer_question."""
+    try:
+        body = json.loads(request.body or b'{}')
+    except ValueError:
+        return JsonResponse({'reply': "Sorry, I didn't catch that."}, status=400)
+
+    message = (body.get('message') or '').strip()
+    if not message:
+        return JsonResponse({'reply': 'Please type a message first.'}, status=400)
+    message = message[:MAX_CHATBOT_MESSAGE_LENGTH]
+
+    try:
+        reply = rag.answer_question(message)
+    except Exception:
+        logger.exception("RAG chatbot failed to answer a question")
+        return JsonResponse({'reply': rag.NOT_CONFIGURED_REPLY}, status=502)
+
+    return JsonResponse({'reply': reply})

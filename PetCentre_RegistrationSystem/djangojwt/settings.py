@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'core',
     'notifications',
     'pet_profiles',
-    'chatbot',
     'corsheaders',
     'drf_spectacular',
     'anymail',
@@ -460,19 +459,11 @@ KHALTI_SECRET_KEY = os.environ.get('KHALTI_SECRET_KEY', '')
 KHALTI_BASE_URL = os.environ.get('KHALTI_BASE_URL', 'https://dev.khalti.com/api/v2')
 
 # ------------------------------------------------------------------
-# AI assistant (PetPal) — the chat UI posts to chatbot.views, which
-# proxies to an n8n workflow running the actual RAG pipeline (Gemini +
-# Pinecone). The workflow lives in rag/workflows.json; rag/README.md has
-# the import/activate steps that produce the URL below.
-#
-# Left empty by default on purpose: with no URL set the assistant
-# answers with a "can't reach me right now" message instead of the app
-# failing to start, so nobody is blocked from running PetCentre just
-# because they haven't set up n8n.
+# AI assistant (PetPal) — retrieval-augmented Q&A over a pet-care
+# knowledge base stored as embeddings in this same Postgres database
+# (pgvector), no separate vector DB or workflow host required. See
+# core/rag.py. Left empty by default on purpose: with no key set the
+# assistant answers with a "can't reach me right now" message instead
+# of the app failing to start.
 # ------------------------------------------------------------------
-N8N_CHATBOT_WEBHOOK_URL = os.environ.get('N8N_CHATBOT_WEBHOOK_URL', '')
-
-# A RAG turn is a vector search plus a Gemini call plus the Google
-# Sheets log write, so it is routinely several seconds — well past the
-# 5s used for the (single, fast) Nominatim lookups in core.views.
-N8N_CHATBOT_TIMEOUT = int(os.environ.get('N8N_CHATBOT_TIMEOUT', '60'))
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')

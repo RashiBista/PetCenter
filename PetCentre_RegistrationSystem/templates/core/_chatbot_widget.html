@@ -123,7 +123,7 @@
       messages.scrollTop = messages.scrollHeight;
 
       try {
-        const res = await fetch("{% url 'chatbot:message' %}", {
+        const res = await fetch("{% url 'core:chatbot_message' %}", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

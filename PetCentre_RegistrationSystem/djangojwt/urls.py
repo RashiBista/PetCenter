@@ -43,7 +43,4 @@ urlpatterns = [
     path('chat/', include('chat.urls')),
     path('api/notifications/', include('notifications.urls')),
     path('pets/', include('pet_profiles.urls')),
-
-    # --- AI assistant (proxies to the n8n RAG workflow) ---
-    path('api/chatbot/', include('chatbot.urls')),
 ]
