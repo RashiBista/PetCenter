@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Admin Dashboard — PetCentre</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -85,39 +86,54 @@ tailwind.config = {
 <h1 class="font-headline-md text-headline-md text-on-surface mb-1">Hello, {{ request.user.get_full_name|default:request.user.username }}</h1>
 <p class="font-body-md text-body-md text-on-surface-variant mb-8">Real-time overview of the PetCentre system.</p>
 
-<!-- Real stat cards -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">group</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Pet Owners</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_owners }}</p>
-</div>
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">stethoscope</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Veterinarians</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_vets }}</p>
-</div>
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">pets</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Registered Pets</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_pets }}</p>
-</div>
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">medication</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Medicines</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_medicines }}</p>
-</div>
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5">
-<span class="material-symbols-outlined text-primary text-2xl mb-2 block">calendar_today</span>
-<p class="font-label-sm text-label-sm text-on-surface-variant">Appointments</p>
-<p class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ stats.total_appointments }}</p>
-</div>
-<div class="bg-error-container/30 rounded-2xl border border-error-container p-5">
-<span class="material-symbols-outlined text-error text-2xl mb-2 block">pending_actions</span>
-<p class="font-label-sm text-label-sm text-on-error-container">Pending Prescriptions</p>
-<p class="font-headline-sm text-headline-sm text-on-error-container font-bold">{{ stats.pending_prescriptions }}</p>
-</div>
-</div>
+<!-- Real stats, as radial gauges (each ring relative to the largest metric) -->
+<div id="stat-gauges" class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10"></div>
+<script>
+(function () {
+  var metrics = [
+    { key: "owners", label: "Pet Owners", icon: "group", value: {{ stats.total_owners|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "vets", label: "Veterinarians", icon: "stethoscope", value: {{ stats.total_vets|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "pets", label: "Registered Pets", icon: "pets", value: {{ stats.total_pets|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "medicines", label: "Medicines", icon: "medication", value: {{ stats.total_medicines|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "appointments", label: "Appointments", icon: "calendar_today", value: {{ stats.total_appointments|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "pending", label: "Pending Prescriptions", icon: "pending_actions", value: {{ stats.pending_prescriptions|default:0 }}, fill: "#ba1a1a", track: "#ffdad6", text: "#93000a" }
+  ];
+  var max = Math.max.apply(null, metrics.map(function (m) { return m.value; })) || 1;
+  var grid = document.getElementById("stat-gauges");
+
+  metrics.forEach(function (m) {
+    var pct = Math.round((m.value / max) * 100);
+    var card = document.createElement("div");
+    card.className = "bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5 flex items-center gap-4";
+    card.innerHTML =
+      '<div style="position:relative;width:76px;height:76px;flex-shrink:0;">' +
+        '<canvas id="gauge-' + m.key + '" role="img" aria-label="' + m.label + ': ' + m.value + '"></canvas>' +
+        '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">' +
+          '<span class="material-symbols-outlined" style="color:' + m.text + ';font-size:22px;">' + m.icon + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div>' +
+        '<p class="font-label-sm text-label-sm text-on-surface-variant">' + m.label + '</p>' +
+        '<p class="font-headline-sm text-headline-sm font-bold" style="color:' + m.text + ';">' + m.value + '</p>' +
+      '</div>';
+    grid.appendChild(card);
+
+    new Chart(card.querySelector("canvas"), {
+      type: "doughnut",
+      data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [m.fill, m.track], borderWidth: 0 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "72%",
+        rotation: -90,
+        circumference: 360,
+        animation: { animateRotate: true, duration: 700 },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      }
+    });
+  });
+})();
+</script>
 
 <!-- User management -->
 <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6">
