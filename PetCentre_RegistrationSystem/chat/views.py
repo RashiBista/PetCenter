@@ -57,6 +57,10 @@ def inbox(request):
     return render(request, "chat/inbox.html", {
         "rooms_data": rooms_data,
         "page_title": "Messages",
+        # Set when arriving from a medicine page's "Ask Vet About This"
+        # link — carried through to each room link below so picking a
+        # vet here also carries the question into room() to prefill.
+        "ask_about": request.GET.get("ask_about", "").strip(),
     })
 
 
@@ -147,12 +151,20 @@ def room(request, room_uuid):
     # Mint a short-lived JWT so the WebSocket handshake can authenticate.
     ws_token = str(RefreshToken.for_user(request.user).access_token)
 
+    # Carried from a medicine page's "Ask Vet About This" link, via
+    # inbox()'s ask_about — prefills the message box so the owner doesn't
+    # have to retype the medicine name, without sending anything on
+    # their behalf.
+    ask_about = request.GET.get("ask_about", "").strip()
+    prefill_message = f'Can you tell me about "{ask_about}"?' if ask_about else ""
+
     return render(request, "chat/room.html", {
         "room": chat_room,
         "other_user": other_user,
         "messages": messages,
         "ws_token": ws_token,
         "page_title": f"Chat with {other_user.get_full_name() or other_user.username}",
+        "prefill_message": prefill_message,
     })
 
 

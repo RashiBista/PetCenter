@@ -120,7 +120,7 @@
 <div class="w-full max-w-[1360px] mx-auto">
 <!-- Breadcrumbs -->
 <nav aria-label="Breadcrumb" class="flex items-center gap-2 mb-section-margin text-on-surface-variant font-label-md text-label-md">
-<a class="hover:text-primary transition-colors" href="{% url 'core:medicine_search' %}">Medicine</a>
+<a class="hover:text-primary transition-colors" href="{% url 'core:medicine_search' %}">Medicine Dictionary</a>
 <span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
 <span aria-current="page" class="text-on-surface">{{ medicine.name }}</span>
 </nav>
@@ -158,7 +158,7 @@
 <!-- Action Button -->
 {% if request.user.role != 'vet' %}
 <div class="mt-8 flex gap-4">
-<a href="{% url 'chat:inbox' %}" class="flex-1 bg-primary text-on-primary py-4 px-8 rounded-full font-label-md text-label-md shadow-md hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2">
+<a href="{% url 'chat:inbox' %}?ask_about={{ medicine.name|urlencode }}" class="flex-1 bg-primary text-on-primary py-4 px-8 rounded-full font-label-md text-label-md shadow-md hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2">
 <span class="material-symbols-outlined" data-icon="forum">forum</span>
                             Ask Vet About This
                         </a>

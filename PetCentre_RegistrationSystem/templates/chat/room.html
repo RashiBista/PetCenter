@@ -116,11 +116,22 @@ tailwind.config = {
   const ROOM_ID = "{{ room.uuid }}";
   const CURRENT_USER_ID = {{ request.user.pk|default:0 }};
   const WS_TOKEN = "{{ ws_token }}";
+  const PREFILL_MESSAGE = "{{ prefill_message|escapejs }}";
 
   const messageList = document.getElementById("message-list");
   const input = document.getElementById("message-input");
   const sendBtn = document.getElementById("send-btn");
   const onlineDot = document.getElementById("online-dot");
+
+  // Arrived here from a medicine page's "Ask Vet About This" link —
+  // drop the question into the box so the owner can review/edit before
+  // sending, rather than sending anything on their behalf automatically.
+  if (PREFILL_MESSAGE) {
+    input.value = PREFILL_MESSAGE;
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 128) + "px";
+    input.focus();
+  }
   const typingIndicator = document.getElementById("typing-indicator");
 
   const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";

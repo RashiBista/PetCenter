@@ -176,7 +176,7 @@
 </a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:medicine_search' %}">
 <span class="material-symbols-outlined">medical_services</span>
-<span class="font-label-md text-label-md">Medicine</span>
+<span class="font-label-md text-label-md">Medicine Dictionary</span>
 </a>
 <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant rounded-lg hover:bg-surface-variant transition-colors duration-200" href="{% url 'core:pet_owner_appointments' %}">
 <span class="material-symbols-outlined">calendar_today</span>
@@ -220,7 +220,7 @@
 <!-- Search (Left aligned as per JSON) -->
 <form method="get" action="{% url 'core:search' %}" class="hidden md:flex relative w-64 md:w-96">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-<input name="q" class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container-low border border-outline-variant text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md" placeholder="Search for medicine, vets..." type="text"/>
+<input name="q" class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container-low border border-outline-variant text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md" placeholder="Search for medicines" type="text"/>
 </form>
 <!-- Mobile Title -->
 <a href="{{ dashboard_url }}" class="md:hidden font-title-lg text-title-lg text-primary font-bold">Pet Centre</a>
@@ -264,8 +264,8 @@
 <span class="material-symbols-outlined">medical_services</span>
 </div>
 <div>
-<h3 class="font-title-lg text-title-lg text-on-surface">Search Medicine</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1">Find prescriptions and refills.</p>
+<h3 class="font-title-lg text-title-lg text-on-surface">Medicine Dictionary</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Browse medicines and dosage info.</p>
 </div>
 </button>
 <!-- Action 2 -->

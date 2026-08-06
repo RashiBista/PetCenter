@@ -951,20 +951,15 @@ def mark_payment_paid_view(request, appointment_id):
 @login_required(login_url='core:pet_owner_login')
 def medicine_search_view(request):
     """
-    Backed by core.medicine_engine (a TF-IDF model trained on a curated
-    veterinary-medicine dataset — see core/medicine_engine/search.py),
-    not the admin-managed Medicine catalog table. Gets typo tolerance
-    and category/symptom matching (e.g. "worms" surfaces dewormers) that
-    a plain icontains filter can't do, at the cost of no photos/prices —
-    which the results already don't show (see medicine_search.html's
-    icon fallback, and prices were hidden pending real pricing data).
+    The "Medicine Dictionary" — a plain browse of every medicine in
+    core.medicine_engine's dataset, alphabetical, no search of its own.
+    Actually searching medicine (by name, category, or symptom/lay-term
+    — see the fuzzy matching in core/medicine_engine/search.py) only
+    ever happens through the "Search for medicines" bar in the topbar,
+    which posts to search_view below instead of here.
     """
-    query = request.GET.get('q', '').strip()
-    if query:
-        medicines = medicine_search_engine.smart_search(query)
-    else:
-        medicines = medicine_search_engine.list_all()
-    return render(request, 'core/medicine_search.html', {'medicines': medicines, 'query': query})
+    medicines = medicine_search_engine.list_all()
+    return render(request, 'core/medicine_search.html', {'medicines': medicines})
 
 
 @login_required(login_url='core:pet_owner_login')

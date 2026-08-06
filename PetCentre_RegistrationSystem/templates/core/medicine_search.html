@@ -3,7 +3,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Medicine — PetCentre</title>
+<title>Medicine Dictionary — PetCentre</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -47,14 +47,11 @@ tailwind.config = {
     <a href="{% if request.user.role == 'vet' %}{% url 'core:veterinary_dashboard' %}{% else %}{% url 'core:pet_owner_dashboard' %}{% endif %}" class="text-on-surface-variant hover:text-primary transition-colors">
       <span class="material-symbols-outlined">arrow_back</span>
     </a>
-    <h1 class="font-headline-md text-headline-md text-on-surface">Search Medicine</h1>
+    <h1 class="font-headline-md text-headline-md text-on-surface">Medicine Dictionary</h1>
   </div>
-
-  <form method="get" class="relative mb-8">
-    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-    <input name="q" value="{{ query }}" placeholder="Search by name or category..."
-           class="w-full pl-12 pr-4 py-3 rounded-full border border-outline-variant bg-surface-container-low text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"/>
-  </form>
+  <p class="font-body-md text-body-md text-on-surface-variant mb-8 ml-9">
+    Browse every medicine we carry information on. Looking for something specific? Use the search bar at the top instead.
+  </p>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     {% for medicine in medicines %}
@@ -76,7 +73,7 @@ tailwind.config = {
     </a>
     {% empty %}
     <p class="text-on-surface-variant font-body-md text-body-md text-center py-10 col-span-2">
-      {% if query %}No medicine found matching "{{ query }}".{% else %}No medicine available right now.{% endif %}
+      No medicine available right now.
     </p>
     {% endfor %}
   </div>

@@ -56,9 +56,15 @@ tailwind.config = {
   {% endfor %}
   {% endif %}
 
+  {% if ask_about %}
+  <div class="mb-6 px-4 py-3 rounded-xl bg-primary-container/40 text-on-primary-container text-body-md">
+    Choose a vet to ask about <span class="font-semibold">&ldquo;{{ ask_about }}&rdquo;</span>.
+  </div>
+  {% endif %}
+
   <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high shadow-sm overflow-hidden">
     {% for entry in rooms_data %}
-    <a href="{% url 'chat:room' entry.room.uuid %}"
+    <a href="{% url 'chat:room' entry.room.uuid %}{% if ask_about %}?ask_about={{ ask_about|urlencode }}{% endif %}"
        class="flex items-center gap-4 px-5 py-4 border-b border-surface-container last:border-b-0 hover:bg-surface-container-low transition-colors">
 
       <div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg flex-shrink-0">
@@ -89,7 +95,10 @@ tailwind.config = {
     <div class="flex flex-col items-center justify-center text-center py-16 gap-3">
       <span class="material-symbols-outlined text-5xl text-on-surface-variant">chat_bubble</span>
       <p class="font-body-md text-body-md text-on-surface-variant">No conversations yet.</p>
-      <p class="font-label-sm text-label-sm text-on-surface-variant">Start a chat from a user's profile to see it here.</p>
+      <p class="font-label-sm text-label-sm text-on-surface-variant">
+        {% if ask_about %}You can message a vet once they've confirmed an appointment with you.
+        {% else %}Start a chat from a user's profile to see it here.{% endif %}
+      </p>
     </div>
     {% endfor %}
   </div>
