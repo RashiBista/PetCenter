@@ -1,4 +1,4 @@
-name: Notification cleanup
+name: Daily scheduled tasks
 on:
   schedule:
     # 18:00 UTC daily — same time originally planned for the Render cron
@@ -6,8 +6,22 @@ on:
     - cron: "0 18 * * *"
   workflow_dispatch: {}
 jobs:
-  cleanup:
+  daily-tasks:
     runs-on: ubuntu-latest
+    env:
+      # DEBUG=True + a throwaway key, same pattern as django.yml's test
+      # job — these commands never serve HTTP, so none of the
+      # DEBUG=False hardening (allowed hosts, CSRF origins, etc.)
+      # applies or matters here.
+      DJANGO_DEBUG: "True"
+      DJANGO_SECRET_KEY: "ci-daily-tasks-not-for-production-use"
+      DB_ENGINE: django.contrib.gis.db.backends.postgis
+      DB_SSLMODE: require
+      DB_PORT: "5432"
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,21 +48,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run cleanup_old_notifications
+      # Reminders run before cleanup so a notification isn't purged by
+      # age in the same run it would otherwise have been created in.
+      - name: Send appointment reminders
         working-directory: ./PetCentre_RegistrationSystem
-        env:
-          # DEBUG=True + a throwaway key, same pattern as django.yml's
-          # test job — this command never serves HTTP, so none of the
-          # DEBUG=False hardening (allowed hosts, CSRF origins, etc.)
-          # applies or matters here.
-          DJANGO_DEBUG: "True"
-          DJANGO_SECRET_KEY: "ci-notification-cleanup-not-for-production-use"
-          DB_ENGINE: django.contrib.gis.db.backends.postgis
-          DB_SSLMODE: require
-          DB_PORT: "5432"
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          python manage.py cleanup_old_notifications
+        run: python manage.py send_appointment_reminders
+      - name: Send vaccination reminders
+        working-directory: ./PetCentre_RegistrationSystem
+        run: python manage.py send_vaccination_reminders
+      - name: Send medicine reminders
+        working-directory: ./PetCentre_RegistrationSystem
+        run: python manage.py send_medicine_reminders
+      - name: Clean up old notifications
+        working-directory: ./PetCentre_RegistrationSystem
+        run: python manage.py cleanup_old_notifications
