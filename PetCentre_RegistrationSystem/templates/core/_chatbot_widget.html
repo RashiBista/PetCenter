@@ -1,3 +1,4 @@
+{% csrf_token %}
 <!-- Floating button -->
 <button id="chatbot-fab" onclick="toggleChatbotWidget()"
         class="fixed bottom-6 right-6 rounded-full p-4 bg-primary text-on-primary shadow-xl z-50 flex items-center justify-center hover:scale-110 hover:shadow-2xl active:scale-95 transition-all duration-200">
@@ -71,6 +72,32 @@
       return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     }
 
+    // The assistant is a Gemini agent, so replies come back as light
+    // markdown. Rather than pull in a markdown library for three
+    // constructs, escape everything first (the reply is model output
+    // built partly from user text — it is never trusted as HTML) and
+    // then re-introduce only bold, bullets and line breaks.
+    function renderReply(text) {
+      return escapeHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^[-*]\s+(.*)$/gm, '&bull; $1')
+        .replace(/\n/g, '<br>');
+    }
+
+    function appendAssistantMessage(text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-start gap-3 max-w-[85%]';
+      wrapper.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
+        </div>
+        <div class="bg-surface-container-lowest shadow-sm rounded-2xl rounded-tl-sm p-3 text-on-surface">
+          <p class="text-sm">${renderReply(text)}</p>
+        </div>`;
+      messages.insertBefore(wrapper, typing);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
     function appendUserMessage(text) {
       const wrapper = document.createElement('div');
       wrapper.className = 'flex items-start gap-3 self-end max-w-[85%] flex-row-reverse';
@@ -85,26 +112,36 @@
       messages.scrollTop = messages.scrollHeight;
     }
 
+    let awaitingReply = false;
+
     async function sendWidgetMessage(text) {
-      if (!text.trim()) return;
+      if (!text.trim() || awaitingReply) return;
+      awaitingReply = true;
       appendUserMessage(text);
       input.value = '';
       typing.classList.remove('hidden');
       messages.scrollTop = messages.scrollHeight;
 
-      // ------------------------------------------------------------
-      // BACKEND INTEGRATION POINT — same contract as the full-page
-      // version this replaced. Planned after the 19th.
-      //   const res = await fetch("/api/chatbot/message/", {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({ message: text }),
-      //   });
-      //   const data = await res.json();
-      //   typing.classList.add('hidden');
-      //   appendAssistantMessage(data.reply);
-      // ------------------------------------------------------------
-      typing.classList.add('hidden');
+      try {
+        const res = await fetch("{% url 'chatbot:message' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value,
+          },
+          body: JSON.stringify({ message: text }),
+        });
+        // Every error path from chatbot.views still carries a `reply`
+        // to show the user, so this reads the body either way rather
+        // than branching on res.ok.
+        const data = await res.json();
+        appendAssistantMessage(data.reply || "Sorry, I couldn't answer that one.");
+      } catch (err) {
+        appendAssistantMessage("Sorry — I couldn't reach the assistant. Please try again.");
+      } finally {
+        typing.classList.add('hidden');
+        awaitingReply = false;
+      }
     }
 
     sendBtn.addEventListener('click', () => sendWidgetMessage(input.value));

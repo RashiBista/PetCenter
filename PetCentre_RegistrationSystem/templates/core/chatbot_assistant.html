@@ -255,7 +255,7 @@
 </header>
 <!-- Chat Canvas -->
 <div class="flex-1 overflow-y-auto mt-20 p-container-padding-desktop bg-surface pb-32">
-<div class="max-w-4xl mx-auto flex flex-col gap-6">
+<div id="chat-messages" class="max-w-4xl mx-auto flex flex-col gap-6">
 <!-- Assistant Message -->
 <div class="flex items-start gap-4 max-w-[80%]">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
@@ -266,29 +266,22 @@
 </div>
 </div>
 <!-- Suggested Prompts -->
-<div class="flex flex-wrap gap-2 ml-14">
-<button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
+<div id="chat-suggestions" class="flex flex-wrap gap-2 ml-14">
+<button data-prompt="How do I find the right medicine for my pet?" class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
                         Find medicine
                     </button>
-<button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
+<button data-prompt="How do I book an appointment with a vet?" class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
                         Book appointment
                     </button>
-<button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
+<button data-prompt="How do I report a lost pet?" class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
                         Report lost pet
                     </button>
-<button class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
-                        Check notifications
+<button data-prompt="What vaccinations does my puppy need?" class="px-4 py-2 rounded-full border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors bg-surface-container-low shadow-sm">
+                        Puppy vaccinations
                     </button>
 </div>
-<!-- User Message -->
-<div class="flex items-start gap-4 self-end max-w-[80%] flex-row-reverse">
-<img alt="User A" class="w-10 h-10 rounded-full border border-outline-variant object-cover flex-shrink-0" data-alt="A professional headshot of a smiling user in a bright, well-lit environment. The user looks friendly and approachable. The background is soft and slightly blurred, suggesting a sunny outdoor or modern indoor setting. The image is cropped into a perfect circle for a profile avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZHvZupeDogBE4jaTgBTmh_mJBtNvVX9TJW8_j11_vzGHDcl6pbkvBkEGx1k5LnRMXQWo7olJ0gtFO6HO_znAYrwtiELh4ufzLlzumpZ3TPY_sQMDqeg0hlgnLLh4xc4cl-5AzEEFA_y59N7I8_QOpfCYJjTJYx2kfcJQOZcN7-1Bs0VPJYgRt3ErXvowG3Mrs-0NGs_5S6TAcjm85ARt6flHmHjMpMcyzTZf1zGUMWN8dU1du43xwPvmuWYPD59NjPJFfozupEHqx"/>
-<div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tr-sm p-4 shadow-sm">
-<p class="font-body-md text-body-md">I need to check the status of my recent medicine order for Luna.</p>
-</div>
-</div>
 <!-- Assistant Typing -->
-<div class="flex items-start gap-4 max-w-[80%]">
+<div id="chat-typing" class="hidden flex items-start gap-4 max-w-[80%]">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
 <span class="material-symbols-outlined text-primary">smart_toy</span>
 </div>
@@ -306,11 +299,112 @@
 <button class="p-2 text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container-highest transition-colors">
 <span class="material-symbols-outlined">attach_file</span>
 </button>
-<input class="flex-1 bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50" placeholder="Type a message..." type="text"/>
-<button class="p-2 bg-primary text-on-primary rounded-full hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors shadow-sm flex items-center justify-center">
+<input id="chat-input" class="flex-1 bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50" placeholder="Type a message..." type="text"/>
+<button id="chat-send" class="p-2 bg-primary text-on-primary rounded-full hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors shadow-sm flex items-center justify-center">
 <span class="material-symbols-outlined">send</span>
 </button>
 </div>
 </div>
 </main>
+
+{% csrf_token %}
+<script>
+  (function () {
+    const messages = document.getElementById('chat-messages');
+    const typing = document.getElementById('chat-typing');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send');
+    const suggestions = document.getElementById('chat-suggestions');
+    const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Gemini replies come back as light markdown. Escape first (model
+    // output is never trusted as HTML), then re-introduce only bold,
+    // bullets and line breaks — not worth a markdown library for three
+    // constructs. Kept in sync with core/_chatbot_widget.html.
+    function renderReply(text) {
+      return escapeHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/^[-*]\s+(.*)$/gm, '&bull; $1')
+        .replace(/\n/g, '<br>');
+    }
+
+    function appendUserMessage(text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-start gap-4 self-end max-w-[80%] flex-row-reverse';
+      wrapper.innerHTML = `
+        <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-on-surface-variant">person</span>
+        </div>
+        <div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tr-sm p-4 shadow-sm">
+          <p class="font-body-md text-body-md">${escapeHtml(text)}</p>
+        </div>`;
+      messages.insertBefore(wrapper, typing);
+      scrollToBottom();
+    }
+
+    function appendAssistantMessage(text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-start gap-4 max-w-[80%]';
+      wrapper.innerHTML = `
+        <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary">smart_toy</span>
+        </div>
+        <div class="bg-surface-container-lowest shadow-[0px_8px_16px_rgba(46,46,56,0.04)] rounded-2xl rounded-tl-sm p-4 text-on-surface">
+          <p class="font-body-md text-body-md">${renderReply(text)}</p>
+        </div>`;
+      messages.insertBefore(wrapper, typing);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      const canvas = messages.parentElement;
+      canvas.scrollTop = canvas.scrollHeight;
+    }
+
+    let awaitingReply = false;
+
+    async function sendMessage(text) {
+      if (!text.trim() || awaitingReply) return;
+      awaitingReply = true;
+      // The starter chips are only useful before the conversation
+      // begins; once it has, they just push the thread down.
+      if (suggestions) suggestions.classList.add('hidden');
+      appendUserMessage(text);
+      input.value = '';
+      typing.classList.remove('hidden');
+      scrollToBottom();
+
+      try {
+        const res = await fetch("{% url 'chatbot:message' %}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+          body: JSON.stringify({ message: text }),
+        });
+        // Error paths in chatbot.views still carry a `reply` for the
+        // user, so read the body either way rather than checking res.ok.
+        const data = await res.json();
+        appendAssistantMessage(data.reply || "Sorry, I couldn't answer that one.");
+      } catch (err) {
+        appendAssistantMessage("Sorry — I couldn't reach the assistant. Please try again.");
+      } finally {
+        typing.classList.add('hidden');
+        awaitingReply = false;
+      }
+    }
+
+    sendBtn.addEventListener('click', () => sendMessage(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); sendMessage(input.value); }
+    });
+    if (suggestions) {
+      suggestions.querySelectorAll('button[data-prompt]').forEach((btn) => {
+        btn.addEventListener('click', () => sendMessage(btn.dataset.prompt));
+      });
+    }
+  })();
+</script>
 </body></html>
