@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from myapp.models import (
-    Appointment, Medicine, Prescription,
+    Appointment, Medicine,
     User, UserProfile, VetAvailability, VetProfile,
 )
 from pet_profiles.models import Pet
@@ -26,9 +26,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         vets = self._create_vets()
         owners = self._create_owners_and_pets()
-        medicines = self._create_medicines()
+        self._create_medicines()
         self._create_appointments(owners, vets)
-        self._create_prescriptions(owners, vets, medicines)
         self._create_availability(vets)
 
         self.stdout.write(self.style.SUCCESS("Demo data ready."))
@@ -137,14 +136,3 @@ class Command(BaseCommand):
                         vet=vet, date=today + timedelta(days=day_offset),
                         time=datetime.strptime(time_str, '%H:%M').time(),
                     )
-
-    def _create_prescriptions(self, owners, vets, medicines):
-        pet1 = owners[0].pets.first()
-        Prescription.objects.get_or_create(
-            pet=pet1, vet=vets[0], medicine_name=medicines[0].name,
-            defaults={'dosage': '250mg twice daily', 'status': Prescription.Status.PENDING},
-        )
-        Prescription.objects.get_or_create(
-            pet=pet1, vet=vets[0], medicine_name=medicines[1].name,
-            defaults={'dosage': 'Monthly', 'status': Prescription.Status.PENDING},
-        )

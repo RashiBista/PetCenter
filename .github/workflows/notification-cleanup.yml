@@ -56,9 +56,6 @@ jobs:
       - name: Send vaccination reminders
         working-directory: ./PetCentre_RegistrationSystem
         run: python manage.py send_vaccination_reminders
-      - name: Send medicine reminders
-        working-directory: ./PetCentre_RegistrationSystem
-        run: python manage.py send_medicine_reminders
       - name: Clean up old notifications
         working-directory: ./PetCentre_RegistrationSystem
         run: python manage.py cleanup_old_notifications

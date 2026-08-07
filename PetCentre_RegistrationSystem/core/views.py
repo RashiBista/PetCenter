@@ -29,7 +29,7 @@ from core import rag
 from core.medicine_engine import search as medicine_search_engine
 from myapp.decorators import role_required
 from myapp.models import (
-    Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Payment, Prescription,
+    Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP, Payment,
     SignupOTP, User, UserProfile, VetAvailability, VetProfile,
 )
 from pet_profiles.models import Pet
@@ -1430,10 +1430,6 @@ def veterinary_dashboard(request):
         appointments__vet=request.user
     ).distinct().count()
 
-    pending_prescriptions_count = Prescription.objects.filter(
-        vet=request.user, status=Prescription.Status.PENDING
-    ).count()
-
     booked_times = set(
         Appointment.objects.filter(vet=request.user, scheduled_time__date__gte=today)
         .exclude(status=Appointment.Status.CANCELLED)
@@ -1489,7 +1485,6 @@ def veterinary_dashboard(request):
     return render(request, 'core/veterinary_dashboard.html', {
         'todays_appointments': todays_appointments,
         'total_patients': total_patients,
-        'pending_prescriptions_count': pending_prescriptions_count,
         'open_slots_count': open_slots_count,
         'recent_messages': recent_messages,
         'appointments_trend': appointments_trend,
@@ -1611,80 +1606,6 @@ def vet_availability_view(request):
     })
 
 
-@role_required(User.Role.VET)
-def veterinary_prescriptions_view(request):
-    """
-    A vet's own issued prescriptions, with the ability to mark one
-    fulfilled (they dispensed it in-house, or their affiliated
-    vetpharma supplier did — see VetProfile.pharma_partner_name) and to
-    set/change a refill-reminder date. This capability used to live
-    entirely on the pharmacy role's dashboard; pharmacies were removed
-    (standalone pet pharmacies aren't a real local concept), so
-    fulfillment now belongs to whoever actually issued the prescription.
-    """
-    status_filter = request.GET.get('status', 'all')
-    prescriptions = Prescription.objects.filter(vet=request.user).select_related('pet', 'pet__owner')
-    if status_filter in (Prescription.Status.PENDING, Prescription.Status.FULFILLED, Prescription.Status.CANCELLED):
-        prescriptions = prescriptions.filter(status=status_filter)
-
-    return render(request, 'core/veterinary_prescriptions.html', {
-        'prescriptions': prescriptions,
-        'status_filter': status_filter,
-        'status_choices': [('all', 'All')] + list(Prescription.Status.choices),
-    })
-
-
-@role_required(User.Role.VET)
-def update_prescription_status_view(request, prescription_id):
-    if request.method != 'POST':
-        return redirect('core:veterinary_prescriptions')
-
-    # Scoped to prescriptions THIS vet issued — the same ownership check
-    # update_appointment_status_view does for appointments.
-    prescription = Prescription.objects.filter(id=prescription_id, vet=request.user).select_related('pet', 'pet__owner').first()
-    if prescription is None:
-        return redirect('core:veterinary_prescriptions')
-
-    action = request.POST.get('action', 'fulfill')
-
-    if action == 'set_reminder':
-        reminder_date_str = request.POST.get('reminder_date')
-        # Parse to an actual date before assigning — leaving it as the
-        # raw POST string "works" for the DB write (Django's DateField
-        # converts on save), but the in-memory attribute stays a str,
-        # and formatting a str with a datetime spec below raises
-        # ValueError: every "set reminder" submission 500'd.
-        reminder_date = None
-        if reminder_date_str:
-            try:
-                reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d').date()
-            except ValueError:
-                reminder_date = None
-        if reminder_date:
-            prescription.reminder_date = reminder_date
-            prescription.reminder_sent = False  # allow re-triggering if the date was changed
-            prescription.save(update_fields=['reminder_date', 'reminder_sent'])
-            # Confirmation that the reminder was set — sent immediately,
-            # separate from the actual reminder which fires the day before.
-            create_notification(
-                recipient=prescription.pet.owner,
-                recipient_role=_recipient_role_for(prescription.pet.owner),
-                notification_type='medicine',
-                title="Medicine reminder set",
-                message=(
-                    f"A reminder has been set for {prescription.pet.name}'s "
-                    f"{prescription.medicine_name} on {prescription.reminder_date:%b %d, %Y}."
-                ),
-                action_url="/dashboard/pet-owner/",
-            )
-    elif action == 'fulfill' and prescription.status == Prescription.Status.PENDING:
-        prescription.status = Prescription.Status.FULFILLED
-        prescription.fulfilled_at = timezone.now()
-        prescription.save(update_fields=['status', 'fulfilled_at'])
-
-    return redirect('core:veterinary_prescriptions')
-
-
 @login_required(login_url='core:admin_login')
 def admin_create_user_view(request):
     """
@@ -1768,33 +1689,45 @@ def admin_delete_medicine_view(request, item_id):
     return redirect('core:admin_dashboard')
 
 
+def _admin_dashboard_stats():
+    return {
+        'total_owners': User.objects.filter(role=User.Role.USER).count(),
+        'total_vets': User.objects.filter(role=User.Role.VET).count(),
+        'total_medicines': medicine_search_engine.count(),
+        'total_appointments': Appointment.objects.count(),
+        'total_pets': Pet.objects.count(),
+    }
+
+
 @login_required(login_url='core:admin_login')
 def admin_dashboard(request):
     if not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, "You don't have access to that page.")
         return redirect('core:landing_page')
 
-    stats = {
-        'total_owners': User.objects.filter(role=User.Role.USER).count(),
-        'total_vets': User.objects.filter(role=User.Role.VET).count(),
-        'total_medicines': Medicine.objects.count(),
-        'total_appointments': Appointment.objects.count(),
-        'pending_prescriptions': Prescription.objects.filter(status=Prescription.Status.PENDING).count(),
-        'total_pets': Pet.objects.count(),
-    }
+    stats = _admin_dashboard_stats()
 
     recent_users = User.objects.exclude(is_superuser=True).order_by('-date_joined')[:15]
     all_medicines = Medicine.objects.order_by('-created_at')
     all_appointments = Appointment.objects.select_related('pet', 'pet__owner', 'vet').order_by('-scheduled_time')[:20]
-    all_prescriptions = Prescription.objects.select_related('pet', 'vet').order_by('-created_at')[:20]
 
     return render(request, 'core/admin_dashboard.html', {
         'stats': stats,
         'recent_users': recent_users,
         'all_medicines': all_medicines,
         'all_appointments': all_appointments,
-        'all_prescriptions': all_prescriptions,
     })
+
+
+@login_required(login_url='core:admin_login')
+def admin_dashboard_stats_view(request):
+    """JSON stats for the dashboard's gauges to poll — same numbers
+    admin_dashboard renders on load, so the gauges can update live
+    without a full page reload."""
+    if not (request.user.is_staff or request.user.is_superuser):
+        return JsonResponse({'error': 'forbidden'}, status=403)
+
+    return JsonResponse(_admin_dashboard_stats())
 
 
 @login_required(login_url='core:admin_login')

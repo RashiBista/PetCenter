@@ -102,9 +102,8 @@ class VetProfile(models.Model):
     # sourced from a wholesale veterinary pharmaceutical supplier
     # ("vetpharma") the vet works with. Optional free text; blank means
     # the vet dispenses in-house rather than through a named supplier.
-    # Shown wherever a prescription/appointment previously showed a
-    # separate pharmacy's name — e.g. admin_dashboard.html's
-    # "Dispensed Via" column and veterinary_prescriptions.html.
+    # Shown wherever an appointment previously showed a separate
+    # pharmacy's name.
     pharma_partner_name = models.CharField(max_length=150, blank=True)
 
     def __str__(self):
@@ -113,8 +112,8 @@ class VetProfile(models.Model):
 
 #  myapp.Pet has been removed entirely — superseded by
 # pet_profiles.Pet (richer: DOB, gender, weight, care notes, medical
-# summary/records/vaccinations/medications). Appointment/Prescription
-# below now reference 'pet_profiles.Pet' instead.
+# summary/records/vaccinations/medications). Appointment below now
+# references 'pet_profiles.Pet' instead.
 
 
 class Appointment(models.Model):
@@ -230,36 +229,6 @@ class VetAvailability(models.Model):
     def __str__(self):
         return f'{self.vet.username} available {self.date} {self.time}'
 
-
-class Prescription(models.Model):
-    class Status(models.TextChoices):
-        PENDING = 'pending', 'Pending'
-        FULFILLED = 'fulfilled', 'Fulfilled'
-        CANCELLED = 'cancelled', 'Cancelled'
-
-    pet = models.ForeignKey(
-        'pet_profiles.Pet', on_delete=models.CASCADE, related_name='prescriptions',
-    )
-    vet = models.ForeignKey(
-        'myapp.User', on_delete=models.CASCADE, related_name='issued_prescriptions',
-        limit_choices_to={'role': User.Role.VET},
-    )
-    medicine_name = models.CharField(max_length=150)
-    dosage = models.CharField(max_length=100, blank=True)
-    instructions = models.TextField(blank=True)
-    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
-    created_at = models.DateTimeField(auto_now_add=True)
-    fulfilled_at = models.DateTimeField(null=True, blank=True)
-    # Set by the issuing vet — a date to remind the owner to give/refill
-    # this medicine. Reminder fires the day before.
-    reminder_date = models.DateField(null=True, blank=True)
-    reminder_sent = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.medicine_name} for {self.pet.name} ({self.get_status_display()})"
 
 
 class PasswordResetOTP(models.Model):

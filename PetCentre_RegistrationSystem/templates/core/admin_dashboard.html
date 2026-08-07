@@ -90,37 +90,47 @@ tailwind.config = {
 <div id="stat-gauges" class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10"></div>
 <script>
 (function () {
-  var metrics = [
-    { key: "owners", label: "Pet Owners", icon: "group", value: {{ stats.total_owners|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
-    { key: "vets", label: "Veterinarians", icon: "stethoscope", value: {{ stats.total_vets|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
-    { key: "pets", label: "Registered Pets", icon: "pets", value: {{ stats.total_pets|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
-    { key: "medicines", label: "Medicines", icon: "medication", value: {{ stats.total_medicines|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
-    { key: "appointments", label: "Appointments", icon: "calendar_today", value: {{ stats.total_appointments|default:0 }}, fill: "#5f578f", track: "#e5deff", text: "#413a70" },
-    { key: "pending", label: "Pending Prescriptions", icon: "pending_actions", value: {{ stats.pending_prescriptions|default:0 }}, fill: "#ba1a1a", track: "#ffdad6", text: "#93000a" }
+  // key must match the JSON field name admin_dashboard_stats_view
+  // returns, so a poll response can be looked up by m.statKey below.
+  var metricDefs = [
+    { key: "owners", statKey: "total_owners", label: "Pet Owners", icon: "group", fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "vets", statKey: "total_vets", label: "Veterinarians", icon: "stethoscope", fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "pets", statKey: "total_pets", label: "Registered Pets", icon: "pets", fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "medicines", statKey: "total_medicines", label: "Medicines", icon: "medication", fill: "#5f578f", track: "#e5deff", text: "#413a70" },
+    { key: "appointments", statKey: "total_appointments", label: "Appointments", icon: "calendar_today", fill: "#5f578f", track: "#e5deff", text: "#413a70" }
   ];
-  var max = Math.max.apply(null, metrics.map(function (m) { return m.value; })) || 1;
-  var grid = document.getElementById("stat-gauges");
+  var initialValues = {
+    total_owners: {{ stats.total_owners|default:0 }},
+    total_vets: {{ stats.total_vets|default:0 }},
+    total_pets: {{ stats.total_pets|default:0 }},
+    total_medicines: {{ stats.total_medicines|default:0 }},
+    total_appointments: {{ stats.total_appointments|default:0 }}
+  };
 
-  metrics.forEach(function (m) {
-    var pct = Math.round((m.value / max) * 100);
+  var grid = document.getElementById("stat-gauges");
+  var charts = {};
+  var valueEls = {};
+
+  metricDefs.forEach(function (m) {
     var card = document.createElement("div");
     card.className = "bg-surface-container-lowest rounded-2xl border border-surface-container-high p-5 flex items-center gap-4";
     card.innerHTML =
       '<div style="position:relative;width:76px;height:76px;flex-shrink:0;">' +
-        '<canvas id="gauge-' + m.key + '" role="img" aria-label="' + m.label + ': ' + m.value + '"></canvas>' +
+        '<canvas id="gauge-' + m.key + '" role="img" aria-label="' + m.label + '"></canvas>' +
         '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">' +
           '<span class="material-symbols-outlined" style="color:' + m.text + ';font-size:22px;">' + m.icon + '</span>' +
         '</div>' +
       '</div>' +
       '<div>' +
         '<p class="font-label-sm text-label-sm text-on-surface-variant">' + m.label + '</p>' +
-        '<p class="font-headline-sm text-headline-sm font-bold" style="color:' + m.text + ';">' + m.value + '</p>' +
+        '<p class="font-headline-sm text-headline-sm font-bold" style="color:' + m.text + ';" id="gauge-value-' + m.key + '"></p>' +
       '</div>';
     grid.appendChild(card);
+    valueEls[m.key] = card.querySelector("#gauge-value-" + m.key);
 
-    new Chart(card.querySelector("canvas"), {
+    charts[m.key] = new Chart(card.querySelector("canvas"), {
       type: "doughnut",
-      data: { datasets: [{ data: [pct, 100 - pct], backgroundColor: [m.fill, m.track], borderWidth: 0 }] },
+      data: { datasets: [{ data: [0, 100], backgroundColor: [m.fill, m.track], borderWidth: 0 }] },
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -132,6 +142,31 @@ tailwind.config = {
       }
     });
   });
+
+  function applyStats(stats) {
+    var max = Math.max.apply(null, metricDefs.map(function (m) { return stats[m.statKey] || 0; })) || 1;
+    metricDefs.forEach(function (m) {
+      var value = stats[m.statKey] || 0;
+      var pct = Math.round((value / max) * 100);
+      valueEls[m.key].textContent = value;
+      var canvas = charts[m.key].canvas;
+      canvas.setAttribute("aria-label", m.label + ": " + value);
+      charts[m.key].data.datasets[0].data = [pct, 100 - pct];
+      charts[m.key].update();
+    });
+  }
+
+  applyStats(initialValues);
+
+  // Auto-refresh so the "real-time overview" claim is actually true
+  // while the admin has the page open, not just accurate as of load.
+  var POLL_INTERVAL_MS = 20000;
+  setInterval(function () {
+    fetch("{% url 'core:admin_dashboard_stats' %}", { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (stats) { if (stats) applyStats(stats); })
+      .catch(function () { /* transient network hiccup — next tick retries */ });
+  }, POLL_INTERVAL_MS);
 })();
 </script>
 
@@ -319,41 +354,6 @@ tailwind.config = {
 </tr>
 {% empty %}
 <tr><td colspan="5" class="py-6 text-center text-on-surface-variant">No appointments yet.</td></tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-</div>
-
-<!-- Recent prescriptions (read-only overview) -->
-<div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6 mt-8">
-<h2 class="font-title-lg text-title-lg text-on-surface mb-4">Recent Prescriptions</h2>
-<div class="overflow-x-auto">
-<table class="w-full text-left">
-<thead>
-<tr class="border-b border-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
-<th class="py-2 pr-4">Medicine</th>
-<th class="py-2 pr-4">Pet</th>
-<th class="py-2 pr-4">Veterinarian</th>
-<th class="py-2 pr-4">Dispensed Via</th>
-<th class="py-2 pr-4">Status</th>
-</tr>
-</thead>
-<tbody>
-{% for rx in all_prescriptions %}
-<tr class="border-b border-surface-container last:border-b-0">
-<td class="py-3 pr-4 font-label-md text-label-md text-on-surface font-semibold">{{ rx.medicine_name }}</td>
-<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ rx.pet.name }}</td>
-<td class="py-3 pr-4 text-on-surface-variant text-sm">Dr. {{ rx.vet.get_full_name|default:rx.vet.username }}</td>
-<td class="py-3 pr-4 text-on-surface-variant text-sm">{{ rx.vet.vet_profile.pharma_partner_name|default:"Clinic" }}</td>
-<td class="py-3 pr-4">
-{% if rx.status == 'pending' %}<span class="px-2 py-1 rounded-full bg-error-container text-on-error-container text-xs">Pending</span>
-{% elif rx.status == 'fulfilled' %}<span class="px-2 py-1 rounded-full bg-primary-container text-on-primary-container text-xs">Fulfilled</span>
-{% else %}<span class="px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant text-xs">{{ rx.get_status_display }}</span>{% endif %}
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="5" class="py-6 text-center text-on-surface-variant">No prescriptions yet.</td></tr>
 {% endfor %}
 </tbody>
 </table>

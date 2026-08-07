@@ -4,7 +4,7 @@ from django.contrib.gis.admin import GISModelAdmin
 
 from .models import (
     Appointment, IPLoginAttempt, LoginAttempt, Medicine, PasswordResetOTP,
-    Prescription, SignupOTP, User, UserProfile, VetProfile,
+    SignupOTP, User, UserProfile, VetProfile,
 )
 
 
@@ -49,14 +49,6 @@ class AppointmentAdmin(admin.ModelAdmin):
     list_display = ('pet', 'vet', 'scheduled_time', 'status', 'created_at')
     list_filter = ('status', 'vet')
     search_fields = ('pet__name', 'vet__username', 'reason')
-    autocomplete_fields = ('pet', 'vet')
-
-
-@admin.register(Prescription)
-class PrescriptionAdmin(admin.ModelAdmin):
-    list_display = ('medicine_name', 'pet', 'vet', 'status', 'created_at')
-    list_filter = ('status',)
-    search_fields = ('medicine_name', 'pet__name', 'vet__username')
     autocomplete_fields = ('pet', 'vet')
 
 

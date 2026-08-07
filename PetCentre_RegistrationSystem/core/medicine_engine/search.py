@@ -143,6 +143,12 @@ def list_all():
     return [_serialize_row(idx, row) for idx, row in df.iterrows()]
 
 
+def count():
+    """Catalog size without serializing every row — for stat displays."""
+    _ensure_loaded()
+    return len(_state["df"])
+
+
 def get_by_id(medicine_id):
     """A single medicine by its dataframe row index (the 'id' smart_search/list_all hand back)."""
     _ensure_loaded()
