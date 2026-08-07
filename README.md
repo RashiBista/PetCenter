@@ -1,78 +1,68 @@
 # PetCentre
 
-## Overview
+A Django web platform connecting pet owners with veterinarians — appointment booking with real vet-managed availability, real-time chat, a medicine dictionary, an AI assistant, and appointment/vaccination reminders.
 
-PetCentre is a combined web-based system designed for improving the health and welfare of animals by making veterinary services readily available. Pet owners, rescuers, adopters, pharmacies, and animal welfare organizations commonly communicate over telephone, social media, and informal means. This often makes veterinary services less accessible, timely, and uncoordinated, among many other issues.
+The live application is the Django project in [`PetCentre_RegistrationSystem/`](PetCentre_RegistrationSystem). The other top-level folders (`ChatbotApp`, `NotificationSystem`, `PetProfile`, `final_chat`, `petcentral_backend`, `frontend`, `search`, `rag`) are earlier standalone prototypes for individual modules that were since merged into that one unified app — kept here for reference, not part of the running system.
 
-PetCentre solves this problem by providing a complete online platform that enables users to:
+## Features
 
-## Key Features
+- **Role-based accounts** — Pet Owner, Veterinarian, and Admin, each with their own dashboard. Signup is verified by a one-time email code (a phone-OTP option exists in the UI but isn't wired to a real SMS provider).
+- **Appointment booking** — vets set their own available date/time slots; owners book directly into open slots. Appointments move through Requested → Confirmed → Completed/Cancelled.
+- **Real-time chat** — a WebSocket chat room (Django Channels + Redis) opens once an appointment is confirmed, letting the owner and vet message each other live.
+- **Payments** — optional Khalti ePayment integration once an appointment is marked Completed, with a manual "Mark as Paid" fallback since chat/confirmation are never gated behind payment.
+- **PetPal AI assistant** — a retrieval-augmented chatbot (Google Gemini for embeddings + generation, pgvector for similarity search over a knowledge base stored in Postgres) that answers pet-care questions, shown on the pet owner dashboard.
+- **Medicine Dictionary** — a typo-tolerant, symptom-aware search engine (TF-IDF) over a veterinary medicine dataset, with lay-term-to-clinical-term expansion (e.g. "throwing up" → vomiting).
+- **Find Nearby Care** — locates registered vet clinics near the owner using PostGIS distance queries.
+- **Notifications** — in-app notifications plus email delivery (via Django's mail backend), with toast pop-ups for booking/confirmation events and daily scheduled reminders for upcoming appointments and vaccinations.
+- **Admin dashboard** — live (auto-refreshing) system stats, user management, and a medicine catalog editor.
 
-### Medicine & Pharmacy Services
-- **Search for medicines** by species, diseases, strengths, price, and manufacturers
-- **Find veterinary pharmacies** located near you
-- Browse medicine catalogs and compare options
+## Tech Stack
 
-### Animal Management
-- **Record animal profiles** with detailed medical and personal information
-- **Post lost and found pets** to help reunite animals with their owners
-- **Submit adoption requests** for rescue animals
-- **Report animal cruelty** and connect with welfare organizations
+| Layer | Technology |
+|---|---|
+| Backend | Django 6, Django Channels (ASGI/WebSockets), Daphne |
+| Database | PostgreSQL (Neon), PostGIS (geospatial), pgvector (AI similarity search) |
+| Real-time | Redis (channel layer + cache) |
+| AI | Google Gemini (`google-genai`) — embeddings + generation |
+| Payments | Khalti ePayment API v2 |
+| Frontend | Django templates, Tailwind CSS |
+| Deployment | Docker Compose (web, pgbouncer, Redis), Render |
+| CI/CD | GitHub Actions — test suite on push, daily scheduled reminders/cleanup |
 
-### Appointment & Health Services
-- **Schedule appointments** with veterinary clinics
-- **Receive reminders** for vaccinations, check-ups, and post-operative treatment appointments
-- **Blood donation module** that connects suitable donor pets with recipients to increase animal health and well-being
+## Running Locally
 
-### Administration & Security
-- **Role-based access control system** to manage different user categories
-- **Secure mobile OTP authentication** for enhanced security
-- **Administration portal** for managing:
-  - Users and permissions
-  - Medicines and pharmaceutical inventory
-  - Pharmacy information
-  - Reports and analytics
-  - Appointment bookings and reminders
-  - Adoption bookings and requests
-  - Other necessary entities
-- **Real-time notification and communication system** to keep users informed and engaged
+The project runs in Docker; `manage.py` is only meant to be run inside the `web` container.
 
-## Technology Framework
+1. Copy `.env` into `PetCentre_RegistrationSystem/` with at least:
 
-### Frontend
-- **Progressive Web Application (PWA)** for cross-device accessibility without requiring native app installation
-- **Framework:** Django
-- **Styling:** Tailwind CSS
+   ```
+   DJANGO_SECRET_KEY=...
+   DB_HOST=... DB_NAME=... DB_USER=... DB_PASSWORD=...
+   GEMINI_API_KEY=...        # PetPal assistant
+   KHALTI_SECRET_KEY=...     # optional, for payments
+   EMAIL_HOST=... EMAIL_HOST_USER=... EMAIL_HOST_PASSWORD=...
+   ```
 
-### Backend
-- **Architecture:** Monolithic full-stack architecture
-- **Framework:** Django for UI components and WebSocket-based real-time communication
-- **Real-Time Features:** WebSocket support for live communication and instant push notifications
+2. Start the stack:
 
-### Database
-- **Primary Database:** PostgreSQL for reliable data management
-- **Geospatial Capability:** PostGIS extension enabled for advanced location-based features:
-  - Finding nearest pharmacy
-  - Locating blood donors by proximity
-  - Map-based rescue reporting
+   ```bash
+   cd PetCentre_RegistrationSystem
+   docker compose up -d --build
+   ```
 
-### Authentication
-- **Email Verification:** Primary authentication method
-- **SMS-based Authentication:** Twilio integration for secure mobile OTP authentication
+3. Run migrations and (optionally) seed demo data:
 
-### Real-Time Communication
-- **WebSockets:** Live pharmacy chat and instant push notifications for users
-- **Chatbot:** Intent-based chatbot to handle common user queries
+   ```bash
+   docker compose exec web python manage.py migrate
+   docker compose exec web python manage.py seed_demo_data
+   ```
 
-### DevOps and Deployment
-- **Containerization:** Docker for consistent deployment environments
-- **Cloud Platform:** AWS or railway for scalable cloud deployment
-- **CI/CD Pipeline:** GitHub Actions for automated testing and deployment
-- **Infrastructure as Code:** Automated deployment pipeline for continuous integration and delivery
+4. Visit `http://localhost:8000`.
 
-## Project Goals
+Code changes need `docker compose restart web` to take effect — the dev server does not autoreload in this setup.
 
-- Make veterinary services more accessible and timely
-- Improve coordination among pet owners, rescuers, adopters, pharmacies, and animal welfare organizations
-- Create a unified platform for all animal health-related services
-- Promote animal welfare through better health management and communication
+## Tests
+
+```bash
+docker compose exec web python manage.py test
+```
