@@ -1344,10 +1344,14 @@ NOTIFICATION_TYPE_ICONS = {
 @role_required(User.Role.USER)
 def pet_owner_dashboard(request):
     pets = Pet.objects.filter(owner=request.user)
+    # Only CONFIRMED shows here — a REQUESTED appointment is still
+    # awaiting the vet's action, not something "upcoming" the owner can
+    # actually count on yet. It's still visible on the full appointments
+    # list; a toast (below) covers the moment right after requesting it.
     next_appointment = Appointment.objects.filter(
         pet__owner=request.user,
         scheduled_time__gte=timezone.now(),
-        status__in=[Appointment.Status.REQUESTED, Appointment.Status.CONFIRMED],
+        status=Appointment.Status.CONFIRMED,
     ).select_related('pet', 'vet').order_by('scheduled_time').first()
 
     recent_notifications = list(
@@ -1358,11 +1362,29 @@ def pet_owner_dashboard(request):
             notification.notification_type, 'notifications'
         )
 
+    # Toast notifications: a just-submitted booking (Django `messages`,
+    # e.g. book_appointment_view's success message on redirect here) and
+    # any not-yet-seen "appointment confirmed" notification both surface
+    # as an auto-dismissing toast — this is where booking redirects to,
+    # and where "Upcoming Appointment" itself lives. Shown once, then
+    # marked read so it doesn't toast again on the next page load.
+    toast_notifications = list(
+        Notification.objects.filter(
+            recipient=request.user, is_read=False,
+            notification_type='appointment', title='Appointment Confirmed',
+        ).order_by('-created_at')[:3]
+    )
+    if toast_notifications:
+        Notification.objects.filter(
+            id__in=[n.id for n in toast_notifications]
+        ).update(is_read=True, read_at=timezone.now())
+
     return render(request, 'core/pet_owner_dashboard.html', {
         'pets': pets,
         'pet_count': pets.count(),
         'next_appointment': next_appointment,
         'recent_notifications': recent_notifications,
+        'toast_notifications': toast_notifications,
     })
 
 

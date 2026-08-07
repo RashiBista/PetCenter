@@ -17,20 +17,15 @@ from pgvector.django import CosineDistance
 
 from core.models import KnowledgeChunk
 
-# Gemini's free tier routinely returns 503 ("high demand") or 429 (rate
-# limit) for a request that succeeds a moment later on retry — observed
-# directly while testing this exact key. Worth one short retry before
-# giving up and showing the user a failure message.
+
 RETRYABLE_STATUS_CODES = (429, 503)
 MAX_RETRIES = 2
 RETRY_DELAY_SECONDS = 2
 
-# Must match KnowledgeChunk.embedding's dimensions exactly — pgvector
-# enforces a fixed size per column, so changing this without a matching
-# migration + full re-ingest breaks retrieval.
+
 EMBEDDING_MODEL = "gemini-embedding-001"
 EMBEDDING_DIMENSIONS = 768
-GENERATION_MODEL = "gemini-flash-latest"
+GENERATION_MODEL = "gemini-flash-lite-latest"
 
 TOP_N_CHUNKS = 3
 

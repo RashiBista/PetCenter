@@ -136,6 +136,39 @@
     </style>
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- Toast notifications: a just-submitted booking request, and any
+     appointment-confirmed notification not yet seen — see
+     core.views.pet_owner_dashboard for what feeds this. -->
+<div id="toast-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 items-end pointer-events-none"></div>
+<script>
+  (function () {
+    const queue = [];
+    {% for message in messages %}
+    queue.push({ text: "{{ message|escapejs }}", tone: "{% if message.tags == 'error' %}error{% else %}success{% endif %}" });
+    {% endfor %}
+    {% for note in toast_notifications %}
+    queue.push({ text: "{{ note.message|escapejs }}", tone: "success" });
+    {% endfor %}
+    if (!queue.length) return;
+
+    const container = document.getElementById('toast-container');
+
+    function showToast(text, tone) {
+      const el = document.createElement('div');
+      el.className = 'pointer-events-auto max-w-sm px-5 py-4 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 translate-x-4 opacity-0 ' +
+        (tone === 'error' ? 'bg-error-container text-on-error-container' : 'bg-primary text-on-primary');
+      el.textContent = text;
+      container.appendChild(el);
+      requestAnimationFrame(() => el.classList.remove('translate-x-4', 'opacity-0'));
+      setTimeout(() => {
+        el.classList.add('opacity-0');
+        setTimeout(() => el.remove(), 300);
+      }, 5000);
+    }
+
+    queue.forEach((t, i) => setTimeout(() => showToast(t.text, t.tone), i * 250));
+  })();
+</script>
 <!-- Mobile Nav Shell (Bottom Bar Pivot) -->
 <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface shadow-[0_-4px_16px_rgba(46,46,56,0.04)] z-50 flex justify-around items-center h-20 px-4">
 <a class="flex flex-col items-center gap-1 text-primary" href="{% url 'core:pet_owner_dashboard' %}">

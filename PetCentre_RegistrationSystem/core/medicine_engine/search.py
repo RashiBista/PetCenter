@@ -1,14 +1,3 @@
-"""
-Typo-tolerant medicine search, backed by a TF-IDF model trained offline
-on a curated veterinary-medicine dataset (see the top-level search/
-notebook this was built from — the trained artifacts here are a copy of
-search/models/*.pkl, bundled inside the Django project so they ship with
-the Docker build instead of living outside it).
-
-Loaded lazily (on first search) rather than at import time, so a
-missing/corrupt pickle only breaks the specific request that needs it,
-not the whole app on startup.
-"""
 import os
 import pickle
 import re
@@ -20,14 +9,7 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 _state = {}
 
-# Maps common pet-owner phrasing (lay terms, plus a handful of the most
-# likely single-word typos of them) to the clinical vocabulary this
-# dataset actually uses — TF-IDF only ever matches on literal shared
-# tokens, so "poop" and "diarrhea" have zero overlap no matter how
-# semantically close they are to a person. Checked phrase keys (multi-
-# word) before word-level correction; word keys are also fed through
-# get_close_matches so close misspellings of these terms resolve too
-# (see _expand_query).
+
 SYMPTOM_SYNONYMS = {
     "worm": "worms deworming anthelmintic parasite",
     "worms": "deworming anthelmintic parasite",
@@ -76,17 +58,10 @@ def _ensure_loaded():
     _state["cosine_sim"] = _load("cosine_sim.pkl")
     _state["df"] = _load("medicine_dataset.pkl")
     _state["medicine_list"] = _state["df"]["generic_name"].str.lower().unique().tolist()
-    # Word-level vocabulary drawn from what the dataset actually says
-    # (category + indications), used to typo-correct clinical/symptom
-    # words the way correct_query() already typo-corrects drug names —
-    # e.g. "dirrhea"/"dirrohea" -> "diarrhea". Short words are dropped;
-    # they produce too many spurious close matches to be useful.
+   
     text = " ".join(_state["df"]["category"].astype(str)) + " " + " ".join(_state["df"]["indications"].astype(str))
     _state["clinical_vocab"] = sorted({w for w in re.findall(r"[a-z]+", text.lower()) if len(w) >= 4})
-    # Single-word synonym keys, checked separately from clinical_vocab —
-    # a typo of the LAY term itself (e.g. "scrathing" for "scratching")
-    # won't be close to anything in the dataset's own vocabulary, since
-    # "scratching" isn't a word the dataset uses; it only exists here.
+   
     _state["synonym_keys"] = [k for k in SYMPTOM_SYNONYMS if " " not in k]
 
 
@@ -145,9 +120,7 @@ def smart_search(query, top_n=20):
     df = _state["df"]
     stripped = query.lower().strip()
     drug_corrected = correct_query(query)
-    # Only trust the drug-name correction if it actually changed
-    # something — otherwise it's just the original query echoed back,
-    # and symptom/lay-term expansion should get a turn instead.
+   
     search_text = drug_corrected if drug_corrected != stripped else _expand_query(query)
 
     scores = cosine_similarity(_state["tfidf"].transform([search_text]), _state["tfidf_matrix"]).flatten()
@@ -160,7 +133,7 @@ def smart_search(query, top_n=20):
         results.append(_serialize_row(idx, df.iloc[idx], similarity=scores[idx]))
         if len(results) == top_n:
             break
-    return results  # empty list if nothing found —> the view decides the message
+    return results  
 
 
 def list_all():
