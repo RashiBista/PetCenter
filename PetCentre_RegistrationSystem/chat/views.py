@@ -54,6 +54,17 @@ def inbox(request):
         for room in rooms
     ]
 
+    # Sort by the real last-message time, not room.updated_at — the
+    # WebSocket consumer's save_message() only creates a Message row, it
+    # never re-saves the parent ChatRoom, so updated_at (auto_now=True)
+    # stays frozen at room-creation time and doesn't track new messages
+    # at all. A room with no messages yet falls back to created_at so it
+    # still sorts sensibly relative to rooms that do have activity.
+    rooms_data.sort(
+        key=lambda entry: entry["last_message"].timestamp if entry["last_message"] else entry["room"].created_at,
+        reverse=True,
+    )
+
     return render(request, "chat/inbox.html", {
         "rooms_data": rooms_data,
         "page_title": "Messages",
