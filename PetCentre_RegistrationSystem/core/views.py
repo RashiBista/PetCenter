@@ -238,17 +238,21 @@ def veterinary_signup_view(request):
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         phone_number = request.POST.get('phone_number', '').strip()
+        specialization = request.POST.get('specialization', '').strip()
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
         channel = request.POST.get('otp_channel', 'email')
 
-        form_data = {'username': username, 'email': email, 'phone_number': phone_number}
+        form_data = {'username': username, 'email': email, 'phone_number': phone_number, 'specialization': specialization}
         errors = _validate_signup_fields(username, email, password, password2)
         if channel == 'phone' and not phone_number:
             errors.setdefault('otp_channel', []).append('Add a phone number above to receive a code by phone.')
 
         if not errors:
-            _stash_pending_signup(request, role='vet', form_data=form_data, password=password)
+            _stash_pending_signup(
+                request, role='vet', form_data=form_data, password=password,
+                extra={'specialization': specialization},
+            )
             destination = phone_number if channel == 'phone' else email
             code = _generate_otp_code()
             SignupOTP.objects.create(
@@ -318,7 +322,7 @@ def verify_signup_view(request):
                             pet.photo.name = public_id
                         pet.save()
                 elif role == 'vet':
-                    VetProfile.objects.create(user=user)
+                    VetProfile.objects.create(user=user, specialization=extra.get('specialization') or 'General Practice')
 
                 otp.is_used = True
                 otp.save()

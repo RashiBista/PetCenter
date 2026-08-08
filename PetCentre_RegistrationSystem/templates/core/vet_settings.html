@@ -241,14 +241,6 @@ Change Photo
 <div class="bg-surface-container-lowest rounded-2xl border border-surface-container-high p-6">
 <h3 class="font-title-lg text-title-lg text-on-surface mb-2">Clinic Location</h3>
 <p class="font-body-md text-body-md text-on-surface-variant mb-4">Used to sort you by distance when pet owners search "Find Nearby Care".</p>
-<div class="flex items-center gap-4 mb-4">
-<span class="material-symbols-outlined text-primary text-2xl">
-{% if profile.location %}location_on{% else %}location_off{% endif %}
-</span>
-<p class="font-label-md text-label-md text-on-surface">
-{% if profile.clinic_address %}{{ profile.clinic_address }}{% elif profile.location %}A location is currently saved for your clinic.{% else %}No location saved yet.{% endif %}
-</p>
-</div>
 <form id="location-form" method="post" action="{% url 'core:update_my_location' %}">
 {% csrf_token %}
 <input type="hidden" name="lat" id="loc-lat"/>

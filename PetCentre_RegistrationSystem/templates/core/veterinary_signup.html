@@ -154,6 +154,10 @@
 <input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="phone_number" name="phone_number" type="text" value="{{ form_data.phone_number|default:'' }}"/>
 </div>
 <div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="specialization">Specialization (optional)</label>
+<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200" id="specialization" name="specialization" placeholder="e.g. General Practice, Surgery" type="text" value="{{ form_data.specialization|default:'' }}"/>
+</div>
+<div class="flex flex-col gap-1.5">
 <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="password">Password</label>
 <div class="relative"><input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors duration-200 pr-12" id="password" name="password" required type="password"/><button onclick="togglePasswordVisibility(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface-variant transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">visibility</span></button></div>
 </div>
